@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "creation": "2021-09-03 16:12:43.934158",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company_sale_stock_detail",
+  "distributor_name",
+  "from",
+  "to",
+  "column_break_5",
+  "city",
+  "file",
+  "process_pdf",
+  "product_sale_detail",
+  "selling_product",
+  "grand_total_section",
+  "total_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_sale_stock_detail",
+   "fieldtype": "Section Break",
+   "label": "Company Sale Stock Detail"
+  },
+  {
+   "fieldname": "distributor_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Distributor Name",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from",
+   "fieldtype": "Date",
+   "label": "From"
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Date",
+   "label": "To"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "distributor_name",
+   "fetch_from": "distributor_name.territory",
+   "fetch_if_empty": 1,
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "label": "City",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "label": "File"
+  },
+  {
+   "fieldname": "process_pdf",
+   "fieldtype": "Button",
+   "label": "Process"
+  },
+  {
+   "fieldname": "product_sale_detail",
+   "fieldtype": "Section Break",
+   "label": "Product Sale"
+  },
+  {
+   "fieldname": "grand_total_section",
+   "fieldtype": "Section Break",
+   "label": "Grand Total"
+  },
+  {
+   "fieldname": "total_value",
+   "fieldtype": "Currency",
+   "label": "Total Value"
+  },
+  {
+   "fieldname": "selling_product",
+   "fieldtype": "Table",
+   "label": "Selling Product",
+   "options": "SSR Product Detail"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-09-04 15:29:47.039292",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Sale Stock Detail",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
