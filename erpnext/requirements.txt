@@ -1,0 +1,2 @@
+git+git://github.com/jsvine/pdfplumber#egg=pdfplumber
+git+git://github.com/seatgeek/fuzzywuzzy.git@0.18.0#egg=fuzzywuzzy
