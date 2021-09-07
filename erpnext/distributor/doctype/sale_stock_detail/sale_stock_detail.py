@@ -60,7 +60,7 @@ def parse_pdf(pdf_file,dist_city):
         #print(require_data)
         #print(len(require_data))    
         info = filter_data_bannu(require_data)
-    elif(dist_city=="Islamabad"):
+    elif(dist_city=="Islamabad" or dist_city == "Narowal"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
