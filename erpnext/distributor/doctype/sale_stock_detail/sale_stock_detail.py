@@ -21,7 +21,7 @@ def parse_pdf(pdf_file,dist_city):
     #print(path)
     alldata = []
     require_data = []
-    if(dist_city == "Abbotabad" or dist_city == "Bannu"):
+    if(dist_city == "Abbotabad" or dist_city == "Bannu" or dist_city == "Jhelum"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -90,7 +90,7 @@ def parse_pdf(pdf_file,dist_city):
     return info;
 
 @frappe.whitelist(allow_guest=True)
-def filter_data(require_data): #for abbotabad,bannu
+def filter_data(require_data): #for abbotabad,bannu, jhelum
     filter_data = {}
     final_data = []
     index_arr = [0,1,3,4,5,7,8] #[item,trade price, opening balance, purchase,return, sale,bonus,]
