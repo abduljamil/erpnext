@@ -289,7 +289,7 @@ def filter_data_peshawar(require_data): #for peshawar, rahim yar khan
 def filter_data_hyderabad(require_data): #for hyderabad
     filter_data = {}
     final_data = []
-    index_arr = [0,1,2,3,8,9,11] #[item,trade price, opening balance, purchase,bonus,return,sale]
+    index_arr = [0,1,2,3,9,11,12] #[item,trade price, opening balance, purchase,bonus,return,sale]
     #get data with specific index
     for x in require_data:
         for i in index_arr:
@@ -301,12 +301,12 @@ def filter_data_hyderabad(require_data): #for hyderabad
                 filter_data['opening_stock'] = x[i]
             elif i == 3:
                 filter_data['purchase'] = x[i]
-            elif i == 8:
-                filter_data['bonus'] = x[i]
             elif i == 9:
                 filter_data['return'] = x[i]
             elif i == 11:
-                filter_data['sale'] = x[i]    
+                filter_data['sale'] = x[i]
+            elif i == 12:
+                filter_data['bonus'] = x[i]        
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)
     #print(final_data)
