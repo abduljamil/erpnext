@@ -107,7 +107,7 @@ def parse_pdf(pdf_file,dist_city):
         #print(len(require_data))    
         info = filter_data_islamabad(require_data)
         #print(info)
-    elif(dist_city=="Peshawar"):
+    elif(dist_city=="Peshawar" or dist_city =="RY Khan"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -126,7 +126,7 @@ def parse_pdf(pdf_file,dist_city):
                 if(len(x)<11):
                     require_data.remove(x)
                 #print(require_data)        
-            for i in require_data[:]: #peshawar
+            for i in require_data[:]: #peshawar, rahim yar khan
                 i[0] = i[0].lstrip('0123456789 ')
                 if(i[1]=='-'):    
                     i[1] = re.sub('-',"0", i[1])
@@ -235,7 +235,7 @@ def filter_data_islamabad(require_data): #for islamabad,narowal
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_peshawar(require_data): #for peshawar
+def filter_data_peshawar(require_data): #for peshawar, rahim yar khan
     filter_data = {}
     final_data = []
     index_arr = [0,1,2,3,6,7] #[item,trade price, opening balance, purchase,sale, return,]
