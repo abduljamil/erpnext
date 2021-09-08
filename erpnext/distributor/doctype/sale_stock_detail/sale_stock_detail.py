@@ -107,7 +107,7 @@ def parse_pdf(pdf_file,dist_city):
         #print(len(require_data))    
         info = filter_data_islamabad(require_data)
         #print(info)
-    elif(dist_city=="Peshawar"):
+    elif(dist_city=="Peshawar" or dist_city =="RY Khan"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -126,7 +126,7 @@ def parse_pdf(pdf_file,dist_city):
                 if(len(x)<11):
                     require_data.remove(x)
                 #print(require_data)        
-            for i in require_data[:]: #peshawar
+            for i in require_data[:]: #peshawar, rahim yar khan
                 i[0] = i[0].lstrip('0123456789 ')
                 if(i[1]=='-'):    
                     i[1] = re.sub('-',"0", i[1])
@@ -149,7 +149,33 @@ def parse_pdf(pdf_file,dist_city):
         #print(require_data)
         #print(len(require_data))    
         info = filter_data_peshawar(require_data)
-        #print(info) 
+        #print(info)
+    if(dist_city == "Hyderabad" or dist_city=="Larkana"):
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                page = pdf.pages[x]
+                data = page.extract_tables()
+                alldata.append(data)
+            #print(data)
+            for i in alldata[:]:
+                #print(i)
+                for j in i[:]:
+                    #print(j)
+                    for w in j[:]:
+                        arr = list(filter(None, w))
+                        #print(arr)
+                        require_data.append(arr)
+            #print(require_data)            
+            for x in require_data[:]:
+                if(len(x)<13):
+                    require_data.remove(x)       
+        #print(require_data)
+        #print(len(require_data))
+        if(dist_city == 'Hyderabad'):     
+            info = filter_data_hyderabad(require_data)
+        elif(dist_city == 'Larkana'):
+            info = filter_data_larkana(require_data)
+     
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
     for x in info:
@@ -235,7 +261,7 @@ def filter_data_islamabad(require_data): #for islamabad,narowal
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_peshawar(require_data): #for peshawar
+def filter_data_peshawar(require_data): #for peshawar, rahim yar khan
     filter_data = {}
     final_data = []
     index_arr = [0,1,2,3,6,7] #[item,trade price, opening balance, purchase,sale, return,]
@@ -260,4 +286,58 @@ def filter_data_peshawar(require_data): #for peshawar
     #print(len(final_data))    
     return final_data    
 
-                
+@frappe.whitelist(allow_guest=True)
+def filter_data_hyderabad(require_data): #for hyderabad
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,3,9,11,12] #[item,trade price, opening balance, purchase,bonus,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i == 1:
+                filter_data['trade_price'] = x[i]
+            elif i == 2:
+                filter_data['opening_stock'] = x[i]
+            elif i == 3:
+                filter_data['purchase'] = x[i]
+            elif i == 9:
+                filter_data['return'] = x[i]
+            elif i == 11:
+                filter_data['sale'] = x[i]
+            elif i == 12:
+                filter_data['bonus'] = x[i]        
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)
+    #print(final_data)
+    #print(len(final_data))    
+    return final_data                
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_larkana(require_data): #for hyderabad
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,3,10,12,13] #[item,trade price, opening balance, purchase,bonus,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i == 1:
+                filter_data['trade_price'] = x[i]
+            elif i == 2:
+                filter_data['opening_stock'] = x[i]
+            elif i == 3:
+                filter_data['purchase'] = x[i]
+            elif i == 10:
+                filter_data['return'] = x[i]
+            elif i == 12:
+                filter_data['sale'] = x[i]
+            elif i == 13:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)
+    #print(final_data)
+    #print(len(final_data))    
+    return final_data
