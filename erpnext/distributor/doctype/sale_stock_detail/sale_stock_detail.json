@@ -16,7 +16,9 @@
   "product_sale_detail",
   "selling_product",
   "grand_total_section",
-  "total_value"
+  "total_value",
+  "data_14",
+  "total_stock_value"
  ],
  "fields": [
   {
@@ -76,20 +78,29 @@
    "label": "Grand Total"
   },
   {
-   "fieldname": "total_value",
-   "fieldtype": "Currency",
-   "label": "Total Value"
-  },
-  {
    "fieldname": "selling_product",
    "fieldtype": "Table",
    "label": "Selling Product",
    "options": "SSR Product Detail"
+  },
+  {
+   "fieldname": "total_stock_value",
+   "fieldtype": "Currency",
+   "label": "Total Stock Value"
+  },
+  {
+   "fieldname": "total_value",
+   "fieldtype": "Currency",
+   "label": "Total Value Sale"
+  },
+  {
+   "fieldname": "data_14",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-04 15:29:47.039292",
+ "modified": "2021-09-09 10:28:04.837001",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Sale Stock Detail",

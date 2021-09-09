@@ -17,8 +17,8 @@ frappe.ui.form.on('Sale Stock Detail', {
                 }
             })
         }
-        //set total value
-        frm.compute_total = function(frm,row){
+        //set total value sale
+        frm.compute_total_value_sale = function(frm,row){
             let total = 0;
             frm.doc.selling_product.forEach(d=>{
                 total = total + d.value;
@@ -26,6 +26,14 @@ frappe.ui.form.on('Sale Stock Detail', {
             frm.set_value('total_value',total);
             //console.log(total)
         }
+		//set total stock value
+		frm.compute_total_stock_value = function(frm, row){
+			let total = 0;
+			frm.doc.selling_product.forEach(d=>{
+				total = total + d.closing_value;
+			});
+			frm.set_value('total_stock_value',total);
+		}
     },
     file:function(frm){
 		cur_frm.clear_table("selling_product");
@@ -110,7 +118,11 @@ frappe.ui.form.on('SSR Product Detail',{
 			frappe.model.set_value(cdt, cdn, 'closing_stock', row.total-row.return-row.sale);
 		}
 		if(row.value){
-			frm.compute_total(frm,row);
+			frm.compute_total_value_sale(frm,row);
+		}
+		if(row.closing_stock){
+			frappe.model.set_value(cdt,cdn, 'closing_value', row.closing_stock*row.trade_price);
+			frm.compute_total_stock_value(frm,row);
 		}
 	},
 	bonus:function(frm,cdt,cdn){
