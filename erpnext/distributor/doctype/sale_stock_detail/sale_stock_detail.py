@@ -150,7 +150,7 @@ def parse_pdf(pdf_file,dist_city):
         #print(len(require_data))    
         info = filter_data_peshawar(require_data)
         #print(info)
-    if(dist_city == "Hyderabad" or dist_city=="Larkana"):
+    if(dist_city == "Hyderabad" or dist_city=="Larkana" or dist_city=="Sukkur"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -173,7 +173,7 @@ def parse_pdf(pdf_file,dist_city):
         #print(len(require_data))
         if(dist_city == 'Hyderabad'):     
             info = filter_data_hyderabad(require_data)
-        elif(dist_city == 'Larkana'):
+        elif(dist_city == 'Larkana' or dist_city=="Sukkur"):
             info = filter_data_larkana(require_data)
      
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
@@ -315,7 +315,7 @@ def filter_data_hyderabad(require_data): #for hyderabad
     return final_data                
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_larkana(require_data): #for hyderabad
+def filter_data_larkana(require_data): #for larkana,sukkur
     filter_data = {}
     final_data = []
     index_arr = [0,1,2,3,10,12,13] #[item,trade price, opening balance, purchase,bonus,return,sale]
