@@ -13,15 +13,17 @@
   "total",
   "return",
   "sale",
-  "bonus",
   "value",
-  "closing_stock"
+  "closing_stock",
+  "bonus",
+  "closing_value"
  ],
  "fields": [
   {
    "columns": 1,
    "fieldname": "code",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Code",
    "options": "Item"
@@ -103,12 +105,18 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Closing Stock"
+  },
+  {
+   "default": "0",
+   "fieldname": "closing_value",
+   "fieldtype": "Currency",
+   "label": "Closing Value"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-07 15:17:30.201656",
+ "modified": "2021-09-09 15:03:10.072152",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "SSR Product Detail",
