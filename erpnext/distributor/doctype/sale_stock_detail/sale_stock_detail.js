@@ -99,11 +99,13 @@ frappe.ui.form.on('SSR Product Detail',{
 		//grab the entire row
 		let row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'total', row.opening_stock+row.purchase);
+		frappe.model.set_value(cdt, cdn, 'closing_stock', row.opening_stock);
 	},
 	purchase:function(frm,cdt,cdn){
 		//grab the entire row
 		let row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, 'total', row.opening_stock+row.purchase);	
+		frappe.model.set_value(cdt, cdn, 'total', row.opening_stock+row.purchase);
+		frappe.model.set_value(cdt, cdn, 'closing_stock', row.opening_stock+row.purchase);	
 	},
 	return:function(frm,cdt,cdn){
 		//grab the entire row
@@ -119,16 +121,20 @@ frappe.ui.form.on('SSR Product Detail',{
 		}
 		if(row.value){
 			frm.compute_total_value_sale(frm,row);
-		}
-		if(row.closing_stock){
-			frappe.model.set_value(cdt,cdn, 'closing_value', row.closing_stock*row.trade_price);
-			frm.compute_total_stock_value(frm,row);
-		}
+		}	
 	},
 	bonus:function(frm,cdt,cdn){
 		//grab the entire row
 		let row = locals[cdt][cdn];
 		frappe.model.set_value(cdt,cdn,'closing_stock',row.total-row.return-row.sale-row.bonus);
+	},
+	closing_stock:function(frm,cdt,cdn){
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt,cdn, 'closing_value', row.closing_stock*row.trade_price);
+		if(row.closing_value){
+			frm.compute_total_stock_value(frm,row);
+		}
+		
 	}
 	
 });
