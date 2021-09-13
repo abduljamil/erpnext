@@ -26,7 +26,6 @@ def parse_pdf(pdf_file,dist_city):
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
                 data = page.extract_tables()
-                #print(data)
                 alldata.append(data)
             for i in alldata[:]:
                 #print(i)
@@ -34,7 +33,6 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
@@ -55,17 +53,13 @@ def parse_pdf(pdf_file,dist_city):
                 if(i[7]=='-'):    
                     i[7] = re.sub('-',"0", i[7])
                 if(i[8]=='-'):    
-                    i[8] = re.sub('-',"0", i[8])
-                #print(i)
-        #print(require_data)
-        #print(len(require_data))    
+                    i[8] = re.sub('-',"0", i[8])   
         info = filter_data_bannu(require_data)
     elif(dist_city=="Islamabad" or dist_city == "Narowal"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
                 data = page.extract_tables()
-                #print(data)
                 alldata.append(data)
             for i in alldata[:]:
                 #print(i)
@@ -73,12 +67,10 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
-                    require_data.remove(x)
-            #print(require_data)        
+                    require_data.remove(x)       
             for i in require_data[:]: #islamabad,narowal
                 i[0] = i[0].lstrip('0123456789 ')
                 if(i[1]=='-'):    
@@ -101,18 +93,13 @@ def parse_pdf(pdf_file,dist_city):
                 i[7] = re.sub(r' \d+$', '', i[7])
                 i[7] = re.sub(' -',"", i[7])    
                 if(i[7]=='-'):    
-                    i[7] = re.sub('-',"0", i[7])
-                #print(i)
-        #print(require_data)
-        #print(len(require_data))    
+                    i[7] = re.sub('-',"0", i[7])   
         info = filter_data_islamabad(require_data)
-        #print(info)
     elif(dist_city=="Peshawar" or dist_city =="RY Khan"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
                 data = page.extract_tables()
-                #print(data)
                 alldata.append(data)
             for i in alldata[:]:
                 #print(i)
@@ -120,12 +107,10 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
-                    require_data.remove(x)
-                #print(require_data)        
+                    require_data.remove(x)       
             for i in require_data[:]: #peshawar, rahim yar khan
                 i[0] = i[0].lstrip('0123456789 ')
                 if(i[1]=='-'):    
@@ -145,18 +130,14 @@ def parse_pdf(pdf_file,dist_city):
                 i[7] = re.sub(r' \d+$', '', i[7]) #return
                 i[7] = re.sub(' -',"", i[7])    
                 if(i[7]=='-'):    
-                    i[7] = re.sub('-',"0", i[7])
-        #print(require_data)
-        #print(len(require_data))    
+                    i[7] = re.sub('-',"0", i[7])   
         info = filter_data_peshawar(require_data)
-        #print(info)
-    if(dist_city == "Hyderabad" or dist_city=="Larkana" or dist_city=="Sukkur" or dist_city=="Thatta"):
+    elif(dist_city == "Hyderabad" or dist_city=="Larkana" or dist_city=="Sukkur" or dist_city=="Thatta"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
                 data = page.extract_tables()
                 alldata.append(data)
-            #print(data)
             for i in alldata[:]:
                 #print(i)
                 for j in i[:]:
@@ -164,18 +145,63 @@ def parse_pdf(pdf_file,dist_city):
                     for w in j[:]:
                         arr = list(filter(None, w))
                         #print(arr)
-                        require_data.append(arr)
-            #print(require_data)            
+                        require_data.append(arr)          
             for x in require_data[:]:
                 if(len(x)<13):
                     require_data.remove(x)       
-        #print(require_data)
-        #print(len(require_data))
         if(dist_city == 'Hyderabad'):     
             info = filter_data_hyderabad(require_data)
         elif(dist_city == 'Larkana' or dist_city=="Sukkur" or dist_city=="Thatta"):
             info = filter_data_larkana(require_data)
-     
+    elif(dist_city=='Chakwal'):
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                page = pdf.pages[x]
+                data = page.extract_tables()
+                alldata.append(data)
+            for i in alldata[:]:
+                #print(i)
+                for j in i[:]:
+                    #print(j)
+                        for w in j[:]:
+                            spl = re.split('  ',w[0])
+                            for x in range(1,len(w)):
+                                if(w[x]==''):
+                                    w[x]="0"
+                                spl.append(w[x])                    
+                            arr = list(filter(None, spl))
+                            require_data.append(arr)            
+            for x in require_data[:]:
+                if(len(x)<10):
+                    require_data.remove(x)
+        info = filter_data_chakwal(require_data)        
+    elif(dist_city=="D.G. Khan"):
+        aligndata = []
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                page = pdf.pages[x]
+                data = page.extract_tables()
+                alldata.append(data)
+            for i in alldata[:]:
+                #print(i)
+                for j in i[:]:
+                    #print(j)
+                    for w in j[:]:
+                        data = re.split('\n',w[0])
+                        aligndata.append(data)                   
+            for x in aligndata:
+                for y in x[:]:
+                    require_data.append(y)
+            for x in range(0,len(require_data)):
+                require_data[x] = re.split('\s\s+',require_data[x])
+                require_data[x].reverse()
+            for x in require_data[:]:
+                if(len(x)<14):
+                    require_data.remove(x)
+                elif(x[0]=='Description'):
+                    require_data.remove(x)                       
+        info = filter_data_deraghazi(require_data)
+
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
     for x in info:
@@ -227,9 +253,7 @@ def filter_data_bannu(require_data): #for abbotabad,bannu, jhelum,rawalpindi
             elif i == 8:
                 filter_data['bonus'] = x[i]
         filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)
-    #print(final_data)
-    #print(len(final_data))    
+        final_data.append(filter_data_copy)   
     return final_data
 
 @frappe.whitelist(allow_guest=True)
@@ -255,9 +279,7 @@ def filter_data_islamabad(require_data): #for islamabad,narowal
             elif i == 7:
                 filter_data['bonus'] = x[i]
         filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)
-    #print(final_data)
-    #print(len(final_data))    
+        final_data.append(filter_data_copy)  
     return final_data
 
 @frappe.whitelist(allow_guest=True)
@@ -281,9 +303,7 @@ def filter_data_peshawar(require_data): #for peshawar, rahim yar khan
             elif i == 7:
                 filter_data['return'] = x[i]
         filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)
-    #print(final_data)
-    #print(len(final_data))    
+        final_data.append(filter_data_copy)    
     return final_data    
 
 @frappe.whitelist(allow_guest=True)
@@ -309,9 +329,7 @@ def filter_data_hyderabad(require_data): #for hyderabad
             elif i == 12:
                 filter_data['bonus'] = x[i]        
         filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)
-    #print(final_data)
-    #print(len(final_data))    
+        final_data.append(filter_data_copy)  
     return final_data                
 
 @frappe.whitelist(allow_guest=True)
@@ -337,7 +355,55 @@ def filter_data_larkana(require_data): #for larkana,sukkur,Thatta
             elif i == 13:
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)
-    #print(final_data)
-    #print(len(final_data))    
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_chakwal(require_data): #for chakwal
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,4,8,9,10] #[item,trade price, opening balance, purchase,bonus,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i == 1:
+                filter_data['trade_price'] = x[i]
+            elif i == 2:
+                filter_data['opening_stock'] = x[i]
+            elif i == 4:
+                filter_data['purchase'] = x[i]
+            elif i == 8:
+                filter_data['return'] = x[i]
+            elif i == 9:
+                filter_data['sale'] = x[i]
+            elif i == 10:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data 
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_deraghazi(require_data): #for deraghazi
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,12,11,10,8,6] #[item,trade price, opening balance, purchase,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]
+            elif i == 12:
+                filter_data['trade_price'] = x[i]
+            elif i == 11:
+                filter_data['opening_stock'] = x[i]
+            elif i == 10:
+                filter_data['purchase'] = x[i]
+            elif i == 8:
+                filter_data['sale'] = x[i]
+            elif i == 6:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
     return final_data
