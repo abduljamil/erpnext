@@ -110,9 +110,7 @@ frappe.ui.form.on('SSR Product Detail',{
 	return:function(frm,cdt,cdn){
 		//grab the entire row
 		let row = locals[cdt][cdn];
-		if(!row.return){
-			frappe.model.set_value(cdt,cdn,'return',0)
-		}
+		frappe.model.set_value(cdt,cdn,'closing_stock',row.total-row.return);
 	},
 	sale:function(frm,cdt,cdn){
 		//grab the row

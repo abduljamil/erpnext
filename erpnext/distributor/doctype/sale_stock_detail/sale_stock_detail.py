@@ -182,33 +182,7 @@ def parse_pdf(pdf_file,dist_city):
                 if(len(x)<10):
                     require_data.remove(x)
         info = filter_data_chakwal(require_data)        
-    elif(dist_city=="D.G. Khan"):
-        aligndata = []
-        with pdfplumber.open(path) as pdf:
-            for x in range(0, len(pdf.pages)):
-                page = pdf.pages[x]
-                data = page.extract_tables()
-                alldata.append(data)
-            for i in alldata[:]:
-                #print(i)
-                for j in i[:]:
-                    #print(j)
-                    for w in j[:]:
-                        data = re.split('\n',w[0])
-                        aligndata.append(data)                   
-            for x in aligndata:
-                for y in x[:]:
-                    require_data.append(y)
-            for x in range(0,len(require_data)):
-                require_data[x] = re.split('\s\s+',require_data[x])
-                require_data[x].reverse()
-            for x in require_data[:]:
-                if(len(x)<14):
-                    require_data.remove(x)
-                elif(x[0]=='Description'):
-                    require_data.remove(x)                       
-        info = filter_data_deraghazi(require_data)
-
+     
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
     for x in info:
@@ -389,28 +363,4 @@ def filter_data_chakwal(require_data): #for chakwal
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
-    return final_data 
-
-@frappe.whitelist(allow_guest=True)
-def filter_data_deraghazi(require_data): #for deraghazi
-    filter_data = {}
-    final_data = []
-    index_arr = [-1,12,11,10,8,6] #[item,trade price, opening balance, purchase,sale,bonus]
-    #get data with specific index
-    for x in require_data:
-        for i in index_arr:
-            if i == -1:
-                filter_data['item'] = x[i]
-            elif i == 12:
-                filter_data['trade_price'] = x[i]
-            elif i == 11:
-                filter_data['opening_stock'] = x[i]
-            elif i == 10:
-                filter_data['purchase'] = x[i]
-            elif i == 8:
-                filter_data['sale'] = x[i]
-            elif i == 6:
-                filter_data['bonus'] = x[i]   
-        filter_data_copy = filter_data.copy()
-        final_data.append(filter_data_copy)    
-    return final_data
+    return final_data    
