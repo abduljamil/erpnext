@@ -175,7 +175,7 @@ def parse_pdf(pdf_file,dist_city):
                 if(len(x)<10):
                     require_data.remove(x)
         info = filter_data_chakwal(require_data)        
-    elif(dist_city=="D.G. Khan"):
+    elif(dist_city=="D.G. Khan"): #deraghazi khan
         aligndata = []
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):

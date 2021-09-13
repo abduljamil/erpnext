@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Sale Stock Detail', {
     setup:function(frm){
-        //check duplicate item
+        //check duplicate item 
         frm.check_dupilcate_item = function(frm,row){
             frm.doc.selling_product.forEach(p=>{
                 if(row.product== '' || row.idx ==p.idx){
