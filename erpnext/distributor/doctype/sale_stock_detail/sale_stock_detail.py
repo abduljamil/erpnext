@@ -153,7 +153,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_hyderabad(require_data)
         elif(dist_city == 'Larkana' or dist_city=="Sukkur" or dist_city=="Thatta"):
             info = filter_data_larkana(require_data)
-    elif(dist_city=="Chakwal" or dist_city=="Kohat"):
+    elif(dist_city=="Chakwal" or dist_city=="Kohat"): #chakwal and kohat
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
