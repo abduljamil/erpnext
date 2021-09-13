@@ -33,7 +33,6 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
@@ -54,8 +53,7 @@ def parse_pdf(pdf_file,dist_city):
                 if(i[7]=='-'):    
                     i[7] = re.sub('-',"0", i[7])
                 if(i[8]=='-'):    
-                    i[8] = re.sub('-',"0", i[8])
-        #print(require_data)   
+                    i[8] = re.sub('-',"0", i[8])   
         info = filter_data_bannu(require_data)
     elif(dist_city=="Islamabad" or dist_city == "Narowal"):
         with pdfplumber.open(path) as pdf:
@@ -69,7 +67,6 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
@@ -96,8 +93,7 @@ def parse_pdf(pdf_file,dist_city):
                 i[7] = re.sub(r' \d+$', '', i[7])
                 i[7] = re.sub(' -',"", i[7])    
                 if(i[7]=='-'):    
-                    i[7] = re.sub('-',"0", i[7])
-        #print(require_data)   
+                    i[7] = re.sub('-',"0", i[7])   
         info = filter_data_islamabad(require_data)
     elif(dist_city=="Peshawar" or dist_city =="RY Khan"):
         with pdfplumber.open(path) as pdf:
@@ -111,7 +107,6 @@ def parse_pdf(pdf_file,dist_city):
                     #print(j)
                     for w in j[:]:
                         arr = list(filter(None, w))
-                        #print(arr)
                         require_data.append(arr)
             for x in require_data[:]:
                 if(len(x)<11):
@@ -135,8 +130,7 @@ def parse_pdf(pdf_file,dist_city):
                 i[7] = re.sub(r' \d+$', '', i[7]) #return
                 i[7] = re.sub(' -',"", i[7])    
                 if(i[7]=='-'):    
-                    i[7] = re.sub('-',"0", i[7])
-        #print(require_data)   
+                    i[7] = re.sub('-',"0", i[7])   
         info = filter_data_peshawar(require_data)
     elif(dist_city == "Hyderabad" or dist_city=="Larkana" or dist_city=="Sukkur" or dist_city=="Thatta"):
         with pdfplumber.open(path) as pdf:
@@ -155,7 +149,6 @@ def parse_pdf(pdf_file,dist_city):
             for x in require_data[:]:
                 if(len(x)<13):
                     require_data.remove(x)       
-        #print(require_data)
         if(dist_city == 'Hyderabad'):     
             info = filter_data_hyderabad(require_data)
         elif(dist_city == 'Larkana' or dist_city=="Sukkur" or dist_city=="Thatta"):
