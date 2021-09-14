@@ -153,7 +153,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_hyderabad(require_data)
         elif(dist_city == 'Larkana' or dist_city=="Sukkur" or dist_city=="Thatta"):
             info = filter_data_larkana(require_data)
-    elif(dist_city=="Chakwal" or dist_city=="Kohat"): #chakwal and kohat
+    elif(dist_city=="Chakwal" or dist_city=="Kohat" or dist_city=="M.B Din"): #chakwal,kohat,Mandibahudin
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -178,14 +178,25 @@ def parse_pdf(pdf_file,dist_city):
                                 if(w[x]==''):
                                     w[x]="0"
                             w = list(filter(None, w))
-                            require_data.append(w)                       
+                            require_data.append(w)
+                        elif dist_city=="M.B Din":
+                            for x in range(0,len(w)):
+                                if(w[x]==''):
+                                    w[x]="0"
+                            require_data.append(w)                                               
             for x in require_data[:]:
-                if(len(x)<9):
-                    require_data.remove(x)
+                if(dist_city=="Chakwal" or dist_city=="Kohat" ):
+                    if(len(x)<9):
+                        require_data.remove(x)
+                elif(dist_city=="M.B Din"):
+                    if(x[1]=="Rate" or x[0]=="Total of BLUE" or x[0]=="Total of"):
+                        require_data.remove(x)             
         if(dist_city=="Chakwal"):
             info = filter_data_chakwal(require_data)
         elif(dist_city=="Kohat"):
-            info = filter_data_kohat(require_data)             
+            info = filter_data_kohat(require_data)
+        elif(dist_city=="M.B Din"):
+            info = filter_data_mandibahudin(require_data)             
     elif(dist_city=="D.G. Khan"): #deraghazi khan
         aligndata = []
         with pdfplumber.open(path) as pdf:
@@ -441,4 +452,28 @@ def filter_data_kohat(require_data): #for kohat
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)   
-    return final_data    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_mandibahudin(require_data): #for Mandibahudin
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,3,5,7] #[item,trade price, opening balance, purchase,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i == 1:
+                filter_data['trade_price'] = x[i]
+            elif i == 2:
+                filter_data['opening_stock'] = x[i]
+            elif i == 3:
+                filter_data['purchase'] = x[i]
+            elif i == 5:
+                filter_data['sale'] = x[i]
+            elif i == 7:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)   
+    return final_data
