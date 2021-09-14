@@ -154,7 +154,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_larkana(require_data)
         elif(dist_city == "Mirpurkhas"):
             info = filter_data_mirpurkhas(require_data)    
-    elif(dist_city=="Chakwal" or dist_city=="Kohat" or dist_city=="M.B Din" or dist_city=="Multan"): #chakwal,kohat,Mandibahudin,multan
+    elif(dist_city=="Chakwal" or dist_city=="Kohat" or dist_city=="M.B Din" or dist_city=="Multan" or dist_city == "Sahiwal"): #chakwal,kohat,Mandibahudin,multan,sahiwal
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -187,7 +187,13 @@ def parse_pdf(pdf_file,dist_city):
                             require_data.append(w)
                         elif dist_city == "Multan":
                             w = list(filter(None, w))
-                            require_data.append(w)                                                    
+                            require_data.append(w)
+                        elif dist_city == "Sahiwal":
+                            for x in range(0,len(w)):
+                                if(w[x]==''):
+                                    w[x]="0"
+                            w = list(filter(None, w))        
+                            require_data.append(w)                                                        
             for x in require_data[:]:
                 if(dist_city=="Chakwal" or dist_city=="Kohat" ):
                     if(len(x)<9):
@@ -197,7 +203,10 @@ def parse_pdf(pdf_file,dist_city):
                         require_data.remove(x)
                 elif(dist_city=="Multan"):
                     if(len(x)<9 or x[1]=="T.P."):
-                        require_data.remove(x)                     
+                        require_data.remove(x)
+                elif(dist_city == "Sahiwal"):
+                    if(len(x)<13):
+                        require_data.remove(x)                             
         if(dist_city=="Chakwal"):
             info = filter_data_chakwal(require_data)
         elif(dist_city=="Kohat"):
@@ -205,7 +214,9 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city=="M.B Din"):
             info = filter_data_mandibahudin(require_data)
         elif(dist_city == "Multan"):
-            info = filter_data_multan(require_data)                  
+            info = filter_data_multan(require_data)
+        elif(dist_city == "Sahiwal"):
+            info = filter_data_hyderabad(require_data)                      
     elif(dist_city=="D.G. Khan"): #deraghazi khan
         aligndata = []
         with pdfplumber.open(path) as pdf:
