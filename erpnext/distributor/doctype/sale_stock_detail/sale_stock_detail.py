@@ -143,8 +143,12 @@ def parse_pdf(pdf_file,dist_city):
                 for j in i[:]:
                     #print(j)
                     for w in j[:]:
-                        arr = list(filter(None, w))
-                        require_data.append(arr)          
+                        if(dist_city =="Larkana"):
+                            for x in range(0,len(w)):
+                                if(w[x]==''):
+                                    w[x]="0"
+                        w = list(filter(None, w))
+                        require_data.append(w)         
             for x in require_data[:]:
                 if(len(x)<13):
                     require_data.remove(x)       
