@@ -267,7 +267,25 @@ def parse_pdf(pdf_file,dist_city):
                     require_data[x].reverse()
                     name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                     require_data[x].append(name)
-            info = filter_data_bahawalnagar(require_data)        
+            info = filter_data_bahawalnagar(require_data)
+    elif(dist_city=="Dadu"):
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                data = pdf.pages[x].extract_text()
+                data = re.sub("\n",",", data) 
+                data = re.split(',',data)
+                for y in range(0,len(data)):           
+                    arr = re.split('\s+',data[y])
+                    arr = list(filter(None, arr))
+                    require_data.append(arr)   
+                for x in require_data[:]:
+                    if(len(x)<14 or len(x)>20):
+                        require_data.remove(x)       
+                for x in range(0,len(require_data)):
+                    require_data[x].reverse()
+                    name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                    require_data[x].append(name)
+            info = filter_data_dadu(require_data)           
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
@@ -620,6 +638,32 @@ def filter_data_bahawalnagar(require_data): #for bahawalnagar,bahawalpur
             elif i == 6:
                 filter_data['sale'] = x[i]
             elif i == 7:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_dadu(require_data): #for dadu
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,11,10,8,6,5,4] #[item,trade price, opening balance, purchase,return,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 11:
+                filter_data['trade_price'] = x[i]
+            elif i == 10:
+                filter_data['opening_stock'] = x[i]
+            elif i == 8:
+                filter_data['purchase'] = x[i]
+            elif i == 6:
+                filter_data['return'] = x[i]     
+            elif i == 5:
+                filter_data['sale'] = x[i]
+            elif i == 4:
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
