@@ -250,7 +250,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_deraghazi(require_data)
         elif(dist_city=="Okara" or dist_city =="Vehari"):
             info = filter_data_okara(require_data)
-    elif(dist_city=="Bahawalnagar"):
+    elif(dist_city=="Bahawalnagar" or dist_city=="Bahawalpur"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -600,15 +600,17 @@ def filter_data_okara(require_data): #for okara, vehari
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_bahawalnagar(require_data): #for bahawalnagar
+def filter_data_bahawalnagar(require_data): #for bahawalnagar,bahawalpur
     filter_data = {}
     final_data = []
-    index_arr = [-1,12,11,10,6,7] #[item,trade price, opening balance, purchase,sale,bonus]
+    index_arr = [-1,2,12,11,10,6,7] #[item, return ,trade price, opening balance, purchase,sale,bonus]
     #get data with specific index
     for x in require_data:
         for i in index_arr:
             if i == -1:
                 filter_data['item'] = x[i]
+            elif i == 2:
+                filter_data['return'] = x[i]   
             elif i == 12:
                 filter_data['trade_price'] = x[i]
             elif i == 11:
