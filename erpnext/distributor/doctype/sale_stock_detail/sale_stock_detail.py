@@ -260,14 +260,14 @@ def parse_pdf(pdf_file,dist_city):
                 for y in range(0,len(data)):           
                     arr = re.split('\s+',data[y])
                     require_data.append(arr)
-                for x in require_data[:]:
-                    if(len(x)<16):
-                        require_data.remove(x)
-                for x in range(0,len(require_data)):
-                    require_data[x].reverse()
-                    name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
-                    require_data[x].append(name)
-            info = filter_data_bahawalnagar(require_data)
+            for x in require_data[:]:
+                if(len(x)<16):
+                    require_data.remove(x)
+            for x in range(0,len(require_data)):
+                require_data[x].reverse()
+                name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                require_data[x].append(name)
+        info = filter_data_bahawalnagar(require_data)
     elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
@@ -291,10 +291,10 @@ def parse_pdf(pdf_file,dist_city):
                 require_data[x].reverse()
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                 require_data[x].append(name)
-            if(dist_city=="Dadu" or dist_city=="Jacobabad"):
-                info = filter_data_dadu(require_data)
-            elif(dist_city=="Lahore"):
-                info = filter_data_lahore(require_data)           
+        if(dist_city=="Dadu" or dist_city=="Jacobabad"):
+            info = filter_data_dadu(require_data)
+        elif(dist_city=="Lahore"):
+            info = filter_data_lahore(require_data)           
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
