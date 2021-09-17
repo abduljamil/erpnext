@@ -268,7 +268,7 @@ def parse_pdf(pdf_file,dist_city):
                     name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                     require_data[x].append(name)
             info = filter_data_bahawalnagar(require_data)
-    elif(dist_city=="Dadu"):
+    elif(dist_city=="Dadu" or dist_city=="Jacobabad"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -280,7 +280,12 @@ def parse_pdf(pdf_file,dist_city):
                     require_data.append(arr)   
                 for x in require_data[:]:
                     if(len(x)<14 or len(x)>20):
-                        require_data.remove(x)       
+                        require_data.remove(x)
+                    if(dist_city=="Jacobabad"):
+                        if(x[0]=="Gr" ):
+                            require_data.remove(x)
+                if(dist_city=="Jacobabad"):          
+                    require_data.pop(0)                       
                 for x in range(0,len(require_data)):
                     require_data[x].reverse()
                     name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
@@ -644,7 +649,7 @@ def filter_data_bahawalnagar(require_data): #for bahawalnagar,bahawalpur
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_dadu(require_data): #for dadu
+def filter_data_dadu(require_data): #for dadu,jacobabad
     filter_data = {}
     final_data = []
     index_arr = [-1,11,10,8,6,5,4] #[item,trade price, opening balance, purchase,return,sale,bonus]
