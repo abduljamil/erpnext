@@ -260,15 +260,15 @@ def parse_pdf(pdf_file,dist_city):
                 for y in range(0,len(data)):           
                     arr = re.split('\s+',data[y])
                     require_data.append(arr)
-                for x in require_data[:]:
-                    if(len(x)<16):
-                        require_data.remove(x)
-                for x in range(0,len(require_data)):
-                    require_data[x].reverse()
-                    name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
-                    require_data[x].append(name)
-            info = filter_data_bahawalnagar(require_data)
-    elif(dist_city=="Dadu"):
+            for x in require_data[:]:
+                if(len(x)<16):
+                    require_data.remove(x)
+            for x in range(0,len(require_data)):
+                require_data[x].reverse()
+                name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                require_data[x].append(name)
+        info = filter_data_bahawalnagar(require_data)
+    elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore" or dist_city=="Gujranwala"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -277,15 +277,26 @@ def parse_pdf(pdf_file,dist_city):
                 for y in range(0,len(data)):           
                     arr = re.split('\s+',data[y])
                     arr = list(filter(None, arr))
-                    require_data.append(arr)   
-                for x in require_data[:]:
-                    if(len(x)<14 or len(x)>20):
-                        require_data.remove(x)       
-                for x in range(0,len(require_data)):
-                    require_data[x].reverse()
-                    name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
-                    require_data[x].append(name)
-            info = filter_data_dadu(require_data)           
+                    require_data.append(arr)        
+            for x in require_data[:]:
+                if(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Gujranwala"):
+                    if(len(x)<14 or len(x)>20 or x[0]=="Gr"):
+                        require_data.remove(x)
+                if(dist_city=="Lahore"):
+                    if(len(x)<12 or len(x)>15):
+                        require_data.remove(x)
+            if(dist_city=="Jacobabad"):          
+                require_data.pop(0)                     
+            for x in range(0,len(require_data)):
+                require_data[x].reverse()
+                name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                require_data[x].append(name)
+        if(dist_city=="Dadu" or dist_city=="Jacobabad"):
+            info = filter_data_dadu(require_data)
+        elif(dist_city=="Lahore"):
+            info = filter_data_lahore(require_data)
+        elif(dist_city=="Gujranwala"):
+            info = filter_data_gujranwala(require_data)                
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
@@ -644,7 +655,7 @@ def filter_data_bahawalnagar(require_data): #for bahawalnagar,bahawalpur
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_dadu(require_data): #for dadu
+def filter_data_dadu(require_data): #for dadu,jacobabad
     filter_data = {}
     final_data = []
     index_arr = [-1,11,10,8,6,5,4] #[item,trade price, opening balance, purchase,return,sale,bonus]
@@ -664,6 +675,58 @@ def filter_data_dadu(require_data): #for dadu
             elif i == 5:
                 filter_data['sale'] = x[i]
             elif i == 4:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_lahore(require_data): #for lahore
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,8,7,6,4,3,1] #[item,trade price, opening balance, purchase,return,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 8:
+                filter_data['trade_price'] = x[i]
+            elif i == 7:
+                filter_data['opening_stock'] = x[i]
+            elif i == 6:
+                filter_data['purchase'] = x[i]
+            elif i == 4:
+                filter_data['return'] = x[i]     
+            elif i == 3:
+                filter_data['sale'] = x[i]
+            elif i == 1:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_gujranwala(require_data): #for gujranwala
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,12,11,9,3,7,5] #[item,trade price, opening balance, purchase,return,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 12:
+                filter_data['trade_price'] = x[i]
+            elif i == 11:
+                filter_data['opening_stock'] = x[i]
+            elif i == 9:
+                filter_data['purchase'] = x[i]
+            elif i == 3:
+                filter_data['return'] = x[i]     
+            elif i == 7:
+                filter_data['sale'] = x[i]
+            elif i == 5:
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
