@@ -307,7 +307,26 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city=="Gujranwala" or dist_city=="Jhang"):
             info = filter_data_gujranwala(require_data)
         elif(dist_city=="Mardan"):
-            info = filter_data_mardan(require_data)                     
+            info = filter_data_mardan(require_data)
+    elif(dist_city=="Timergrah" ):
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                data = pdf.pages[x].extract_text()
+                data = re.split('\n', data) 
+                for y in range(0,len(data)):           
+                    arr = re.split('\s+',data[y])
+                    arr = list(filter(None, arr))
+                    require_data.append(arr)                 
+            for x in require_data[:]:
+                if(dist_city=="Timergrah"):
+                    x.pop(0)
+                    if(len(x)<18 or x[0]=='Open' or x[0]=="Description" ):
+                        require_data.remove(x) 
+            for x in range(0,len(require_data)):
+                require_data[x].reverse()
+                name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                require_data[x].append(name)
+        info = filter_data_timergrah(require_data)                                
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
     
@@ -764,6 +783,32 @@ def filter_data_mardan(require_data): #for mardan
             elif i == 7:
                 filter_data['sale'] = x[i]
             elif i == 4:
+                filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_timergrah(require_data): #for timergrah
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,15,14,13,8,6,5] #[item,trade price, opening balance, purchase,return,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 15:
+                filter_data['trade_price'] = x[i]
+            elif i == 14:
+                filter_data['opening_stock'] = x[i]
+            elif i == 13:
+                filter_data['purchase'] = x[i]
+            elif i == 8:
+                filter_data['return'] = x[i]    
+            elif i == 6:
+                filter_data['sale'] = x[i]
+            elif i == 5:
                 filter_data['bonus'] = x[i]   
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
