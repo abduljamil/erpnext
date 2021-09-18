@@ -268,7 +268,7 @@ def parse_pdf(pdf_file,dist_city):
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                 require_data[x].append(name)
         info = filter_data_bahawalnagar(require_data)
-    elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore" or dist_city=="Gujranwala"):
+    elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore" or dist_city=="Gujranwala" or dist_city=="Jhang"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -285,6 +285,10 @@ def parse_pdf(pdf_file,dist_city):
                 if(dist_city=="Lahore"):
                     if(len(x)<12 or len(x)>15):
                         require_data.remove(x)
+                if(dist_city=="Jhang"):
+                    if(len(x)<14 or len(x)>20):
+                        require_data.remove(x)
+                    x.pop(0)        
             if(dist_city=="Jacobabad"):          
                 require_data.pop(0)                     
             for x in range(0,len(require_data)):
@@ -295,7 +299,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_dadu(require_data)
         elif(dist_city=="Lahore"):
             info = filter_data_lahore(require_data)
-        elif(dist_city=="Gujranwala"):
+        elif(dist_city=="Gujranwala" or dist_city=="Jhang"):
             info = filter_data_gujranwala(require_data)                
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power'], as_list=True);
@@ -707,7 +711,7 @@ def filter_data_lahore(require_data): #for lahore
     return final_data
 
 @frappe.whitelist(allow_guest=True)
-def filter_data_gujranwala(require_data): #for gujranwala
+def filter_data_gujranwala(require_data): #for gujranwala, jhang
     filter_data = {}
     final_data = []
     index_arr = [-1,12,11,9,3,7,5] #[item,trade price, opening balance, purchase,return,sale,bonus]
