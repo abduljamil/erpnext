@@ -49,7 +49,8 @@ frappe.ui.form.on('Sale Stock Detail', {
 		}
 	},
     process_pdf:function(frm){
-		
+		cur_frm.clear_table("selling_product");
+		cur_frm.refresh_fields();
 		let pdf_file = frm.doc.file;
 		if(frm.doc.city){
 			let dist_city = frm.doc.city;
