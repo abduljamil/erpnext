@@ -355,30 +355,30 @@ def parse_pdf(pdf_file,dist_city):
     for x in info:
         for y in product_list:
             Token_Set_Ratio = fuzz.token_set_ratio(x['item'],y[1])
-            if Token_Set_Ratio >= 90:
+            if Token_Set_Ratio >= 67:
                 x['id'] = y[0]
                 x['DB_trade_price'] = y[4]
 
     for z in info:
-        key = 'id'
+        key = 'DB_trade_price'
         if key not in z.keys():
             if z:
                 for w in product_list:
                     Token_Set_Ratio = fuzz.token_set_ratio(z['item'],w[1])
-                    if Token_Set_Ratio >= 80:
+                    if Token_Set_Ratio >= 60:
                         z['id'] = w[0]
                         z['DB_trade_price'] = w[4]    
     
     for a in info:
-        key = 'id'
+        key = 'DB_trade_price'
         if key not in a.keys():
             if a:
                 for b in product_list:
                     Token_Set_Ratio = fuzz.token_set_ratio(a['item'],b[1]+" "+b[2])
-                    if Token_Set_Ratio >= 70:
+                    if Token_Set_Ratio >= 59:
                         a['id'] = b[0]
                         a['DB_trade_price'] = b[4]
-    
+                        
     return info;
 
 @frappe.whitelist(allow_guest=True)
