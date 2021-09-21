@@ -395,7 +395,7 @@ def parse_pdf(pdf_file,dist_city):
                     if Token_Set_Ratio >= 59:
                         a['id'] = b[0]
                         a['DB_trade_price'] = b[4]
-    print(info)
+                        
     return info;
 
 @frappe.whitelist(allow_guest=True)
