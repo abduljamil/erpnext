@@ -348,37 +348,54 @@ def parse_pdf(pdf_file,dist_city):
                 require_data[x].reverse()
                 name = require_data[x][-1] +" "+ require_data[x][-2]
                 require_data[x].append(name)
-        info = filter_data_bhakkar(require_data)                                    
+        info = filter_data_bhakkar(require_data)
+    elif(dist_city=="Faisalabad" ):
+        with pdfplumber.open(path) as pdf:
+            for x in range(0, len(pdf.pages)):
+                data = pdf.pages[x].extract_text()
+                data = re.split('\n', data)
+                for y in range(0,len(data)):           
+                    arr = re.sub('\s+',' ',data[y])
+                    arr = re.split('\s',arr)
+                    require_data.append(arr)  
+            for x in require_data[:]:
+                if(len(x)<18):
+                    require_data.remove(x)
+            for x in range(0,len(require_data)):
+                require_data[x].reverse()
+                name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
+                require_data[x].append(name)   
+        info = filter_data_faisalabad(require_data)                                           
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power','trade_price'], as_list=True);
     
     for x in info:
         for y in product_list:
             Token_Set_Ratio = fuzz.token_set_ratio(x['item'],y[1])
-            if Token_Set_Ratio >= 90:
+            if Token_Set_Ratio >= 67:
                 x['id'] = y[0]
                 x['DB_trade_price'] = y[4]
 
     for z in info:
-        key = 'id'
+        key = 'DB_trade_price'
         if key not in z.keys():
             if z:
                 for w in product_list:
                     Token_Set_Ratio = fuzz.token_set_ratio(z['item'],w[1])
-                    if Token_Set_Ratio >= 80:
+                    if Token_Set_Ratio >= 60:
                         z['id'] = w[0]
                         z['DB_trade_price'] = w[4]    
     
     for a in info:
-        key = 'id'
+        key = 'DB_trade_price'
         if key not in a.keys():
             if a:
                 for b in product_list:
                     Token_Set_Ratio = fuzz.token_set_ratio(a['item'],b[1]+" "+b[2])
-                    if Token_Set_Ratio >= 70:
+                    if Token_Set_Ratio >= 59:
                         a['id'] = b[0]
                         a['DB_trade_price'] = b[4]
-    
+                        
     return info;
 
 @frappe.whitelist(allow_guest=True)
@@ -859,6 +876,28 @@ def filter_data_bhakkar(require_data): #for timergrah
                 filter_data['sale'] = x[i]
             elif i == 3:
                 filter_data['bonus'] = x[i]   
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_faisalabad(require_data): #for faisalabad
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,15,13,5,4] #[item, opening balance, purchase,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 15:
+                filter_data['opening_stock'] = x[i]
+            elif i == 13:
+                filter_data['purchase'] = x[i]
+            elif i == 5:
+                filter_data['return'] = x[i]     
+            elif i == 4:
+                filter_data['sale'] = x[i]  
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
     return final_data
