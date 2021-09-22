@@ -333,7 +333,7 @@ def parse_pdf(pdf_file,dist_city):
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                 require_data[x].append(name)
         info = filter_data_timergrah(require_data)
-    elif(dist_city=="Bhakkar" or dist_city=="Mainwali"): 
+    elif(dist_city=="Bhakkar" or dist_city=="Mainwali" or dist_city=="Sargodha"): 
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -351,7 +351,7 @@ def parse_pdf(pdf_file,dist_city):
                     x[0] = re.sub(r'[0-9]',"",x[0])
                     if(len(x)<14 or x[0]=="PR.ID"):
                         require_data.remove(x)
-                if(dist_city=="Mainwali"):
+                if(dist_city=="Mainwali" or dist_city=="Sargodha"):
                     if(len(x)<11 or x[0]=="Name"):
                         require_data.remove(x)               
             for x in range(0,len(require_data)):
@@ -360,7 +360,7 @@ def parse_pdf(pdf_file,dist_city):
                 require_data[x].append(name)
         if(dist_city=="Bhakkar"):            
             info = filter_data_bhakkar(require_data)
-        elif(dist_city=="Mainwali"):
+        elif(dist_city=="Mainwali" or dist_city=="Sargodha"):
             info = filter_data_mainwali(require_data)
     elif(dist_city=="Faisalabad" ):
         with pdfplumber.open(path) as pdf:
