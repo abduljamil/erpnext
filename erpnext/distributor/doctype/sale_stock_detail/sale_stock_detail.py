@@ -268,7 +268,7 @@ def parse_pdf(pdf_file,dist_city):
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
                 require_data[x].append(name)
         info = filter_data_bahawalnagar(require_data)
-    elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore" or dist_city=="Gujranwala" or dist_city=="Jhang" or dist_city=="Mardan"):
+    elif(dist_city=="Dadu" or dist_city=="Jacobabad" or dist_city=="Lahore" or dist_city=="Gujranwala" or dist_city=="Jhang" or dist_city=="Mardan" or dist_city=="Gujrat"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -292,7 +292,11 @@ def parse_pdf(pdf_file,dist_city):
                 if(dist_city=="Mardan"):
                     x.pop(0)
                     if(len(x)<20):
-                        require_data.remove(x)        
+                        require_data.remove(x)
+                if(dist_city=="Gujrat"):
+                    x.pop(0)
+                    if(len(x)<13 or x[1]=="PCW"):
+                        require_data.remove(x)                
                             
             if(dist_city=="Jacobabad"):          
                 require_data.pop(0)                     
@@ -308,6 +312,8 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_gujranwala(require_data)
         elif(dist_city=="Mardan"):
             info = filter_data_mardan(require_data)
+        elif(dist_city=="Gujrat"):
+            info = filter_data_gujrat(require_data)    
     elif(dist_city=="Timergrah" ):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
@@ -898,6 +904,30 @@ def filter_data_faisalabad(require_data): #for faisalabad
                 filter_data['return'] = x[i]     
             elif i == 4:
                 filter_data['sale'] = x[i]  
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_gujrat(require_data): #for gujrat
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,9,8,2,5,4] #[item, opening balance, purchase,return,sale,bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 9:
+                filter_data['opening_stock'] = x[i]
+            elif i == 8:
+                filter_data['purchase'] = x[i]
+            elif i == 2:
+                filter_data['return'] = x[i]     
+            elif i == 5:
+                filter_data['sale'] = x[i]
+            elif i == 4:
+                filter_data['bonus'] = x[i]      
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
     return final_data
