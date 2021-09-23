@@ -70,7 +70,7 @@ frappe.ui.form.on('Sale Stock Detail', {
 						var child = cur_frm.add_child("selling_product");
 						frappe.model.set_value(child.doctype, child.name, "code", element.id)
 						frappe.model.set_value(child.doctype, child.name, "product_name", element.item)
-						if(dist_city=="Bhakkar" || dist_city=="Faisalabad" || dist_city=="Gujrat" || dist_city=="Mainwali" || dist_city=="Sargodha"){
+						if(dist_city=="Bhakkar" || dist_city=="Faisalabad" || dist_city=="Gujrat" || dist_city=="Mainwali" || dist_city=="Sargodha" || dist_city=="Toba Tek Singh"){
 							frappe.model.set_value(child.doctype, child.name, "trade_price", parseFloat(element.DB_trade_price))
 						} else {
 							frappe.model.set_value(child.doctype, child.name, "trade_price", parseFloat(element.trade_price))
