@@ -362,7 +362,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_bhakkar(require_data)
         elif(dist_city=="Mainwali" or dist_city=="Sargodha"):
             info = filter_data_mainwali(require_data)
-    elif(dist_city=="Faisalabad" or dist_city=="Toba Tek Singh" or dist_city=="Sialkot"):
+    elif(dist_city=="Faisalabad" or dist_city=="Toba Tek Singh" or dist_city=="Sialkot" or dist_city=="Kasur"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -380,7 +380,13 @@ def parse_pdf(pdf_file,dist_city):
                         require_data.remove(x)
                 if(dist_city=="Sialkot"):
                     if(len(x)<16):
-                        require_data.remove(x)        
+                        require_data.remove(x)
+                if(dist_city=="Kasur"):
+                    for y in range(0,len(x)):
+                        if(x[y]=='-'):
+                            x[y]="0"
+                    if(len(x)<11 or x[0]=="Product" or x[0]=="Group"):
+                        require_data.remove(x)                 
             for x in range(0,len(require_data)):
                 require_data[x].reverse()
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
@@ -390,7 +396,9 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city=="Toba Tek Singh"):
             info = filter_data_tobateksingh(require_data)
         elif(dist_city=="Sialkot"):
-            info = filter_data_sialkot(require_data)                                               
+            info = filter_data_sialkot(require_data)
+        elif(dist_city=="Kasur"):
+            info = filter_data_kasur(require_data)                                                   
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power','trade_price'], as_list=True);
     
@@ -1021,4 +1029,26 @@ def filter_data_sialkot(require_data): #for sialkot
                 filter_data['bonus'] = x[i]      
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
-    return final_data    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_kasur(require_data): #for kasur
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,7,6,3,4] #[item, opening balance, purchase,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 7:
+                filter_data['opening_stock'] = x[i]
+            elif i == 6:
+                filter_data['purchase'] = x[i]
+            elif i == 3:
+                filter_data['return'] = x[i]     
+            elif i == 4:
+                filter_data['sale'] = x[i]      
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
