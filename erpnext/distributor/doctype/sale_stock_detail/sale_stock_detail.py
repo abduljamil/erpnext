@@ -158,7 +158,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_larkana(require_data)
         elif(dist_city == "Mirpurkhas"):
             info = filter_data_mirpurkhas(require_data)    
-    elif(dist_city=="Chakwal" or dist_city=="Kohat" or dist_city=="M.B Din" or dist_city=="Multan" or dist_city == "Sahiwal"): #chakwal,kohat,Mandibahudin,multan,sahiwal
+    elif(dist_city=="Chakwal" or dist_city=="Kohat" or dist_city=="M.B Din" or dist_city=="Multan" or dist_city == "Sahiwal" or dist_city=="Quetta"): #chakwal,kohat,Mandibahudin,multan,sahiwal
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 page = pdf.pages[x]
@@ -192,7 +192,7 @@ def parse_pdf(pdf_file,dist_city):
                         elif dist_city == "Multan":
                             w = list(filter(None, w))
                             require_data.append(w)
-                        elif dist_city == "Sahiwal":
+                        elif(dist_city == "Sahiwal" or dist_city == "Quetta"):
                             for x in range(0,len(w)):
                                 if(w[x]==''):
                                     w[x]="0"
@@ -210,7 +210,10 @@ def parse_pdf(pdf_file,dist_city):
                         require_data.remove(x)
                 elif(dist_city == "Sahiwal"):
                     if(len(x)<13):
-                        require_data.remove(x)                             
+                        require_data.remove(x)
+                elif(dist_city == "Quetta"):
+                    if(len(x)<11 or x[0]=="Product" or x[0]=="Total" or x[0]=="Grand Total"):
+                        require_data.remove(x)                                     
         if(dist_city=="Chakwal"):
             info = filter_data_chakwal(require_data)
         elif(dist_city=="Kohat"):
@@ -220,7 +223,9 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city == "Multan"):
             info = filter_data_multan(require_data)
         elif(dist_city == "Sahiwal"):
-            info = filter_data_hyderabad(require_data)                      
+            info = filter_data_hyderabad(require_data)
+        elif(dist_city == "Quetta"):
+            info = filter_data_quetta(require_data)                          
     elif(dist_city=="D.G. Khan" or dist_city=="Okara" or dist_city=="Vehari"): #deraghazi khan
         aligndata = []
         with pdfplumber.open(path) as pdf:
@@ -362,7 +367,7 @@ def parse_pdf(pdf_file,dist_city):
             info = filter_data_bhakkar(require_data)
         elif(dist_city=="Mainwali" or dist_city=="Sargodha"):
             info = filter_data_mainwali(require_data)
-    elif(dist_city=="Faisalabad" or dist_city=="Toba Tek Singh" or dist_city=="Sialkot"):
+    elif(dist_city=="Faisalabad" or dist_city=="Toba Tek Singh" or dist_city=="Sialkot" or dist_city=="Kasur"):
         with pdfplumber.open(path) as pdf:
             for x in range(0, len(pdf.pages)):
                 data = pdf.pages[x].extract_text()
@@ -380,7 +385,13 @@ def parse_pdf(pdf_file,dist_city):
                         require_data.remove(x)
                 if(dist_city=="Sialkot"):
                     if(len(x)<16):
-                        require_data.remove(x)        
+                        require_data.remove(x)
+                if(dist_city=="Kasur"):
+                    for y in range(0,len(x)):
+                        if(x[y]=='-'):
+                            x[y]="0"
+                    if(len(x)<11 or x[0]=="Product" or x[0]=="Group"):
+                        require_data.remove(x)                 
             for x in range(0,len(require_data)):
                 require_data[x].reverse()
                 name = require_data[x][-1] +" "+ require_data[x][-2] +" "+ require_data[x][-3]
@@ -390,7 +401,9 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city=="Toba Tek Singh"):
             info = filter_data_tobateksingh(require_data)
         elif(dist_city=="Sialkot"):
-            info = filter_data_sialkot(require_data)                                               
+            info = filter_data_sialkot(require_data)
+        elif(dist_city=="Kasur"):
+            info = filter_data_kasur(require_data)                                                   
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power','trade_price'], as_list=True);
     
@@ -1021,4 +1034,50 @@ def filter_data_sialkot(require_data): #for sialkot
                 filter_data['bonus'] = x[i]      
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)    
-    return final_data    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_kasur(require_data): #for kasur
+    filter_data = {}
+    final_data = []
+    index_arr = [-1,7,6,3,4] #[item, opening balance, purchase,return,sale]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == -1:
+                filter_data['item'] = x[i]   
+            elif i == 7:
+                filter_data['opening_stock'] = x[i]
+            elif i == 6:
+                filter_data['purchase'] = x[i]
+            elif i == 3:
+                filter_data['return'] = x[i]     
+            elif i == 4:
+                filter_data['sale'] = x[i]      
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)    
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_quetta(require_data): #for quetta
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,7,8,9] #[item,opening stock, purchase, return , sale, bonus]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i == 1:
+                filter_data['opening_stock'] = x[i]
+            elif i == 2:
+                filter_data['purchase'] = x[i]
+            elif i == 8:
+                filter_data['sale'] = x[i]
+            elif i == 9:
+                filter_data['bonus'] = x[i]
+            elif i == 7:
+                filter_data['return'] = x[i]       
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)  
+    return final_data
