@@ -9,6 +9,7 @@ import pdfplumber
 from frappe.utils import get_site_path
 import re
 from fuzzywuzzy import fuzz
+import pandas as pd
 
 class SaleStockDetail(Document):
     pass
@@ -403,7 +404,16 @@ def parse_pdf(pdf_file,dist_city):
         elif(dist_city=="Sialkot"):
             info = filter_data_sialkot(require_data)
         elif(dist_city=="Kasur"):
-            info = filter_data_kasur(require_data)                                                   
+            info = filter_data_kasur(require_data)
+    elif(dist_city=="Dera Ismail Khan"):
+        data = pd.read_excel(path)
+        require_data = data.values.tolist()
+        for x in require_data[:]:
+            x[0] = str(x[0])       
+            if(x[0]=='nan' or x[0]=='CODE'):
+                require_data.remove(x)
+            x.pop(0)            
+        info = filter_data_deraismailkhan(require_data)                                                           
 
     product_list = frappe.db.get_all('Item',fields=['item_code', 'item_name','item_type','item_power','trade_price'], as_list=True);
     
@@ -1077,6 +1087,32 @@ def filter_data_quetta(require_data): #for quetta
             elif i == 9:
                 filter_data['bonus'] = x[i]
             elif i == 7:
+                filter_data['return'] = x[i]       
+        filter_data_copy = filter_data.copy()
+        final_data.append(filter_data_copy)  
+    return final_data
+
+@frappe.whitelist(allow_guest=True)
+def filter_data_deraismailkhan(require_data): #for dera ismail khan
+    filter_data = {}
+    final_data = []
+    index_arr = [0,1,2,3,6,7,9] #[item,trade price,opening stock, purchase, sale, bonus, return ]
+    #get data with specific index
+    for x in require_data:
+        for i in index_arr:
+            if i == 0:
+                filter_data['item'] = x[i]
+            elif i==1:
+                filter_data['trade_price'] = x[i]   
+            elif i == 2:
+                filter_data['opening_stock'] = x[i]
+            elif i == 3:
+                filter_data['purchase'] = x[i]
+            elif i == 6:
+                filter_data['sale'] = x[i]
+            elif i == 7:
+                filter_data['bonus'] = x[i]
+            elif i == 9:
                 filter_data['return'] = x[i]       
         filter_data_copy = filter_data.copy()
         final_data.append(filter_data_copy)  
