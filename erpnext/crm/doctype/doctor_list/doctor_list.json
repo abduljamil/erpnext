@@ -1,0 +1,161 @@
+{
+ "actions": [],
+ "creation": "2021-09-29 09:02:04.031162",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "team",
+  "products",
+  "doctor_code",
+  "doctor_name",
+  "brick",
+  "city",
+  "area",
+  "zone",
+  "column_break_9",
+  "qualification",
+  "specialization",
+  "grade",
+  "landline",
+  "mobile",
+  "primary_address",
+  "secondary_address",
+  "manager",
+  "manager_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctor_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Doctor Code"
+  },
+  {
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name"
+  },
+  {
+   "fieldname": "brick",
+   "fieldtype": "Link",
+   "label": "Brick",
+   "options": "Territory"
+  },
+  {
+   "depends_on": "brick",
+   "fetch_from": "brick.parent",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Link",
+   "label": "Area",
+   "options": "Territory"
+  },
+  {
+   "depends_on": "area",
+   "fetch_from": "area.parent",
+   "fieldname": "zone",
+   "fieldtype": "Data",
+   "label": "Zone"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Select",
+   "label": "Team",
+   "options": "\nBlue\nGreen"
+  },
+  {
+   "fieldname": "products",
+   "fieldtype": "Table",
+   "label": "Products",
+   "options": "Products"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qualification",
+   "fieldtype": "Select",
+   "label": "Qualification",
+   "options": "\nDIP. CARD\nFCPS\nDCH\nDGO\nDTC\nMBBS\nMS\nMCPS\nMRCP\nMBBS,MCPS\nMBBS,MCPs\nMS SURGEORY\nMBBS,PHD\nMBBS,MS\nLHV\nPCPS\nMS\nRMP\nPhD\nFCPD\nFRCS\nDTCD\nMS\nDisp\nGyne\nRMDC\nMP\nMbbs\nDTCP\nMBBS\nRMPC\nRMP\nMPO\nMO\nWMO\nMBBS,FCPS\nMBBS DGO\nMBBS FCPS\nMBBS DCH\nDGO MBBS SONOLOGIST\nFCPS MBBS\nDNB MBBS\nFCPS DCH MBBS\nARTHO\nFCPS MBBS\nDCH MBBS\nDGO MBBS\nDIP\nD.G.O\nDIP DIAB\nMBBS-D.G.O\nL.H.V\nGYNEE\nMBBs\nPHYSITION\ndgo\nfcps\nmbbs\ndtcd\ndch\nGyna\nDHMS\nOrtho\nMBBS\nGeneral medician\nMBBS&RMP\nMBBS&Ortho\nMBBS&FCPS&DCH\nMBBS&FCPS\nMBBS&General medician\nMBBS&DGO\nMBBS&Gyna\nMBBS+FCPS\nMBBS+DCH\nMBBS+RMP\nFCPS+MBBS\nDCH+MBBS\nDGO+MBBS\nDCS\nTECH\nMD\nGynae\nM-Phil\nSM Technician\nSM-Tech\nSM-TECH\nFCPS/MCPS\nFCPS\nMRCP\nFCPS/MRCPH\nTECHNICIAN\nMBBS/DCH\nMBBS/FCPS\nMCPS\nF.C.P.S\nMBBS/MRCP\nMBBS/SMO\nFCPS\nMSURO\nMRCP\nFCPS/SCP/RCP\nM.D\nFICP\nTechnician\nMPPS\nFCPS/MRCP\nFCPS,MSURO\nFCPS,MCPS\nFCPS,MRCP\nMRCP,FCPS\nFCPS1\nGP\nFcps\nPEADS\nMOH\nFCPC\nBDS\nDLO\nPrec\nLhv\nprec\nPHY\nGENERAL SURGEON\nCARDIO\nGYNE\nUROLOGIST\nSURGEON\nORTHO\nM.O\nNEURO"
+  },
+  {
+   "fieldname": "specialization",
+   "fieldtype": "Select",
+   "label": "Specialization",
+   "options": "\nCARDIC\nPHY\nPEDS\nORTHO\nENT\nURO\nGYNA\nTB\nGP\nNEURO\nMEDICINE\nMO EMERGENCY\nUROLOGY\nMO\nMO SURGERY\nCHEST\nMO (PKLI)\nUROLOGIST (PKLI)\nPHY & DC\nDC\nPSY\nSR & CHEST\nMO Chest\nLIVER OPD\nUINT M3\nUINT M2\nUINT MI\nCHEST & PHY\nPHY MED\nHEAD CHEST\nUNIT MI\nMBBS\nDCH\nMP\nLHV\nDISP\nARTHO\nUROLOGIST\nSURG\nGASTRO/HEPTO\nGEN SURGEON\nGIS\nDIABETS\nG1\nGP ORTHO\nGP CHEST\nGI\nFCPS & MBBS\nDGO & MBBS\nMBBS & GYNA\nFCPS\nMBBS & RMP\nCMO\nHOD\nGASTRO\nREGISTRAR\nCHILD\nCARDIO\nHOSPITAL\nCP\nCONSULTANT PHYSICIAN\nMBBS & GENERAL MEDICIAN\nMBBS & FCPS & DCH\nMBBS & DGO\nSKIN\nMED & GP\nMED & ORTHO\nTMO\nMO GOP\nSMO\nGOP\nPG\nNEPH\nGYNA & GP\nMED & UYOG\nPED & GP\nNEURO & SURG\nOBST\nLMO\nEMO\nSURG & GP\nREGES\nMSP\nMS\nDENTAL\nPROF\nAP\nFCPS-PHY\nCARD+PHY\nPHY-FCPS\nRMP\nPRO\nHP\nRMO\nPUL\nHEPATOLOGIST\nNEURO PHY\nCHEST PHY"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Select",
+   "label": "Grade",
+   "options": "\nA\nB\nC\nA1\nA2\nB1\nB2\nA.1\nA.2\nB.1\nB.2\nA+\nB+"
+  },
+  {
+   "fieldname": "landline",
+   "fieldtype": "Data",
+   "label": "Landline "
+  },
+  {
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile"
+  },
+  {
+   "fieldname": "primary_address",
+   "fieldtype": "Data",
+   "label": "Primary Address"
+  },
+  {
+   "fieldname": "secondary_address",
+   "fieldtype": "Data",
+   "label": "Secondary Address"
+  },
+  {
+   "fieldname": "manager",
+   "fieldtype": "Link",
+   "label": "Manager",
+   "options": "Employee"
+  },
+  {
+   "bold": 1,
+   "depends_on": "manager",
+   "fetch_from": "manager.employee_name",
+   "fetch_if_empty": 1,
+   "fieldname": "manager_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Manager Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-10-05 10:38:11.553271",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Doctor List",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
