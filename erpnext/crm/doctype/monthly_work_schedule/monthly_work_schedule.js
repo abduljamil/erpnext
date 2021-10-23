@@ -35,7 +35,7 @@ frappe.ui.form.on('Monthly Work Schedule', {
 						frappe.model.set_value(child.doctype, child.name, "day", weekDays[a.getDay()]);
 						// check if area is enter then also default set the area town 
 						if(frm.doc.area){
-							frappe.model.set_value(child.doctype, child.name, "areatown", frm.doc.area);
+							frappe.model.set_value(child.doctype, child.name, "area_town", frm.doc.area);
 						}
 						cur_frm.refresh_field("work_schedule_detail")
 					}
