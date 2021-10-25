@@ -1,8 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
 from __future__ import unicode_literals
+from datetime import date
 import frappe
 from frappe.model.document import Document
 import pdfplumber
@@ -15,11 +15,19 @@ class SaleStockDetail(Document):
     pass
 
 @frappe.whitelist(allow_guest=True)
-def parse_pdf(pdf_file,dist_city):
-    #print(pdf_file,dist_city)
+def parse_pdf(pdf_file,dist_city,from_date,to_date):
+    #print(pdf_file,dist_city,from_date,to_date)
     arr = re.split('/',pdf_file);
     path = frappe.get_site_path(arr[1],arr[2],arr[3]);
     #print(path)
+    dates_data = frappe.db.get_list('Sale Stock Detail',
+        filters={
+            'from': from_date,
+            'to': to_date
+        },
+        as_list=True)
+    if(dates_data):
+        frappe.throw(('Same dates record already exist'))       
     alldata = []
     require_data = []
     if(dist_city == "Abbotabad" or dist_city == "Bannu" or dist_city == "Jhelum" or dist_city == "Rawalpindi"):
