@@ -52,6 +52,8 @@ frappe.ui.form.on('Sale Stock Detail', {
 		cur_frm.clear_table("selling_product");
 		cur_frm.refresh_fields();
 		let pdf_file = frm.doc.file;
+		let from_date = frm.doc.from;
+		let to_date = frm.doc.to;
 		if(frm.doc.city){
 			let dist_city = frm.doc.city;
 			frappe.call({
@@ -59,6 +61,8 @@ frappe.ui.form.on('Sale Stock Detail', {
 				args: {
 					'pdf_file': pdf_file,
 					'dist_city': dist_city,
+					'from_date': from_date,
+					'to_date': to_date,
 				},
 				callback: function (r) {
 					var info = r.message;
