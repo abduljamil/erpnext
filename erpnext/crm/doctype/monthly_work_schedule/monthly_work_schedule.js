@@ -18,7 +18,8 @@ frappe.ui.form.on('Monthly Work Schedule', {
 			var stopDate = new Date(frm.doc.to_date).getDate();
 			var currentDate = new Date(frm.doc.from_date).getDate();
 			while (currentDate <= stopDate) {
-				var tomorrow = new Date();
+
+				var tomorrow = new Date(frm.doc.from_date);
 				tomorrow.setDate(currentDate);
 				dateArray.push(tomorrow);
 				currentDate = currentDate+1
