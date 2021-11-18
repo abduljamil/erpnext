@@ -1,0 +1,358 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-11-11 10:40:11.246277",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "designation",
+  "territory",
+  "from_date",
+  "column_break_5",
+  "name1",
+  "team",
+  "area",
+  "to_date",
+  "section_break_10",
+  "expense_report",
+  "total_expenses",
+  "receipt_section",
+  "postage",
+  "attach_image_14",
+  "telephone",
+  "attach_image_16",
+  "tool_tax",
+  "attach_image_18",
+  "column_break_19",
+  "stationery",
+  "attach_image_21",
+  "fright",
+  "attach_image_23",
+  "parking",
+  "attach_image_25",
+  "misc_section",
+  "misc_1",
+  "attach_image_28",
+  "misc_2",
+  "attach_image_30",
+  "misc_3",
+  "attach_image_32",
+  "grand_total",
+  "column_break_37",
+  "misc_4",
+  "attach_image_34",
+  "misc_5",
+  "attach_image_36",
+  "misc_6",
+  "attach_image_38",
+  "total_sale_section",
+  "local_sale",
+  "column_break_41",
+  "out_station_sale",
+  "column_break_43",
+  "total_sale",
+  "signatures_section",
+  "tm_signatures",
+  "tm_sign",
+  "column_break_48",
+  "rsm_signatures",
+  "rsm_sign"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "depends_on": "employee",
+   "fetch_from": "employee.area",
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "employee",
+   "fetch_from": "employee.employee_name",
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Data",
+   "label": "Team"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "label": "Area"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expense_report",
+   "fieldtype": "Table",
+   "label": "Expense Report",
+   "options": "TADA Report Child"
+  },
+  {
+   "fieldname": "receipt_section",
+   "fieldtype": "Section Break",
+   "label": "Receipt"
+  },
+  {
+   "default": "0",
+   "fieldname": "postage",
+   "fieldtype": "Currency",
+   "label": "Postage"
+  },
+  {
+   "fieldname": "attach_image_14",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "telephone",
+   "fieldtype": "Currency",
+   "label": "Telephone"
+  },
+  {
+   "fieldname": "attach_image_16",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "tool_tax",
+   "fieldtype": "Currency",
+   "label": "Tool Tax"
+  },
+  {
+   "fieldname": "attach_image_18",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "stationery",
+   "fieldtype": "Currency",
+   "label": "Stationery"
+  },
+  {
+   "fieldname": "attach_image_21",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "fright",
+   "fieldtype": "Currency",
+   "label": "Fright"
+  },
+  {
+   "fieldname": "attach_image_23",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "parking",
+   "fieldtype": "Currency",
+   "label": "Parking"
+  },
+  {
+   "fieldname": "attach_image_25",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "fieldname": "misc_section",
+   "fieldtype": "Section Break",
+   "label": "Misc"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_1",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_28",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_2",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_30",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_3",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_32",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_4",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_34",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_5",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_36",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "misc_6",
+   "fieldtype": "Currency",
+   "label": "Misc option"
+  },
+  {
+   "fieldname": "attach_image_38",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "local_sale",
+   "fieldtype": "Currency",
+   "label": "Local Sale"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "out_station_sale",
+   "fieldtype": "Currency",
+   "label": "Out Station Sale"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_sale",
+   "fieldtype": "Currency",
+   "label": "Total Sale"
+  },
+  {
+   "fieldname": "signatures_section",
+   "fieldtype": "Section Break",
+   "label": "Signatures"
+  },
+  {
+   "fieldname": "tm_signatures",
+   "fieldtype": "Data",
+   "label": "TM Signatures"
+  },
+  {
+   "fieldname": "tm_sign",
+   "fieldtype": "Signature",
+   "label": "TM Sign"
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rsm_sign",
+   "fieldtype": "Signature",
+   "label": "RSM Sign"
+  },
+  {
+   "fieldname": "total_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Expenses",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rsm_signatures",
+   "fieldtype": "Data",
+   "label": "RSM Signatures"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_sale_section",
+   "fieldtype": "Section Break",
+   "label": "Total Sale"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-11-16 15:59:34.736592",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "TADA Report",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
