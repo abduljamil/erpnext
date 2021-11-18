@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-11-11 10:16:09.945002",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day",
+  "da",
+  "dt",
+  "ns",
+  "os_from",
+  "os_to",
+  "km",
+  "fare",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "da",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "DA"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "dt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "DT"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "ns",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "NS"
+  },
+  {
+   "columns": 1,
+   "fieldname": "os_from",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "OS From",
+   "options": "Territory"
+  },
+  {
+   "columns": 1,
+   "fieldname": "os_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "OS To",
+   "options": "Territory"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "km",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "KM"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "fare",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Fare"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-11-18 10:01:44.006398",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "TADA Report Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
