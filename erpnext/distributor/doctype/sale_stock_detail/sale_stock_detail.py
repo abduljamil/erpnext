@@ -26,10 +26,8 @@ def parse_pdf(pdf_file,dist_city,from_date,to_date):
             'to': to_date
         },
         as_list=True)
-<<<<<<< HEAD
     if(dates_data):
         frappe.throw(('Same dates record already exist'))       
-=======
     dates_fdata = frappe.db.get_list('Sale Stock Detail',
         filters={
             'from': from_date
