@@ -26,10 +26,8 @@ def parse_pdf(pdf_file,dist_city,from_date,to_date):
             'to': to_date
         },
         as_list=True)
-<<<<<<< HEAD
     if(dates_data):
-        frappe.throw(('Same dates record already exist'))       
-=======
+        frappe.throw(('Same dates record already exist'))
     dates_fdata = frappe.db.get_list('Sale Stock Detail',
         filters={
             'from': from_date
@@ -46,7 +44,7 @@ def parse_pdf(pdf_file,dist_city,from_date,to_date):
         frappe.throw(('Same From date record already exist')) 
     elif(dates_tdata):
         frappe.throw(('Same To date record already exist'))
->>>>>>> 3717499cb07afc7c98f737044c5696bc2b0c8d28
+		
     alldata = []
     require_data = []
     if(dist_city == "Abbotabad" or dist_city == "Bannu" or dist_city == "Jhelum" or dist_city == "Rawalpindi"):
