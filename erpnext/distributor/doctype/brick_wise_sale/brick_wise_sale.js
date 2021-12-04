@@ -82,6 +82,9 @@ frappe.ui.form.on('Brick Wise Sale', {
 					var info = r.message;
 					//get pdf length
                     console.log(info)
+					// if(!info){
+					// 	frappe.show_progress('Loading',25,50,75,100,'Please Wait until the data load')
+					// }
 					var len = info.length;
 					// let newArr = transposingArray(info,len)
 					for (let index = 0; index < len; index++) {
