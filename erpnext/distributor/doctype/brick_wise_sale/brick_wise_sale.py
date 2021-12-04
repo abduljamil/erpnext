@@ -39,7 +39,7 @@ def parse_pdf(pdf_file,dist_city):
 							if (string != '          '): ## 10 spaces in pdf
 								without_empty_string.append(string)
 							else:
-								string = 0
+								string = '0'
 								without_empty_string.append(string)
 						if(len(without_empty_string)>1):
 							full_array.append(without_empty_string)
@@ -74,6 +74,8 @@ def parse_pdf(pdf_file,dist_city):
 								b[c] =  'AL FAISAL TOWN'
 							elif b[c] == 'GULSHAN-E-':
 								b[c] = 'GULSHAN E RAVI'
+							elif b[c] == 'BAIGAM KOT':
+								b[c] = 'BAIGUM KOT'
 			# print(full_array)
 			# define the item code with array so  that we can replace the name of item with code which auto get item name#define item code
 			item_code = ['008376','017230','002392','002188','004348','008999','012961','009072']
