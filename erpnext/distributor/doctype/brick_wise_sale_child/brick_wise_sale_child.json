@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "creation": "2021-11-20 15:38:00.046536",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "product_name",
+  "product_price",
+  "brick",
+  "sale_qty",
+  "brick_parent",
+  "value"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "fieldname": "brick",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Brick",
+   "options": "Territory"
+  },
+  {
+   "columns": 1,
+   "fieldname": "sale_qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sale Qty"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Value"
+  },
+  {
+   "depends_on": "product",
+   "fetch_from": "product.item_name",
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Name"
+  },
+  {
+   "depends_on": "brick",
+   "fetch_from": "brick.parent_territory",
+   "fieldname": "brick_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Brick Parent"
+  },
+  {
+   "depends_on": "product",
+   "fetch_from": "product.trade_price",
+   "fieldname": "product_price",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Product Price"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-11-22 14:14:26.985097",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Brick Wise Sale Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
