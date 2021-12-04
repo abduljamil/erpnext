@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "creation": "2021-11-11 14:36:44.689259",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company_sale_stock_detail_section",
+  "distributor_name",
+  "from",
+  "to",
+  "column_break_5",
+  "city",
+  "file",
+  "process_pdf",
+  "product_sale_detail",
+  "selling_product",
+  "grand_total_section",
+  "total_value",
+  "column_break_13"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_sale_stock_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Company Brick Wise Detail"
+  },
+  {
+   "fieldname": "distributor_name",
+   "fieldtype": "Link",
+   "label": "Distributor Name",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "from",
+   "fieldtype": "Date",
+   "label": "From"
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Date",
+   "label": "To"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "\n",
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "label": "City",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "product_sale_detail",
+   "fieldtype": "Section Break",
+   "label": "Product Sale"
+  },
+  {
+   "fieldname": "selling_product",
+   "fieldtype": "Table",
+   "label": "Selling Product",
+   "options": "Brick Wise Sale Child"
+  },
+  {
+   "fieldname": "grand_total_section",
+   "fieldtype": "Section Break",
+   "label": "Grand Total"
+  },
+  {
+   "fieldname": "total_value",
+   "fieldtype": "Currency",
+   "label": "Total Value Sale"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "label": "File"
+  },
+  {
+   "fieldname": "process_pdf",
+   "fieldtype": "Button",
+   "label": "Process Pdf"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-11-20 15:38:25.330589",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Brick Wise Sale",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
