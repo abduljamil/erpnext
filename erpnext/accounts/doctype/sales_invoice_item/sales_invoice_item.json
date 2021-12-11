@@ -9,8 +9,13 @@
  "field_order": [
   "barcode",
   "item_code",
-  "col_break1",
   "item_name",
+  "batch_no_2",
+  "qty",
+  "packing",
+  "trade_price",
+  "amount",
+  "col_break1",
   "customer_item_code",
   "description_section",
   "description",
@@ -20,7 +25,6 @@
   "image",
   "image_view",
   "quantity_and_rate",
-  "qty",
   "stock_uom",
   "col_break2",
   "uom",
@@ -39,7 +43,6 @@
   "base_rate_with_margin",
   "section_break1",
   "rate",
-  "amount",
   "item_tax_template",
   "col_break3",
   "base_rate",
@@ -111,11 +114,11 @@
   },
   {
    "bold": 1,
-   "columns": 4,
+   "columns": 1,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Item",
+   "label": "Reg No",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -126,10 +129,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 3,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Item Name",
+   "in_list_view": 1,
+   "label": "Name of Drugs",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -172,7 +177,7 @@
   },
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -314,7 +319,7 @@
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -829,12 +834,35 @@
    "fieldtype": "Link",
    "label": "Discount Account",
    "options": "Account"
+  },
+  {
+   "columns": 1,
+   "fieldname": "batch_no_2",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Batch No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "packing",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Packing"
+  },
+  {
+   "columns": 1,
+   "depends_on": "item_code",
+   "fetch_from": "item_code.trade_price",
+   "fieldname": "trade_price",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Trade Price"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-19 13:41:53.435827",
+ "modified": "2021-12-11 11:05:59.700773",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

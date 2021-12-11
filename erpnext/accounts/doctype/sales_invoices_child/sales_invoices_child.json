@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "creation": "2021-11-18 15:58:57.317844",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dcdate",
+  "tr__rr_no",
+  "tr_date",
+  "reg_no",
+  "name_of_drug",
+  "packing",
+  "batch_no",
+  "trading_price",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "dcdate",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "DC.Date"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tr__rr_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "T.R / R.R No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tr_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "T.R Date"
+  },
+  {
+   "columns": 1,
+   "fieldname": "reg_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reg No",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "depends_on": "reg_no",
+   "fetch_from": "reg_no.item_name",
+   "fieldname": "name_of_drug",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name of Drug"
+  },
+  {
+   "columns": 1,
+   "depends_on": "reg_no",
+   "fetch_from": "reg_no.packing",
+   "fieldname": "packing",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Packing"
+  },
+  {
+   "columns": 1,
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Batch No"
+  },
+  {
+   "columns": 1,
+   "depends_on": "reg_no",
+   "fetch_from": "reg_no.trade_price",
+   "fieldname": "trading_price",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Trading Price"
+  },
+  {
+   "columns": 1,
+   "depends_on": "reg_no",
+   "fetch_from": "reg_no.trade_price",
+   "fieldname": "amount",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-12-11 09:42:44.574242",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Invoices Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
