@@ -1,20 +1,6 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-function transposingArray(info,len){
-	// console.log(info,len)
-	var newArray = [];
-    for(var i = 0; i < info.length; i++){
-        newArray.push([]);
-    };
 
-    for(var i = 0; i < info.length; i++){
-        for(var j = 0; j < len; j++){
-            newArray[j].push(info[i][j]);
-        };
-    };
-
-    console.log(newArray);
-}
 frappe.ui.form.on('Brick Wise Sale', {
     setup:function(frm){
         //check duplicate item 
@@ -82,9 +68,8 @@ frappe.ui.form.on('Brick Wise Sale', {
 					var info = r.message;
 					//get pdf length
                     console.log(info)
-					// if(!info){
-					// 	frappe.show_progress('Loading',25,50,75,100,'Please Wait until the data load')
-					// }
+					// frappe.show_progress(__('Loading'),50,100,'Please Wait until the data load')
+					
 					var len = info.length;
 					// let newArr = transposingArray(info,len)
 					for (let index = 0; index < len; index++) {
@@ -129,7 +114,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 						}
 												
 					}
-					
+				
 				}
 			})
 			

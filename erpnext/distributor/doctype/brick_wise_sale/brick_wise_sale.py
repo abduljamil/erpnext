@@ -171,7 +171,7 @@ def parse_pdf(pdf_file,dist_city):
 			# print(products )
 			# print(bricks)
 			db_bricks = ['SHEIKHU PURA', 'FAROOQA ABAD','KHANQAH DOGRAN','SUKHE KE','PINDI BHATTIAN','SAFDARA ABAD','MANA WALA',
-						'WARBUR TON','NANKANA SAHIB','BUCHEKI','MORE KHUNDA','FAIZA BAD','SHARIQ PUR','BEGUM KOT',
+						'WARBUR TON','NANKANA SAHIB','BUCHEKI','MORE KHUNDA','FAIZA BAD','SHARAK PUR','BEGUM KOT',
 						'MURIDKEE','NARANG MANDI','JANDIALA SHER KHAN']
 			bricks = db_bricks
 			for i in range(0,len(products)):
@@ -324,3 +324,174 @@ def parse_pdf(pdf_file,dist_city):
 					if end_result[r][2] == t[0]:
 						end_result[r].insert(4,t[1]) ## insert brick parent into index 4
 			return end_result
+		elif dist_city == 'Okara':
+			products = []
+			bricks = []
+			sales = []
+			result = []
+			for x in range(0,len(pdf.pages)):
+				data = pdf.pages[x].extract_table()
+				# print(data)
+				for p in range(1,len(data)-2):
+					products.append(data[p][1])
+				for q in range(0,len(products)):
+					index = products[q].index('{')
+					products[q] = products[q][:index]
+				for s in range(1,len(data)-2):
+					sale = data[s][2:-1]
+					sales.append(sale)
+				# print(sales)        bricks = data[0][2:-1]
+			new_bricks = ['AKHTER ABAD','BANGLA GOGERA','BASIR PUR','DEPAL PUR','DEPAL PUR CHOWK','DHA 1', 'DHA 2','FAISLA ABAD ROAD','CANTT','HABIB ABAD','HAVELI LAKHA','HOSPITAL BAZAR','HUJRA CITY','JABOKA','MANDI AHMED ABAD','RAJO WAL','RENALA KHURD CITY','SAHIWAL ROAD','SIRKI']
+			bricks = new_bricks
+			for p in range(0,len(products)):
+				for b in range(0,len(bricks)):
+					child = []
+					child.append(products[p])
+					child.append(bricks[b])
+					child.append(sales[p][b])
+					result.append(child)
+		# print(result)
+			for r in result:
+				for i in item_list:
+					final_result = fuzz.token_set_ratio(r[0],i[1])
+					if final_result >= 80:
+						r[0] = i[0]
+			for r in result:
+				for i in item_list:
+					final_result = fuzz.token_set_ratio(r[0],i[1])
+					if final_result >= 75:
+						r[0] = i[0]    
+						# print(r)    
+			for r in result:
+				for i in item_list:
+					final_result = fuzz.token_set_ratio(r[0],i[1])
+					if final_result >= 70:
+						r[0] = i[0]    
+						# print(r)
+			for r in result:
+				for i in item_list:
+					if r[0] == i[0]:
+						r.insert(1,i[1])
+						r.append(i[2])
+			for r in result:
+				for t in tt_list:
+					if r[2] == t[0]:
+						r.insert(4,t[1])
+			return result
+		elif dist_city == 'Karachi':
+			result = []
+			for x in range(0,len(pdf.pages)):
+				products = []
+				bricks = []
+				sales = []
+				data = pdf.pages[x].extract_table()
+				product = data[0][1:]
+				products.append(product)
+        		# print(products)
+				for i in range(2,len(data)): ## for skipping total row
+					bricks.append(data[i][0])
+					sale = data[i][1:]
+					sales.append(sale)
+			for p in range(0,len(products)):
+				products[p] = list(filter(None,products[p])) ##remove none value
+			bricks = list(filter(None,bricks))
+			for s in range(0,len(sales)):
+				sales[s] = ['0' if x == '' else x for x in sales[s]] ## change '' with '0'
+			only_sale = [sales[s] for s in range(0,len(sales)) if '\n' not in sales[s][0]]
+			## remove the total of territory wise
+			for p in products:
+				for s in range(0,len(only_sale)):
+					if len(only_sale[s])-len(p) == 1:
+						only_sale[s] = only_sale[s][:-1]
+			for b in range(0,len(bricks)):
+				for s in range(0,len(only_sale[b])): 
+					child = []
+					child.append(products[0][s])
+					child.append(bricks[b])
+					# print(products[0][s])
+					child.append(only_sale[b][s])
+					result.append(child)
+			print(result)
+		elif dist_city=='Sahiwal':
+			products = []
+			bricks = []
+			sales = []
+			result = []
+			for x in range(0,len(pdf.pages)):
+				data = pdf.pages[x].extract_table()
+				bricks =data[0][1:-2]
+				for b in range(0,len(bricks)):
+					if bricks[b] =='SWLCN':
+						bricks[b] = 'SAHIWAL CENTER'
+					if bricks[b] =='DHQ':
+						bricks[b] = 'DISTRICT HEAD QUARTER HOSPITAL'
+					if bricks[b] =='PAKPN':
+						bricks[b] = 'PAK PATTAN'
+					if bricks[b] =='ARIFW':
+						bricks[b] = 'ARIFWALA'
+					if bricks[b] =='IQNGR':
+						bricks[b] = 'IQBAL NAGAR'
+					if bricks[b] =='KASWL':
+						bricks[b] = 'KASSOWAL'
+					if bricks[b] =='QBLA':
+						bricks[b] = 'QABOOLA'
+					if bricks[b] =='CCI':
+						bricks[b] = 'CHICHAWATNI'
+					if bricks[b] =='GHABD':
+						bricks[b] = 'GHAZIA ABAD'
+					if bricks[b] =='HARPA':
+						bricks[b] = 'HARAPPA'
+						# print(b[l])
+				# print(bricks)
+				for p in range(2,len(data)-4):
+					products.append(data[p][0]) 
+					sales.append(data[p][1:-2])
+				for i in sales:
+					# print(i)
+					for a in range(0,len(i)):
+						# print(i[a])
+						if i[a] == '':
+							i[a] = '0'
+				# print(bricks)
+				for p in range(0,len(products)):
+					for b in range(0,len(bricks)):
+							# print(products[p],bricks[b],sales[p][b]
+							child = []
+							child.append(products[p])
+							child.append(bricks[b])
+							child.append(sales[p][b])
+							result.append(child)
+				# print(result)
+				# for jetepar syrup and 2ml inj
+				for r in result:
+					if r[0] ==  'JETEPAR 2ML INJ 10S':
+						r[0] = 'Jetepar Injection 2ml'
+					if r[0] ==  'AFLOXAN 300MG TAB 30S':
+						r[0] = 'Afloxan Tablet'
+					if r[0] ==  "AFLOXAN CAP 20'S":
+						r[0] = 'Afloxan Capsule'
+					if r[0] ==  'JETEPAR 10ML INJ 5S':
+						r[0] = 'Jetepar Injection 10ml'
+					if r[0] ==  'JETEPAR CAP 20S':
+						r[0] = 'Jetepar Capsule'
+					if r[0] ==  'JETEPAR SYRUP 112ML':
+						r[0] = 'Jetepar Syrup'
+					if r[0] ==  'MAIORAD 3ML INJ 6S':
+						r[0] = 'Maiorad Injection'
+					if r[0] ==  'MAIORAD TAB 30S':
+						r[0] = 'Maiorad Tablet'
+					for i in item_list:
+						final_result = fuzz.token_set_ratio(r[0],i[1])
+						if final_result >= 100:
+							r[0] = i[0]    
+							# print(r)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
