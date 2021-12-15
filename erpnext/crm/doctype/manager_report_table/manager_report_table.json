@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "creation": "2021-10-27 13:48:17.774382",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "doctor_id",
+  "doctor_visited",
+  "time"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctor_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Doctor ID",
+   "options": "Doctor List"
+  },
+  {
+   "depends_on": "doctor_id",
+   "fetch_from": "doctor_id.doctor_name",
+   "fieldname": "doctor_visited",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctor Visited"
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-12-07 15:03:56.104634",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Manager Report Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

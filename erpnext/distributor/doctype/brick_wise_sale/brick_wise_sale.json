@@ -47,6 +47,8 @@
   },
   {
    "default": "\n",
+   "depends_on": "distributor_name",
+   "fetch_from": "distributor_name.territory",
    "fieldname": "city",
    "fieldtype": "Link",
    "label": "City",
@@ -90,7 +92,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-20 15:38:25.330589",
+ "modified": "2021-12-07 14:22:15.065002",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Brick Wise Sale",
