@@ -1,0 +1,317 @@
+{
+ "actions": [],
+ "creation": "2021-10-27 13:48:23.067068",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "manager_id",
+  "manager_name",
+  "team",
+  "column_break_3",
+  "date",
+  "territory",
+  "section_break_6",
+  "accompanied_with",
+  "section_break_10",
+  "doctor_visited",
+  "comments_on_the_working_of",
+  "tm",
+  "comments_on_the_working_of_tm",
+  "column_break_13",
+  "stm",
+  "comments_on_the_working_of_stm",
+  "column_break_15",
+  "fsm",
+  "comments_on_the_working_of_fsm",
+  "section_break_20",
+  "overall_analysis",
+  "section_break_22",
+  "accompanied_with_1",
+  "section_break_24",
+  "doctors_visited_1",
+  "comments_on_the_working_of_1",
+  "tm_1",
+  "comments_on_the_working_of_tm_1",
+  "column_break_29",
+  "stm_1",
+  "comments_on_the_working_of_stm_1",
+  "column_break_32",
+  "fsm_1",
+  "comments_on_the_working_of_fsm_1",
+  "section_break_35",
+  "overall_analysis_1",
+  "section_break_52",
+  "managers_signature",
+  "column_break_54",
+  "dispatch_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "manager_id",
+   "fieldtype": "Link",
+   "label": "Manager ID",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "manager_id",
+   "fetch_from": "manager_id.employee_name",
+   "fieldname": "manager_name",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Manager Name"
+  },
+  {
+   "depends_on": "manager_id",
+   "fetch_from": "manager_id.employee_team",
+   "fieldname": "team",
+   "fieldtype": "Data",
+   "label": "Team"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "depends_on": "manager_id",
+   "fetch_from": "manager_id.territory",
+   "fieldname": "territory",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Territory"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accompanied_with",
+   "fieldtype": "Table",
+   "label": "Accompanied With",
+   "options": "Accompanied With"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "doctor_visited",
+   "fieldtype": "Table",
+   "label": "Doctor Visited",
+   "options": "Manager Report Table"
+  },
+  {
+   "fieldname": "comments_on_the_working_of",
+   "fieldtype": "Section Break",
+   "label": "Comments on the Working of"
+  },
+  {
+   "default": "0",
+   "fieldname": "tm",
+   "fieldtype": "Check",
+   "label": "TM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_tm",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of TM"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "stm",
+   "fieldtype": "Check",
+   "label": "STM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_stm",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of STM"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "fsm",
+   "fieldtype": "Check",
+   "label": "FSM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_fsm",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of FSM"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overall_analysis",
+   "fieldtype": "Text",
+   "label": "Overall Analysis"
+  },
+  {
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accompanied_with_1",
+   "fieldtype": "Table",
+   "label": "Accompanied With ",
+   "options": "Accompanied With"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "doctors_visited_1",
+   "fieldtype": "Table",
+   "label": "Doctors Visited",
+   "options": "Manager Report Table"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_1",
+   "fieldtype": "Section Break",
+   "label": "Comments on the Working of"
+  },
+  {
+   "default": "0",
+   "fieldname": "tm_1",
+   "fieldtype": "Check",
+   "label": "TM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_tm_1",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of TM"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "stm_1",
+   "fieldtype": "Check",
+   "label": "STM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_stm_1",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of STM"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "fsm_1",
+   "fieldtype": "Check",
+   "label": "FSM"
+  },
+  {
+   "fieldname": "comments_on_the_working_of_fsm_1",
+   "fieldtype": "Small Text",
+   "label": "Comments on the Working of FSM"
+  },
+  {
+   "fieldname": "section_break_35",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overall_analysis_1",
+   "fieldtype": "Text",
+   "label": "Overall Analysis"
+  },
+  {
+   "fieldname": "section_break_52",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "managers_signature",
+   "fieldtype": "Signature",
+   "label": "Manager's Signature"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispatch_date",
+   "fieldtype": "Date",
+   "label": "Dispatch Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-12-07 15:01:51.293928",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Manager Report",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Regional Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
