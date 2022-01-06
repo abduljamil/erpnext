@@ -57,12 +57,15 @@ frappe.ui.form.on('Brick Wise Sale', {
 		cur_frm.refresh_fields();
 		let pdf_file = frm.doc.file;
 		if(frm.doc.city){
-			let dist_city = frm.doc.city;
+			let parent_detail= [];
 			frappe.call({
 				method: "erpnext.distributor.doctype.brick_wise_sale.brick_wise_sale.parse_pdf",
 				args: {
 					'pdf_file': pdf_file,
-					'dist_city': dist_city,
+					'parent_detail': {
+						city:frm.doc.city,
+						fromDate:frm.doc.from,
+						toDate:frm.doc.to},
 				},
 				callback: function (r) {
 					var info = r.message;
@@ -70,17 +73,23 @@ frappe.ui.form.on('Brick Wise Sale', {
                     console.log(info)
 					// frappe.show_progress(__('Loading'),50,100,'Please Wait until the data load')
 					
+					// var time = 2000;
 					var len = info.length;
-					// let newArr = transposingArray(info,len)
-					for (let index = 0; index < len; index++) {
+					// cur_dialog.hide()
+					// i = 0,j = array.length; i < j; i += chunk
+					for (index = 0; index < len; index++) {
 						let element = info[index];
-					var child = cur_frm.add_child("selling_product");
+						var child = cur_frm.add_child("selling_product");
 					// console.log(element)
 					// if(element[0]=='PRODUCT NAME PACK'){
-						var sum= 0
+						// if(index%50 == 0){
+						// 	time = time + 1000
+						// }
+						// console.log(time)
 						for (let j = 0; j < element.length; j++) {
 							let nested_element = element[j];
 							// console.log(element[j])
+							// setTimeout((j)=>{
 							switch (j) {
 								case 0:
 									frappe.model.set_value(child.doctype, child.name, "product", nested_element)
@@ -110,8 +119,10 @@ frappe.ui.form.on('Brick Wise Sale', {
 								default:
 									break;
 							}
+						// }, time)
 							cur_frm.refresh_field("selling_product")
 						}
+						
 												
 					}
 				
