@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "creation": "2022-01-05 13:23:10.182460",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "item_qty",
+  "item_price",
+  "team",
+  "item_value"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item ",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "depends_on": "item",
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name"
+  },
+  {
+   "columns": 1,
+   "fieldname": "item_qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Item Qty",
+   "reqd": 1
+  },
+  {
+   "depends_on": "item",
+   "fetch_from": "item.trade_price",
+   "fieldname": "item_price",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "item Price"
+  },
+  {
+   "columns": 1,
+   "depends_on": "item",
+   "fetch_from": "item.belong_to",
+   "fieldname": "team",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Team"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Item Value"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-05 13:27:47.077237",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Order Form Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

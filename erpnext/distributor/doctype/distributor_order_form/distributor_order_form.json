@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "creation": "2022-01-05 13:23:31.146266",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "order_form_detail_section",
+  "distributor_name",
+  "order_date",
+  "column_break_4",
+  "area",
+  "item_detail_section",
+  "order_form_items",
+  "total_order_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "order_form_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Order Form Detail"
+  },
+  {
+   "fieldname": "order_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Order Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "distributor_name",
+   "fetch_from": "distributor_name.territory",
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Area"
+  },
+  {
+   "fieldname": "item_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Item Detail"
+  },
+  {
+   "fieldname": "order_form_items",
+   "fieldtype": "Table",
+   "label": "Order Form Items",
+   "options": "Order Form Items"
+  },
+  {
+   "fieldname": "distributor_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Distributor Name",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_order_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Total Order Value",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-01-05 13:39:13.425472",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Distributor Order Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
