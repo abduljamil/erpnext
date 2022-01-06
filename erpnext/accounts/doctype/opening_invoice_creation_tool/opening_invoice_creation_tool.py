@@ -1,16 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import traceback
 from json import dumps
+
+import frappe
 from frappe import _, scrub
-from frappe.utils import flt, nowdate
 from frappe.model.document import Document
+from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 
 
 class OpeningInvoiceCreationTool(Document):
@@ -156,7 +159,8 @@ class OpeningInvoiceCreationTool(Document):
 			frappe.scrub(row.party_type): row.party,
 			"is_pos": 0,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"update_stock": 0
+			"update_stock": 0,
+			"invoice_number": row.invoice_number
 		})
 
 		accounting_dimension = get_accounting_dimensions()
@@ -197,10 +201,13 @@ def start_import(invoices):
 	names = []
 	for idx, d in enumerate(invoices):
 		try:
+			invoice_number = None
+			if d.invoice_number:
+				invoice_number = d.invoice_number
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
-			doc.insert()
+			doc.insert(set_name=invoice_number)
 			doc.submit()
 			frappe.db.commit()
 			names.append(doc.name)
@@ -216,7 +223,8 @@ def start_import(invoices):
 	return names
 
 def publish(index, total, doctype):
-	if total < 5: return
+	if total < 50:
+		return
 	frappe.publish_realtime(
 		"opening_invoice_creation_progress",
 		dict(
@@ -240,5 +248,3 @@ def get_temporary_opening_account(company=None):
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
 
 	return accounts[0].name
-
-

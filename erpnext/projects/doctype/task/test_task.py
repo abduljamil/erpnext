@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
-import frappe
+
 import unittest
-from frappe.utils import getdate, nowdate, add_days
+
+import frappe
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.projects.doctype.task.task import CircularReferenceError
+
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
@@ -76,11 +78,11 @@ class TestTask(unittest.TestCase):
 			return frappe.db.get_value("ToDo",
 				filters={"reference_type": task.doctype, "reference_name": task.name,
 					"description": "Close this task"},
-				fieldname=("owner", "status"), as_dict=True)
+				fieldname=("allocated_to", "status"), as_dict=True)
 
 		assign()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.allocated_to, "test@example.com")
 		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
@@ -88,7 +90,7 @@ class TestTask(unittest.TestCase):
 		task.status = "Completed"
 		task.save()
 		todo = get_owner_and_status()
-		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.allocated_to, "test@example.com")
 		self.assertEqual(todo.status, "Closed")
 
 	def test_overdue(self):

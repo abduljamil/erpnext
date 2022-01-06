@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
-from six import iteritems
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -14,7 +14,7 @@ def execute(filters=None):
 	material_transfer_vouchers = get_material_transfer_vouchers()
 	data = []
 
-	for item_code, suppliers in iteritems(supplier_details):
+	for item_code, suppliers in supplier_details.items():
 		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
 		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
@@ -69,7 +69,7 @@ def get_consumed_details(filters):
 		i.stock_uom, sle.actual_qty, sle.stock_value_difference,
 		sle.voucher_no, sle.voucher_type
 		from `tabStock Ledger Entry` sle, `tabItem` i
-		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
+		where sle.is_cancelled = 0 and sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
 			consumed_details.setdefault(d.item_code, []).append(d)
 
 	return consumed_details
@@ -95,7 +95,7 @@ def get_suppliers_details(filters):
 
 	if supplier:
 		invalid_items = []
-		for item_code, suppliers in iteritems(item_supplier_map):
+		for item_code, suppliers in item_supplier_map.items():
 			if supplier not in suppliers:
 				invalid_items.append(item_code)
 

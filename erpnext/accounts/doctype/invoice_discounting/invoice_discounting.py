@@ -1,14 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json, erpnext
+
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import flt, getdate, nowdate, add_days
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import add_days, flt, getdate, nowdate
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.controllers.accounts_controller import AccountsController
+
 
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
@@ -49,11 +55,11 @@ class InvoiceDiscounting(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.set_status()
+		self.set_status(cancel=1)
 		self.update_sales_invoice()
 		self.make_gl_entries()
 
-	def set_status(self, status=None):
+	def set_status(self, status=None, cancel=0):
 		if status:
 			self.status = status
 			self.db_set("status", status)
@@ -65,6 +71,9 @@ class InvoiceDiscounting(AccountsController):
 				self.status = "Sanctioned"
 			elif self.docstatus == 2:
 				self.status = "Cancelled"
+
+		if cancel:
+			self.db_set('status', self.status, update_modified = True)
 
 	def update_sales_invoice(self):
 		for d in self.invoices:

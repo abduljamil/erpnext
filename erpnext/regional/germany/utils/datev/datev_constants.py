@@ -1,4 +1,3 @@
-# coding: utf-8
 """Constants used in datev.py."""
 
 TRANSACTION_COLUMNS = [
@@ -455,7 +454,7 @@ ACCOUNT_NAME_COLUMNS = [
 	"Konto",
 	# Account name
 	"Kontenbeschriftung",
-	# Language of the account name 
+	# Language of the account name
 	# "de-DE" or "en-GB"
 	"Sprach-ID"
 ]

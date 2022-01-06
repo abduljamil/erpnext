@@ -1,13 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, cint
+from frappe.utils import cint
+
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from six import iteritems
+
 
 def execute(filters=None):
 	args = {
@@ -35,7 +36,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
 			self.filters.report_date, self.filters.show_future_payments, self.filters.company) or {}
 
-		for party, party_dict in iteritems(self.party_total):
+		for party, party_dict in self.party_total.items():
 			if party_dict.outstanding == 0:
 				continue
 
@@ -82,6 +83,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"range3": 0.0,
 			"range4": 0.0,
 			"range5": 0.0,
+			"total_due": 0.0,
 			"sales_person": []
 		}))
 
@@ -135,3 +137,6 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
 			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))]):
 				self.add_column(label=label, fieldname='range' + str(i+1))
+
+		# Add column for total due amount
+		self.add_column(label="Total Amount Due", fieldname='total_due')

@@ -1,19 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
 
+import frappe
+from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
-from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate, get_link_to_form
-from erpnext.stock.get_item_details import get_reserved_qty_for_so
-
-from frappe import _, ValidationError
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate
 
 from erpnext.controllers.stock_controller import StockController
-from six import string_types
-from six.moves import map
+from erpnext.stock.get_item_details import get_reserved_qty_for_so
+
 
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
@@ -165,8 +163,14 @@ class SerialNo(StockController):
 				)
 			ORDER BY
 				posting_date desc, posting_time desc, creation desc""",
-			(self.item_code, self.company,
-				serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'), as_dict=1):
+			(
+				self.item_code, self.company,
+				serial_no,
+				serial_no+'\n%',
+				'%\n'+serial_no,
+				'%\n'+serial_no+'\n%'
+			),
+			as_dict=1):
 				if serial_no.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
@@ -189,23 +193,6 @@ class SerialNo(StockController):
 
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
-
-	def before_rename(self, old, new, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
-
-	def after_rename(self, old, new, merge=False):
-		"""rename serial_no text fields"""
-		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text', 'Long Text')"""):
-
-			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
-
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
-				frappe.db.sql("""update `tab%s` set serial_no = %s
-					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(list(serial_nos)), item[0]))
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
@@ -338,7 +325,7 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
 	msg = None
 
-	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+	if sr and (actual_qty < 0 or is_stock_reco) and (sr.warehouse and sr.warehouse != sle.warehouse):
 		# receipt(inward) is being cancelled
 		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
 			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
@@ -473,16 +460,13 @@ def get_serial_nos(serial_no):
 		if s.strip()]
 
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
-	serial_no_doc.update({
-		"item_code": args.get("item_code"),
-		"company": args.get("company"),
-		"batch_no": args.get("batch_no"),
-		"via_stock_ledger": args.get("via_stock_ledger") or True,
-		"supplier": args.get("supplier"),
-		"location": args.get("location"),
-		"warehouse": (args.get("warehouse")
-			if args.get("actual_qty", 0) > 0 else None)
-	})
+	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
+		if args.get(field):
+			serial_no_doc.set(field, args.get(field))
+
+	serial_no_doc.via_stock_ledger = args.get("via_stock_ledger") or True
+	serial_no_doc.warehouse = (args.get("warehouse")
+		if args.get("actual_qty", 0) > 0 else None)
 
 	if is_new:
 		serial_no_doc.serial_no = serial_no
@@ -570,7 +554,7 @@ def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch
 	if batch_nos:
 		try:
 			filters["batch_no"] = json.loads(batch_nos) if (type(json.loads(batch_nos)) == list) else [json.loads(batch_nos)]
-		except:
+		except Exception:
 			filters["batch_no"] = [batch_nos]
 
 	if posting_date:
@@ -587,7 +571,7 @@ def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
-	if isinstance(filters, string_types):
+	if isinstance(filters, str):
 		filters = json.loads(filters)
 
 	pos_transacted_sr_nos = frappe.db.sql("""select item.serial_no as serial_no
@@ -607,7 +591,9 @@ def get_pos_reserved_serial_nos(filters):
 
 	return reserved_sr_nos
 
-def fetch_serial_numbers(filters, qty, do_not_include=[]):
+def fetch_serial_numbers(filters, qty, do_not_include=None):
+	if do_not_include is None:
+		do_not_include = []
 	batch_join_selection = ""
 	batch_no_condition = ""
 	batch_nos = filters.get("batch_no")

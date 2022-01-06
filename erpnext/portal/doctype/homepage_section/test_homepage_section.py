@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from bs4 import BeautifulSoup
 from frappe.utils import set_request
-from frappe.website.render import render
+from frappe.website.serve import get_response
+
 
 class TestHomepageSection(unittest.TestCase):
 	def test_homepage_section_card(self):
@@ -26,7 +26,7 @@ class TestHomepageSection(unittest.TestCase):
 			pass
 
 		set_request(method='GET', path='home')
-		response = render()
+		response = get_response()
 
 		self.assertEqual(response.status_code, 200)
 
@@ -59,7 +59,7 @@ class TestHomepageSection(unittest.TestCase):
 		}).insert()
 
 		set_request(method='GET', path='home')
-		response = render()
+		response = get_response()
 
 		self.assertEqual(response.status_code, 200)
 

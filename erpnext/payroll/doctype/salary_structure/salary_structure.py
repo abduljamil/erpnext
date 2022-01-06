@@ -1,14 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
 
-from frappe.utils import flt, cint, cstr
+import frappe
 from frappe import _
-from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from six import iteritems
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt
+
+import erpnext
+
 
 class SalaryStructure(Document):
 	def validate(self):
@@ -166,15 +167,12 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 	def postprocess(source, target):
 		if employee:
 			employee_details = frappe.db.get_value("Employee", employee,
-				["employee_name", "branch", "designation", "department", "payroll_cost_center"], as_dict=1)
+				["employee_name", "branch", "designation", "department"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name
 			target.branch = employee_details.branch
 			target.designation = employee_details.designation
 			target.department = employee_details.department
-			target.payroll_cost_center = employee_details.payroll_cost_center
-			if not target.payroll_cost_center and target.department:
-				target.payroll_cost_center = frappe.db.get_value("Department", target.department, "payroll_cost_center")
 
 		target.run_method('process_salary_structure', for_preview=for_preview)
 
@@ -206,4 +204,3 @@ def get_employees(salary_structure):
 			salary_structure, salary_structure))
 
 	return list(set([d.employee for d in employees]))
-

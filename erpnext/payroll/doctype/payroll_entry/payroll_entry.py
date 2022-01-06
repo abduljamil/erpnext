@@ -1,16 +1,31 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.model.document import Document
+
+import frappe
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, add_days, getdate, add_to_date, DATE_FORMAT, date_diff, comma_and
 from frappe import _
+from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
+from frappe.utils import (
+	DATE_FORMAT,
+	add_days,
+	add_to_date,
+	cint,
+	comma_and,
+	date_diff,
+	flt,
+	getdate,
+)
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from frappe.desk.reportview import get_match_cond, get_filters_cond
+
 
 class PayrollEntry(Document):
 	def onload(self):
@@ -41,7 +56,7 @@ class PayrollEntry(Document):
 				emp_with_sal_slip.append(employee_details.employee)
 
 		if len(emp_with_sal_slip):
-			frappe.throw(_("Salary Slip already exists for {0} ").format(comma_and(emp_with_sal_slip)))
+			frappe.throw(_("Salary Slip already exists for {0}").format(comma_and(emp_with_sal_slip)))
 
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
@@ -116,7 +131,6 @@ class PayrollEntry(Document):
 			Creates salary slip for selected employees if already not created
 		"""
 		self.check_permission('write')
-		self.created = 1
 		employees = [emp.employee for emp in self.employees]
 		if employees:
 			args = frappe._dict({
@@ -144,11 +158,20 @@ class PayrollEntry(Document):
 			Returns list of salary slips based on selected criteria
 		"""
 
-		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
-			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
-		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		ss = frappe.qb.DocType("Salary Slip")
+		ss_list = (
+			frappe.qb.from_(ss)
+				.select(ss.name, ss.salary_structure)
+				.where(
+					(ss.docstatus == ss_status)
+					& (ss.start_date >= self.start_date)
+					& (ss.end_date <= self.end_date)
+					& (ss.payroll_entry == self.name)
+					& ((ss.journal_entry.isnull()) | (ss.journal_entry == ""))
+					& (Coalesce(ss.salary_slip_based_on_timesheet, 0) == self.salary_slip_based_on_timesheet)
+				)
+		).run(as_dict=as_dict)
+
 		return ss_list
 
 	@frappe.whitelist()
@@ -177,13 +200,20 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
+
 		if salary_slips:
-			salary_components = frappe.db.sql("""
-				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
-				from `tabSalary Slip` ss, `tabSalary Detail` ssd
-				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
-			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
-				tuple([d.name for d in salary_slips]), as_dict=True)
+			ss = frappe.qb.DocType("Salary Slip")
+			ssd = frappe.qb.DocType("Salary Detail")
+			salary_components = (
+				frappe.qb.from_(ss)
+					.join(ssd)
+					.on(ss.name == ssd.parent)
+					.select(ssd.salary_component, ssd.amount, ssd.parentfield, ss.salary_structure, ss.employee)
+					.where(
+						(ssd.parentfield == component_type)
+						& (ss.name.isin(tuple([d.name for d in salary_slips])))
+					)
+			).run(as_dict=True)
 
 			return salary_components
 
@@ -191,17 +221,48 @@ class PayrollEntry(Document):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
 			component_dict = {}
+			self.employee_cost_centers = {}
 			for item in salary_components:
+				employee_cost_centers = self.get_payroll_cost_centers_for_employee(item.employee, item.salary_structure)
+
 				add_component_to_accrual_jv_entry = True
 				if component_type == "earnings":
-					is_flexible_benefit, only_tax_impact = frappe.db.get_value("Salary Component", item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
+					is_flexible_benefit, only_tax_impact = \
+						frappe.get_cached_value("Salary Component",item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
 					if is_flexible_benefit == 1 and only_tax_impact ==1:
 						add_component_to_accrual_jv_entry = False
+
 				if add_component_to_accrual_jv_entry:
-					component_dict[(item.salary_component, item.payroll_cost_center)] \
-						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
+					for cost_center, percentage in employee_cost_centers.items():
+						amount_against_cost_center = flt(item.amount) * percentage / 100
+						component_dict[(item.salary_component, cost_center)] \
+							= component_dict.get((item.salary_component, cost_center), 0) + amount_against_cost_center
+
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
+
+	def get_payroll_cost_centers_for_employee(self, employee, salary_structure):
+		if not self.employee_cost_centers.get(employee):
+			ss_assignment_name = frappe.db.get_value("Salary Structure Assignment",
+				{"employee": employee, "salary_structure": salary_structure, "docstatus": 1}, 'name')
+
+			if ss_assignment_name:
+				cost_centers = dict(frappe.get_all("Employee Cost Center", {"parent": ss_assignment_name},
+					["cost_center", "percentage"], as_list=1))
+				if not cost_centers:
+					default_cost_center, department = frappe.get_cached_value("Employee", employee, ["payroll_cost_center", "department"])
+					if not default_cost_center and department:
+						default_cost_center = frappe.get_cached_value("Department", department, "payroll_cost_center")
+					if not default_cost_center:
+						default_cost_center = self.cost_center
+
+					cost_centers = {
+						default_cost_center: 100
+					}
+
+				self.employee_cost_centers.setdefault(employee, cost_centers)
+
+		return self.employee_cost_centers.get(employee, {})
 
 	def get_account(self, component_dict = None):
 		account_dict = {}
@@ -211,7 +272,7 @@ class PayrollEntry(Document):
 		return account_dict
 
 	def make_accrual_jv_entry(self):
-		self.check_permission('write')
+		self.check_permission("write")
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
 		payroll_payable_account = self.payroll_payable_account
@@ -219,12 +280,13 @@ class PayrollEntry(Document):
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
 		if earnings or deductions:
-			journal_entry = frappe.new_doc('Journal Entry')
-			journal_entry.voucher_type = 'Journal Entry'
-			journal_entry.user_remark = _('Accrual Journal Entry for salaries from {0} to {1}')\
+			journal_entry = frappe.new_doc("Journal Entry")
+			journal_entry.voucher_type = "Journal Entry"
+			journal_entry.user_remark = _("Accrual Journal Entry for salaries from {0} to {1}")\
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = self.posting_date
+			accounting_dimensions = get_accounting_dimensions() or []
 
 			accounts = []
 			currencies = []
@@ -236,37 +298,34 @@ class PayrollEntry(Document):
 			for acc_cc, amount in earnings.items():
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount += flt(amount, precision)
-				accounts.append({
+				accounts.append(self.update_accounting_dimensions({
 					"account": acc_cc[0],
 					"debit_in_account_currency": flt(amt, precision),
 					"exchange_rate": flt(exchange_rate),
-					"party_type": '',
 					"cost_center": acc_cc[1] or self.cost_center,
 					"project": self.project
-				})
+				}, accounting_dimensions))
 
 			# Deductions
 			for acc_cc, amount in deductions.items():
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount -= flt(amount, precision)
-				accounts.append({
+				accounts.append(self.update_accounting_dimensions({
 					"account": acc_cc[0],
 					"credit_in_account_currency": flt(amt, precision),
 					"exchange_rate": flt(exchange_rate),
 					"cost_center": acc_cc[1] or self.cost_center,
-					"party_type": '',
 					"project": self.project
-				})
+				}, accounting_dimensions))
 
 			# Payable amount
 			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, payable_amount, company_currency, currencies)
-			accounts.append({
+			accounts.append(self.update_accounting_dimensions({
 				"account": payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amt, precision),
 				"exchange_rate": flt(exchange_rate),
-				"party_type": '',
 				"cost_center": self.cost_center
-			})
+			}, accounting_dimensions))
 
 			journal_entry.set("accounts", accounts)
 			if len(currencies) > 1:
@@ -285,6 +344,12 @@ class PayrollEntry(Document):
 				raise
 
 		return jv_name
+
+	def update_accounting_dimensions(self, row, accounting_dimensions):
+		for dimension in accounting_dimensions:
+			row.update({dimension: self.get(dimension)})
+
+		return row
 
 	def get_amount_and_exchange_rate_for_journal_entry(self, account, amount, company_currency, currencies):
 		conversion_rate = 1
@@ -333,23 +398,24 @@ class PayrollEntry(Document):
 		currencies = []
 		multi_currency = 0
 		company_currency = erpnext.get_company_currency(self.company)
+		accounting_dimensions = get_accounting_dimensions() or []
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(self.payment_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": self.payment_account,
 			"bank_account": self.bank_account,
 			"credit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
-		})
+		}, accounting_dimensions))
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": payroll_payable_account,
 			"debit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
 			"reference_type": self.doctype,
 			"reference_name": self.name
-		})
+		}, accounting_dimensions))
 
 		if len(currencies) > 1:
 				multi_currency = 1
@@ -454,6 +520,7 @@ def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
 			where
 				t1.name = t2.employee
 				and t2.docstatus = 1
+				and t1.status != 'Inactive'
 		%s order by t2.from_date desc
 		""" % cond, {"sal_struct": tuple(sal_struct), "from_date": end_date, "payroll_payable_account": payroll_payable_account}, as_dict=True)
 
@@ -524,7 +591,8 @@ def get_end_date(start_date, frequency):
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
 	if ysd:
-		import calendar, datetime
+		import calendar
+		import datetime
 		diff_mnt = cint(month)-cint(ysd.month)
 		if diff_mnt<0:
 			diff_mnt = 12-int(ysd.month)+cint(month)
@@ -674,9 +742,13 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	include_employees = []
 	emp_cond = ''
+
+	if not filters.payroll_frequency:
+		frappe.throw(_('Select Payroll Frequency.'))
+
 	if filters.start_date and filters.end_date:
 		employee_list = get_employee_list(filters)
-		emp = filters.get('employees')
+		emp = filters.get('employees') or []
 		include_employees = [employee.employee for employee in employee_list if employee.employee not in emp]
 		filters.pop('start_date')
 		filters.pop('end_date')

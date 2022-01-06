@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 
-from __future__ import unicode_literals, division
 import frappe
 from frappe import _
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -219,7 +218,7 @@ def get_quiz(quiz_name, course):
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
 		questions = quiz.get_questions()
-	except:
+	except Exception:
 		frappe.throw(_("Quiz {0} does not exist").format(quiz_name), frappe.DoesNotExistError)
 		return None
 
@@ -236,7 +235,7 @@ def get_quiz(quiz_name, course):
 			'questions': questions,
 			'activity': None,
 			'is_time_bound': quiz.is_time_bound,
-			'duration':quiz.duration
+			'duration': quiz.duration
 		}
 
 	student = get_current_student()
@@ -355,11 +354,11 @@ def get_or_create_course_enrollment(course, program):
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
 	if not course_enrollment:
-		program_enrollment = get_enrollment('program', program, student.name)
+		program_enrollment = get_enrollment('program', program.name, student.name)
 		if not program_enrollment:
 			frappe.throw(_("You are not enrolled in program {0}").format(program))
 			return
-		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program, student.name))
+		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program.name, student.name))
 	else:
 		return frappe.get_doc('Course Enrollment', course_enrollment)
 

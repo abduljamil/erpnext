@@ -27,7 +27,6 @@ erpnext.setup.slides_settings = [
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
-					{ "label": __("Agriculture (beta)"), "value": "Agriculture" },
 					{ "label": __("Healthcare (beta)"), "value": "Healthcare" },
 					{ "label": __("Non Profit (beta)"), "value": "Non Profit" }
 				], reqd: 1
@@ -147,7 +146,7 @@ erpnext.setup.slides_settings = [
 			}
 
 			// Validate bank name
-			if(me.values.bank_account){
+			if(me.values.bank_account) {
 				frappe.call({
 					async: false,
 					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
