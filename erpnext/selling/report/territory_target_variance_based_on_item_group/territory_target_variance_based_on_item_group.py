@@ -20,10 +20,14 @@ def execute(filters=None):
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	territory_item_group_dict = get_territory_item_month_map(filters)
 	# print(territory_item_group_dict)
+	item_list = get_item_groups()
 	data = []
 	for territory, territory_items in territory_item_group_dict.items():
 		for item_group, monthwise_data in territory_items.items():
-			row = [territory, item_group]
+			# print(item_list[item_group])
+			name = item_list[item_group]
+			row = [territory, name]
+			print(row)
 			totals = [0, 0, 0]
 			for relevant_months in period_month_ranges:
 				period_data = [0, 0, 0]
@@ -144,7 +148,7 @@ def get_territory_item_month_map(filters):
 	for e in employee_list:
 		if e.get('employee_name') == full_name:
 			login_user = e
-	print(login_user)
+	# print(login_user)
 	## get all area that login user can access
 	if login_user:
 		area = login_user.get('Territory')
@@ -155,7 +159,7 @@ def get_territory_item_month_map(filters):
 				if territory['name'] == tt['parent_territory']:
 					name = tt['name']
 					check_territory[name] = name
-	print(check_territory)
+	# print(check_territory)
 	for td in territory_details:
 		# print(check_territory[td.parent_territory])
 		if td.parent_territory == check_territory.get(td.parent_territory):
@@ -178,6 +182,7 @@ def get_territory_item_month_map(filters):
 					value_dict = item_actual_details[td.item_group][d.month_name]
 					value_dict.quantity += flt(d.sale_qty)
 					value_dict.amount += flt(d.value)
+			print(td)
 			for month_id in range(1, 13):
 				month = datetime.date(2013, month_id, 1).strftime('%B')
 
@@ -244,4 +249,4 @@ def get_territory_item_month_map(filters):
 	return territory_item_group_dict
 
 def get_item_groups():
-	return dict(frappe.get_all("Item", fields=["name", "item_group"], as_list=1))
+	return dict(frappe.get_all("Item", fields=["name","item_name"], as_list=1))
