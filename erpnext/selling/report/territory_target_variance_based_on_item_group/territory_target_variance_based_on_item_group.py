@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from dataclasses import fields
+
+from numpy import full
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
@@ -62,7 +65,7 @@ def get_columns(filters):
 def get_territory_details(filters):
 	return frappe.db.sql("""
 		select
-			t.name, td.item_group, td.target_qty, td.target_amount, td.distribution_id
+			t.name,t.territory_manager,t.parent_territory ,td.item_group, td.target_qty, td.target_amount, td.distribution_id
 		from
 			`tabTerritory` t, `tabTarget Detail` td
 		where
@@ -88,8 +91,8 @@ def get_target_distribution_details(filters):
 #Get achieved details from sales order
 def get_achieved_details(filters, territory, item_groups):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-	print(territory)
-
+	# print(territory)
+	values = {'territory':territory}
 	# lft, rgt = frappe.db.get_value("Territory", territory, ["lft", "rgt"])
 	# print(lft,rgt)
 	if territory == 'LHR2':
@@ -100,152 +103,144 @@ def get_achieved_details(filters, territory, item_groups):
 		where bwc.parent=bw.name and bw.city='Lahore' and bwc.brick_parent='LHR2'
 		""", as_dict=1)
 		return item_details
-	elif territory =="Lahore":
+	else:
 	# 	item_details=""
 		item_details = frappe.db.sql("""
 			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
 				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
 				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Lahore'
-			""", as_dict=1)
+			where bwc.parent=bw.name and bw.city= %(territory)s
+			""",values = values ,as_dict=1)
 	
 		return item_details
-	elif territory =="Sheikhupura":
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Sheikhupura'
-			""", as_dict=1)
 	
-		return item_details
-	elif territory =='Kasur':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Kasur'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Sahiwal':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Sahiwal'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Okara':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Okara'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Sialkot':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Sialkot'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Narowal':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Narowal'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Gujranwala':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Gujranwala'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Gujrat':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Gujrat'
-			""", as_dict=1)
-	
-		return item_details
-	elif territory =='Mandi Bahauddin':
-		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
-				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
-				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city='Mandi Bahauddin'
-			""", as_dict=1)
-	
-		return item_details
 
 
 def get_territory_item_month_map(filters):
 	import datetime
 	territory_details = get_territory_details(filters)
-	print(territory_details)
-	print(frappe.session.user)
+	# print(territory_details)
+	# print(frappe.session.user.full_name)
+	# print(frappe.session.full_name)
 	tdd = get_target_distribution_details(filters)
 	# print(tdd)
 	item_groups = get_item_groups()
 	# print(item_groups)
 	territory_item_group_dict = {}
 
+	check_territory = {}
+	user = frappe.session.user
+	## get user full name from db
+	users = frappe.db.get_value("User", user, ["full_name"], as_dict=True)
+	## get all employee record
+	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory'])
+	## get all territory list
+	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
+	# print(tt_list)
+	full_name = users.full_name
+	## find specific login employee record
+	login_user = ''
+	area = ''
+	for e in employee_list:
+		if e.get('employee_name') == full_name:
+			login_user = e
+	print(login_user)
+	## get all area that login user can access
+	if login_user:
+		area = login_user.get('Territory')
+		check_territory[area] = area
+	for territory  in tt_list:
+		if area == territory['parent_territory']:
+			for tt in tt_list:
+				if territory['name'] == tt['parent_territory']:
+					name = tt['name']
+					check_territory[name] = name
+	print(check_territory)
 	for td in territory_details:
-		achieved_details = get_achieved_details(filters, td.name, item_groups)
-		item_actual_details = {}
-		for d in achieved_details:
-			if td.item_group == d.product:
-				# print(td.item_group)
-				item_group = item_groups[d.product]
-				# print(item_group)
-				item_actual_details.setdefault(td.item_group, frappe._dict())\
-					.setdefault(d.month_name, frappe._dict({
-						"quantity": 0,
-						"amount": 0
+		# print(check_territory[td.parent_territory])
+		if td.parent_territory == check_territory.get(td.parent_territory):
+			# if check_territory == td.parent_territory:
+			# print(td)
+			achieved_details = get_achieved_details(filters, td.name, item_groups)
+			item_actual_details = {}
+			
+			for d in achieved_details:
+				if td.item_group == d.product:
+					# print(td.item_group)
+					item_group = item_groups[d.product]
+					# print(item_group)
+					item_actual_details.setdefault(td.item_group, frappe._dict())\
+						.setdefault(d.month_name, frappe._dict({
+							"quantity": 0,
+							"amount": 0
+						}))
+
+					value_dict = item_actual_details[td.item_group][d.month_name]
+					value_dict.quantity += flt(d.sale_qty)
+					value_dict.amount += flt(d.value)
+			for month_id in range(1, 13):
+				month = datetime.date(2013, month_id, 1).strftime('%B')
+
+				territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
+					.setdefault(month, frappe._dict({
+						"target": 0.0, "achieved": 0.0
 					}))
 
-				value_dict = item_actual_details[td.item_group][d.month_name]
-				value_dict.quantity += flt(d.sale_qty)
-				value_dict.amount += flt(d.value)
-		# print(item_actual_details)
-		# print(achieved_details)
-		for month_id in range(1, 13):
-			month = datetime.date(2013, month_id, 1).strftime('%B')
-
-			territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
-				.setdefault(month, frappe._dict({
-					"target": 0.0, "achieved": 0.0
-				}))
-
-			target_achieved = territory_item_group_dict[td.name][td.item_group][month]
-			month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
-				if td.distribution_id else 100.0/12
+				target_achieved = territory_item_group_dict[td.name][td.item_group][month]
+				month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
+					if td.distribution_id else 100.0/12
 
 
-			if (filters["target_on"] == "Quantity"):
-				target_achieved.target = flt(td.target_qty) * month_percentage / 100
-			else:
-				target_achieved.target = flt(td.target_amount) * month_percentage / 100
+				if (filters["target_on"] == "Quantity"):
+					target_achieved.target = flt(td.target_qty) * month_percentage / 100
+				else:
+					target_achieved.target = flt(td.target_amount) * month_percentage / 100
 
-			print("target",target_achieved.target)
-			target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
-				.get(filters["target_on"].lower())
-			print("acheive", target_achieved.achieved)
-		print(territory_item_group_dict)
+				# print("target",target_achieved.target)
+				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
+					.get(filters["target_on"].lower())
+				# print("acheive", target_achieved.achieved)
+			# print(territory_item_group_dict)
+		elif full_name=='Administrator' or full_name=='Sh Abdul Rauf':
+			achieved_details = get_achieved_details(filters, td.name, item_groups)
+			item_actual_details = {}
+			
+			for d in achieved_details:
+				if td.item_group == d.product:
+					# print(td.item_group)
+					item_group = item_groups[d.product]
+					# print(item_group)
+					item_actual_details.setdefault(td.item_group, frappe._dict())\
+						.setdefault(d.month_name, frappe._dict({
+							"quantity": 0,
+							"amount": 0
+						}))
+
+					value_dict = item_actual_details[td.item_group][d.month_name]
+					value_dict.quantity += flt(d.sale_qty)
+					value_dict.amount += flt(d.value)
+			for month_id in range(1, 13):
+				month = datetime.date(2013, month_id, 1).strftime('%B')
+
+				territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
+					.setdefault(month, frappe._dict({
+						"target": 0.0, "achieved": 0.0
+					}))
+
+				target_achieved = territory_item_group_dict[td.name][td.item_group][month]
+				month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
+					if td.distribution_id else 100.0/12
+
+
+				if (filters["target_on"] == "Quantity"):
+					target_achieved.target = flt(td.target_qty) * month_percentage / 100
+				else:
+					target_achieved.target = flt(td.target_amount) * month_percentage / 100
+
+				# print("target",target_achieved.target)
+				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
+					.get(filters["target_on"].lower())
+			
 	return territory_item_group_dict
 
 def get_item_groups():
