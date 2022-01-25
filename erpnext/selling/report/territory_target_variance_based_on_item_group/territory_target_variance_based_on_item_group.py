@@ -27,7 +27,6 @@ def execute(filters=None):
 			# print(item_list[item_group])
 			name = item_list[item_group]
 			row = [territory, name]
-			print(row)
 			totals = [0, 0, 0]
 			for relevant_months in period_month_ranges:
 				period_data = [0, 0, 0]
@@ -99,13 +98,20 @@ def get_achieved_details(filters, territory, item_groups):
 	values = {'territory':territory}
 	# lft, rgt = frappe.db.get_value("Territory", territory, ["lft", "rgt"])
 	# print(lft,rgt)
-	if territory == 'LHR2':
+	contains_digit = any(map(str.isdigit, territory))
+	# print(contains_digit)
+
+	if contains_digit:
+		## get territory list 
+		tt_list = get_territory_dict()
+		parent_brick = tt_list.get(territory)
+		nested_values = { 'parent_brick':parent_brick , 'territory':territory}
 		item_details = frappe.db.sql("""
 		select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
 			MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
 			`tabBrick Wise Sale Child` bwc
-		where bwc.parent=bw.name and bw.city='Lahore' and bwc.brick_parent='LHR2'
-		""", as_dict=1)
+		where bwc.parent=bw.name and bw.city=%(parent_brick)s and bwc.brick_parent=%(territory)s
+		""",values = nested_values ,as_dict=1)
 		return item_details
 	else:
 	# 	item_details=""
@@ -161,8 +167,8 @@ def get_territory_item_month_map(filters):
 					check_territory[name] = name
 	# print(check_territory)
 	for td in territory_details:
-		# print(check_territory[td.parent_territory])
-		if td.parent_territory == check_territory.get(td.parent_territory):
+		# print(check_territory,td)
+		if td.parent_territory == check_territory.get(td.parent_territory) or td.name==check_territory.get(td.name):
 			# if check_territory == td.parent_territory:
 			# print(td)
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
@@ -182,7 +188,7 @@ def get_territory_item_month_map(filters):
 					value_dict = item_actual_details[td.item_group][d.month_name]
 					value_dict.quantity += flt(d.sale_qty)
 					value_dict.amount += flt(d.value)
-			print(td)
+			# print(td)
 			for month_id in range(1, 13):
 				month = datetime.date(2013, month_id, 1).strftime('%B')
 
@@ -250,3 +256,6 @@ def get_territory_item_month_map(filters):
 
 def get_item_groups():
 	return dict(frappe.get_all("Item", fields=["name","item_name"], as_list=1))
+
+def get_territory_dict():
+	return dict(frappe.get_all("Territory",fields=["name","parent_territory"],as_list=1))
