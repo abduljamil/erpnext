@@ -129,9 +129,6 @@ def get_achieved_details(filters, territory, item_groups):
 def get_territory_item_month_map(filters):
 	import datetime
 	territory_details = get_territory_details(filters)
-	# print(territory_details)
-	# print(frappe.session.user.full_name)
-	# print(frappe.session.full_name)
 	tdd = get_target_distribution_details(filters)
 	# print(tdd)
 	item_groups = get_item_groups()
@@ -148,6 +145,7 @@ def get_territory_item_month_map(filters):
 	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
 	# print(tt_list)
 	full_name = users.full_name
+	# print(full_name)
 	## find specific login employee record
 	login_user = ''
 	area = ''
@@ -159,6 +157,7 @@ def get_territory_item_month_map(filters):
 	if login_user:
 		area = login_user.get('Territory')
 		check_territory[area] = area
+
 	for territory  in tt_list:
 		if area == territory['parent_territory']:
 			for tt in tt_list:
@@ -212,7 +211,7 @@ def get_territory_item_month_map(filters):
 					.get(filters["target_on"].lower())
 				# print("acheive", target_achieved.achieved)
 			# print(territory_item_group_dict)
-		elif full_name=='Administrator' or full_name=='Sh Abdul Rauf':
+		elif full_name=='Administrator' or full_name=='Sh Abdul Rauf' or full_name=='Zafar Hameed Paracha':
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
 			item_actual_details = {}
 			
