@@ -93,11 +93,8 @@ def get_target_distribution_details(filters):
 
 #Get achieved details from sales order
 def get_achieved_details(filters, territory, item_groups):
-	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-	# print(territory)
+	# start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 	values = {'territory':territory}
-	# lft, rgt = frappe.db.get_value("Territory", territory, ["lft", "rgt"])
-	# print(lft,rgt)
 	contains_digit = any(map(str.isdigit, territory))
 	# print(contains_digit)
 
