@@ -49,20 +49,21 @@
    "depends_on": "brick",
    "fetch_from": "brick.parent",
    "fieldname": "city",
-   "fieldtype": "Data",
-   "label": "City"
-  },
-  {
-   "fieldname": "area",
    "fieldtype": "Link",
-   "label": "Area",
+   "label": "City",
    "options": "Territory"
   },
   {
-   "depends_on": "area",
-   "fetch_from": "area.parent",
+   "depends_on": "city",
+   "fetch_from": "city.parent",
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "label": "Area"
+  },
+  {
    "fieldname": "zone",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Zone"
   },
   {
@@ -85,13 +86,13 @@
    "fieldname": "qualification",
    "fieldtype": "Select",
    "label": "Qualification",
-   "options": "\nDIP. CARD\nFCPS\nDCH\nDGO\nDTC\nMBBS\nMS\nMCPS\nMRCP\nMBBS,MCPS\nMBBS,MCPs\nMS SURGEORY\nMBBS,PHD\nMBBS,MS\nLHV\nPCPS\nMS\nRMP\nPhD\nFCPD\nFRCS\nDTCD\nMS\nDisp\nGyne\nRMDC\nMP\nMbbs\nDTCP\nMBBS\nRMPC\nRMP\nMPO\nMO\nWMO\nMBBS,FCPS\nMBBS DGO\nMBBS FCPS\nMBBS DCH\nDGO MBBS SONOLOGIST\nFCPS MBBS\nDNB MBBS\nFCPS DCH MBBS\nARTHO\nFCPS MBBS\nDCH MBBS\nDGO MBBS\nDIP\nD.G.O\nDIP DIAB\nMBBS-D.G.O\nL.H.V\nGYNEE\nMBBs\nPHYSITION\ndgo\nfcps\nmbbs\ndtcd\ndch\nGyna\nDHMS\nOrtho\nMBBS\nGeneral medician\nMBBS&RMP\nMBBS&Ortho\nMBBS&FCPS&DCH\nMBBS&FCPS\nMBBS&General medician\nMBBS&DGO\nMBBS&Gyna\nMBBS+FCPS\nMBBS+DCH\nMBBS+RMP\nFCPS+MBBS\nDCH+MBBS\nDGO+MBBS\nDCS\nTECH\nMD\nGynae\nM-Phil\nSM Technician\nSM-Tech\nSM-TECH\nFCPS/MCPS\nFCPS\nMRCP\nFCPS/MRCPH\nTECHNICIAN\nMBBS/DCH\nMBBS/FCPS\nMCPS\nF.C.P.S\nMBBS/MRCP\nMBBS/SMO\nFCPS\nMSURO\nMRCP\nFCPS/SCP/RCP\nM.D\nFICP\nTechnician\nMPPS\nFCPS/MRCP\nFCPS,MSURO\nFCPS,MCPS\nFCPS,MRCP\nMRCP,FCPS\nFCPS1\nGP\nFcps\nPEADS\nMOH\nFCPC\nBDS\nDLO\nPrec\nLhv\nprec\nPHY\nGENERAL SURGEON\nCARDIO\nGYNE\nUROLOGIST\nSURGEON\nORTHO\nM.O\nNEURO\nMBBS & DGO\nMBBS & FCPS\nDES\nDENTIST"
+   "options": "\nAP\nCONSULTANT\nSMO\nDIP. CARD\nFCPS\nDCH\nDGO\nDTC\nMBBS\nMS\nMCPS\nMRCP\nMBBS,MCPS\nMBBS,MCPs\nMS SURGEORY\nMBBS,PHD\nMBBS,MS\nLHV\nPCPS\nMS\nRMP\nPhD\nFCPD\nFRCS\nDTCD\nMS\nDisp\nGyne\nRMDC\nMP\nMbbs\nDTCP\nMBBS\nRMPC\nRMP\nMPO\nMO\nWMO\nMBBS,FCPS\nMBBS DGO\nMBBS FCPS\nMBBS DCH\nDGO MBBS SONOLOGIST\nFCPS MBBS\nDNB MBBS\nFCPS DCH MBBS\nARTHO\nFCPS MBBS\nDCH MBBS\nDGO MBBS\nDIP\nD.G.O\nDIP DIAB\nMBBS-D.G.O\nL.H.V\nGYNEE\nMBBs\nPHYSITION\ndgo\nfcps\nmbbs\ndtcd\ndch\nGyna\nDHMS\nOrtho\nMBBS\nGeneral medician\nMBBS&RMP\nMBBS&Ortho\nMBBS&FCPS&DCH\nMBBS&FCPS\nMBBS&General medician\nMBBS&DGO\nMBBS&Gyna\nMBBS+FCPS\nMBBS+DCH\nMBBS+RMP\nFCPS+MBBS\nDCH+MBBS\nDGO+MBBS\nDCS\nTECH\nMD\nGynae\nM-Phil\nSM Technician\nSM-Tech\nSM-TECH\nFCPS/MCPS\nFCPS\nMRCP\nFCPS/MRCPH\nTECHNICIAN\nMBBS/DCH\nMBBS/FCPS\nMCPS\nF.C.P.S\nMBBS/MRCP\nMBBS/SMO\nFCPS\nMSURO\nMRCP\nFCPS/SCP/RCP\nM.D\nFICP\nTechnician\nMPPS\nFCPS/MRCP\nFCPS,MSURO\nFCPS,MCPS\nFCPS,MRCP\nMRCP,FCPS\nFCPS1\nGP\nFcps\nPEADS\nMOH\nFCPC\nBDS\nDLO\nPrec\nLhv\nprec\nPHY\nGENERAL SURGEON\nCARDIO\nGYNE\nUROLOGIST\nSURGEON\nORTHO\nM.O\nNEURO\nMBBS & DGO\nMBBS & FCPS\nDES\nDENTIST"
   },
   {
    "fieldname": "specialization",
    "fieldtype": "Select",
    "label": "Specialization",
-   "options": "\nCARDIC\nPHY\nPEDS\nORTHO\nENT\nURO\nGYNA\nTB\nGP\nNEURO\nMEDICINE\nMO EMERGENCY\nUROLOGY\nMO\nMO SURGERY\nCHEST\nMO (PKLI)\nUROLOGIST (PKLI)\nPHY & DC\nDC\nPSY\nSR & CHEST\nMO Chest\nLIVER OPD\nUINT M3\nUINT M2\nUINT MI\nCHEST & PHY\nPHY MED\nHEAD CHEST\nUNIT MI\nMBBS\nDCH\nMP\nLHV\nDISP\nARTHO\nUROLOGIST\nSURG\nGASTRO/HEPTO\nGEN SURGEON\nGIS\nDIABETS\nG1\nGP ORTHO\nGP CHEST\nGI\nFCPS & MBBS\nDGO & MBBS\nMBBS & GYNA\nFCPS\nMBBS & RMP\nCMO\nHOD\nGASTRO\nREGISTRAR\nCHILD\nCARDIO\nHOSPITAL\nCP\nCONSULTANT PHYSICIAN\nMBBS & GENERAL MEDICIAN\nMBBS & FCPS & DCH\nMBBS & DGO\nSKIN\nMED & GP\nMED & ORTHO\nTMO\nMO GOP\nSMO\nGOP\nPG\nNEPH\nGYNA & GP\nMED & UYOG\nPED & GP\nNEURO & SURG\nOBST\nLMO\nEMO\nSURG & GP\nREGES\nMSP\nMS\nDENTAL\nPROF\nAP\nFCPS-PHY\nCARD+PHY\nPHY-FCPS\nRMP\nPRO\nHP\nRMO\nPUL\nHEPATOLOGIST\nNEURO PHY\nCHEST PHY\nMED\nMO CHEST\nPHY & Dc\nCHEST TB\nLIVER (PKLI)"
+   "options": "\nGENERAL PRACTITIONER\nGENERAL SURGEON\nSKIN SPECIALIST\nMED & CHEST\nMED & ORTHO\nSURGEON\nNEURO\nPULMONOLOGIST\nGASTROENTEROLOGIST\nENT SPECIALIST\nREGISTERED MEDICAL OFFICER\nNEUROSURGEON\nCARDIC\nCARDIO\nPHY\nMO GOP\nPEDS\nORTHO\nENT\nURO\nGYNA\nTB\nGP\nNEURO\nMEDICINE\nMO EMERGENCY\nUROLOGY\nMO\nMO SURGERY\nCHEST\nMO (PKLI)\nUROLOGIST (PKLI)\nPHY & DC\nDC\nPSY\nSR & CHEST\nMO Chest\nLIVER OPD\nUINT M3\nUINT M2\nUINT MI\nCHEST & PHY\nPHY MED\nHEAD CHEST\nUNIT MI\nMBBS\nDCH\nMP\nLHV\nDISP\nARTHO\nUROLOGIST\nSURG\nGASTRO/HEPTO\nGEN SURGEON\nGIS\nDIABETS\nG1\nGP ORTHO\nGP CHEST\nGI\nFCPS & MBBS\nDGO & MBBS\nMBBS & GYNA\nFCPS\nMBBS & RMP\nCMO\nHOD\nGASTRO\nREGISTRAR\nCHILD\nCARDIO\nHOSPITAL\nCP\nCONSULTANT PHYSICIAN\nMBBS & GENERAL MEDICIAN\nMBBS & FCPS & DCH\nMBBS & DGO\nSKIN\nMED & GP\nMED & ORTHO\nTMO\nMO GOP\nSMO\nGOP\nPG\nNEPH\nGYNA & GP\nMED & UYOG\nPED & GP\nNEURO & SURG\nOBST\nLMO\nEMO\nSURG & GP\nREGES\nMSP\nMS\nDENTAL\nPROF\nAP\nFCPS-PHY\nCARD+PHY\nPHY-FCPS\nRMP\nPRO\nHP\nRMO\nPUL\nHEPATOLOGIST\nNEURO PHY\nCHEST PHY\nMED\nMO CHEST\nPHY & Dc\nCHEST TB\nLIVER (PKLI)"
   },
   {
    "fieldname": "grade",
@@ -120,20 +121,17 @@
    "label": "Secondary Address"
   },
   {
-   "bold": 1,
    "depends_on": "tm",
    "fetch_from": "tm.manager_name",
-   "fetch_if_empty": 1,
    "fieldname": "manager_name",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Manager Name",
-   "options": "Employee"
+   "label": "Manager Name"
   },
   {
    "fieldname": "tm",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Territory Manager",
    "options": "Employee"
@@ -142,14 +140,14 @@
    "depends_on": "tm",
    "fetch_from": "tm.employee_name",
    "fieldname": "tm_name",
-   "fieldtype": "Link",
-   "label": "TM Name",
-   "options": "Employee"
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "TM Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-07 15:40:50.666117",
+ "modified": "2022-01-26 11:52:46.618538",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Doctor List",

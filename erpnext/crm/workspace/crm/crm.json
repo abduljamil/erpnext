@@ -14,11 +14,12 @@
  "hide_custom": 0,
  "icon": "crm",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "CRM",
  "links": [
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Sales Pipeline",
    "onboard": 0,
@@ -115,7 +116,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Reports",
    "onboard": 0,
@@ -192,7 +193,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Maintenance",
    "onboard": 0,
@@ -229,7 +230,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Campaign",
    "onboard": 0,
@@ -266,7 +267,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Settings",
    "onboard": 0,
@@ -363,7 +364,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.871352",
+ "modified": "2022-01-26 09:29:16.527466",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -373,35 +374,44 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "Blue",
-   "format": "{} Open",
-   "label": "Lead",
-   "link_to": "Lead",
-   "stats_filter": "{\"status\":\"Open\"}",
-   "type": "DocType"
-  },
-  {
-   "color": "Blue",
-   "format": "{} Assigned",
-   "label": "Opportunity",
-   "link_to": "Opportunity",
-   "stats_filter": "{\"_assign\": [\"like\", '%' + frappe.session.user + '%']}",
-   "type": "DocType"
-  },
-  {
    "label": "Customer",
    "link_to": "Customer",
    "type": "DocType"
   },
   {
-   "label": "Sales Analytics",
-   "link_to": "Sales Analytics",
-   "type": "Report"
-  },
-  {
    "label": "Dashboard",
    "link_to": "CRM",
    "type": "Dashboard"
+  },
+  {
+   "doc_view": "",
+   "label": "Monthly Work Schedule",
+   "link_to": "Monthly Work Schedule",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Daily Call Report",
+   "link_to": "Daily Call Report",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Doctor List",
+   "link_to": "Doctor List",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "TA/DA Expense Report",
+   "link_to": "TADA Report",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Leave Application",
+   "link_to": "Leave Application",
+   "type": "DocType"
   }
  ]
 }

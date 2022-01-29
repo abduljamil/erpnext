@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "creation": "2021-12-18 10:19:50.188388",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "order_no",
+  "delivery_challan",
+  "dc_date",
+  "tr__rr_no",
+  "tr_date"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "order_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Order No"
+  },
+  {
+   "columns": 2,
+   "fieldname": "delivery_challan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Delivery Challan"
+  },
+  {
+   "columns": 2,
+   "fieldname": "dc_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "DC. Date"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tr__rr_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "T.R / R.R No"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tr_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "T.R Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-28 14:58:43.804323",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Order Details Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

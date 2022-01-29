@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "creation": "2021-10-12 16:05:58.919091",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day",
+  "shift",
+  "area_town",
+  "contact_point"
+ ],
+ "fields": [
+  {
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "\nMorning\nEvening"
+  },
+  {
+   "fieldname": "area_town",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Area/Town",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "contact_point",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Contact point",
+   "options": "\nOffice\nField"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-08 11:57:58.091016",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "RSM Work Schedule Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

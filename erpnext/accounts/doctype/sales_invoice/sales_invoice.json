@@ -67,8 +67,6 @@
   "set_warehouse",
   "column_break_55",
   "set_target_warehouse",
-  "order_details_section",
-  "table_192",
   "items_section",
   "update_stock",
   "scan_barcode",
@@ -704,8 +702,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -2046,16 +2043,6 @@
    "label": "Invoice No"
   },
   {
-   "fieldname": "order_details_section",
-   "fieldtype": "Section Break",
-   "label": "Order Details"
-  },
-  {
-   "fieldname": "table_192",
-   "fieldtype": "Table",
-   "options": "Order Details Child"
-  },
-  {
    "fieldname": "prepared_by",
    "fieldtype": "Link",
    "label": "Prepared by",
@@ -2092,7 +2079,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-11-29 12:38:49.000973",
+ "modified": "2022-01-28 15:11:33.706340",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
