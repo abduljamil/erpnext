@@ -1032,4 +1032,78 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(4,t[1])
 				# print(result)
 				return result
-		
+			elif dist_city == "Gujranwala":
+				result = []
+				products = ['008999','004348','002392','002188','009072','012961']
+				brick = []
+				sale = []
+				sales = []
+				bricks = []
+				for x in range(0,len(pdf.pages)):
+					# print(pdf.pages[0].lines)
+					data = pdf.pages[x].extract_text()
+					# print(data)
+					data = re.sub("\n","$", data)
+					# print(data)
+					# data = re.sub(r"\s\s+","",data)
+					data = data.split('$')
+					# print(data)
+					if x == len(pdf.pages)-1: # condition for lat page
+						# print("page 2")
+						for x in range(6,len(data)-5):
+							data[x] = re.sub(r"\s\s+","#",data[x]) # search for double sapce and put # after it
+							data[x] = data[x].split('#')  # split line after # and convert into different element in an array
+							data[x] = data[x].pop(0) # remove the second element from array
+							# print(data[x]) 
+							brick = re.sub('[0-9]+','',data[x])
+							# data = data.split(',')
+							bricks.append(brick)
+							sale = re.findall('[0-9]+', data[x])
+							sales.append(sale)
+							# print(sales)
+					else:
+						# print('page 1')
+						for x in range(8,len(data)-1):
+							data[x] = re.sub(r"\s\s\s+","#",data[x])
+							data[x] = data[x].split('#')
+							data[x] = data[x].pop(0)
+							# print(data[x])  
+							brick = re.sub('[0-9]+','',data[x])
+							bricks.append(brick)        
+							sale = re.findall('[0-9]+', data[x])
+							sales.append(sale)
+							# print(sales)
+				for b in range(0,len(bricks)):
+					bricks[b] = re.sub(r"\s\s\s+","#",bricks[b])
+					bricks[b] = bricks[b].split("#")
+					bricks[b] = bricks[b].pop(0)
+					if bricks[b] == "HOSPITAL  ROAD":
+						bricks[b] = "HOSPITAL ROAD"
+					if bricks[b] == "SIALKOT RAOD":
+						bricks[b] = "SIALKOT ROAD GUJRANWALA"
+					if bricks[b] == "SHAHEEN ABAD  -":
+						bricks[b] = "SHAHEEN ABAD"
+					if bricks[b] == "SIALKOT RAOD":
+						bricks[b] = "SIALKOT ROAD"
+				# print(bricks)
+				for b in range(0,len(bricks)):
+					for p in range(0,len(products)):
+						child = []
+						child.append(products[p])
+						child.append(bricks[b])
+						child.append(sales[b][p])
+						result.append(child)
+				
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				for r in result:
+						for t in tt_list:    
+							if r[2] == t[0]:
+								r.insert(4,t[1])
+								# print(r)
+				# print(result)
+				return result
