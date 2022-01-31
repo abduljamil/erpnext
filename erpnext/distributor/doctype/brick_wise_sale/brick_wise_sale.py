@@ -1107,3 +1107,131 @@ def parse_pdf(pdf_file,parent_detail):
 								# print(r)
 				# print(result)
 				return result
+			elif dist_city == "Mandi Bahauddin":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					bricks = data[0][1:14]
+					if x == len(pdf.pages)-1:
+						for d in range(1,len(data)-2):
+							sales.append(data[d][1:14])
+							if d == len(data)-3:
+								products.append('081274')
+							elif d == len(data)-4:
+								products.append('008909')  
+							else:
+								products.append(data[d][0])
+
+					else:
+						for d in range(1,len(data)):
+							if data[d][0] != 'BLUE':
+								sales.append(data[d][1:14])
+								products.append(data[d][0])
+				# print(len(products))
+
+				for b in range(0,len(bricks)):
+					if bricks[b] == 'KUT.SH':
+						bricks[b] = 'KUTHYALA SYEDAN'
+					if bricks[b] == 'MALIK.':
+						bricks[b] = 'MALAKWAL'
+					if bricks[b] == 'QADIF':
+						bricks[b] = 'QADIRABAD'
+				# print(bricks)
+
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0'
+
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						if bricks[s] == '':
+							continue
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				# print(result)
+    
+				for r in range(0,len(result)):
+					if 'MAIORAD INJ 6AMP' in result[r][0]:
+						result[r][0] = '009072'
+					if 'JETEPAR 2ML INJ 10AMP' in result[r][0]:
+						result[r][0] = '004348'
+					if 'JETEPAR CAP 20CAP' in result[r][0]:
+						result[r][0] = '002392'
+					if 'JETEPAR 10ML/INJ 5AMP' in result[r][0]:
+						result[r][0] = '008999'
+					if 'MAIORAD 100MG TAB 30TAB' in result[r][0]:
+						result[r][0] = '012961'
+					if 'AFLOXAN 150MG CAP 20CAP' in result[r][0]:
+						result[r][0] = '008376'
+					if 'AFLOXAN 300MG TAB 30TAB' in result[r][0]:
+						result[r][0] = '017230'
+					if 'MOXILIUM 250GM 60ML' in result[r][0]:
+						result[r][0] = '012649'
+					if 'MOXILIUM 250CAP 20CAP' in result[r][0]:
+						result[r][0] = '006784'
+					if 'EBAST 10MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '023906'
+					if 'MINQAIR 5MG TAB 14TAB' in result[r][0]:
+						result[r][0] = '038426'
+					if 'MINQAIR 10MG TAB 14TAB' in result[r][0]:
+						result[r][0] = '038427'
+					if 'SUPRACEF 100MG SYRP 30ML' in result[r][0]:
+						result[r][0] = '024819'
+					if 'PROBITOR 20MGCAP 14CAP' in result[r][0]:
+						result[r][0] = '016654'
+					if 'TRAMAGESIC INJ 5AMP' in result[r][0]:
+						result[r][0] = '026920'
+					if 'JETEPAR SYRUP 112ML' in result[r][0]:
+						result[r][0] = '002188'
+					if 'MOXILIUM 125SUSPEN 45ML' in result[r][0]:
+						result[r][0] = '006783'
+					if 'VIKONON FORTE SYRUP 120ML' in result[r][0]:
+						result[r][0] = '006406'
+					if 'MOXILIUM 500MG CAP 20CAP' in result[r][0]:
+						result[r][0] = '008908'
+					if 'MOXILIUM DROPES 10ML' in result[r][0]:
+						result[r][0] = '006782'
+					if 'PC-LAC SYRUP 120ML' in result[r][0]:
+						result[r][0] = '019133'
+					if 'VIGROL FORTE 50TAB' in result[r][0]:
+						result[r][0] = '007018'
+					if 'CYANORIN FORTE 25AMP' in result[r][0]:
+						result[r][0] = '005425'
+					if 'HISTAFEX 120MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '031037'
+					if 'SAVELOX 250MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '032255'
+					if 'SAVELOX 500MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '029328'
+					if 'SUPRALOX 50ML' in result[r][0]:
+						result[r][0] = '028728'
+					if 'SUPRACEF 400MG CAP 5CAP' in result[r][0]:
+						result[r][0] = '024820'
+					if 'TRAMAGESIC 50MG 20CAP' in result[r][0]:
+						result[r][0] = '029327'
+					if 'DEPROGESIC -P 10TAB' in result[r][0]:
+						result[r][0] = '081838'
+					if 'AVOR 2MG TAB 100TAB' in result[r][0]:
+						result[r][0] = '007853'
+				# print(result)
+    
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							# print(r)
+				# print(result)
+				return result
