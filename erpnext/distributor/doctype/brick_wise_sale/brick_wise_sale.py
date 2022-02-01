@@ -1235,3 +1235,86 @@ def parse_pdf(pdf_file,parent_detail):
 							# print(r)
 				# print(result)
 				return result
+			elif dist_city =="Mardan":
+				result = []
+				products = [] 
+				products1 = []
+				bricks = []
+				sales = []
+				n_sales = []
+				for x in range(0,len(pdf.pages)):
+					
+					data = pdf.pages[x].extract_tables()
+					# print(data)
+					bricks = data[0]
+					# print(bricks)
+					index1 = bricks[0].index('')
+					# print(index1)
+					if index1 == 8:
+						products1 = ['008999','002188','004348','002392']
+					if index1 == 14:
+						products1 = ['008999','002188','004348','002392','009072']
+					if index1 == 15:
+						products1 = ['008376','008999','002188','004348','002392','009072']
+
+					bricks = [b for b in bricks[0][1:index1]]
+					# print(bricks)
+					for c in range(0,len(bricks)):
+						bricks[c] = re.sub('\n','',bricks[c])
+						bricks[c] = re.sub('SHAWAADDA[+]N','SHEWA ADDA',bricks[c])
+						bricks[c] = re.sub('SHAHMANSOO','SHAHMANSOOR',bricks[c])
+						bricks[c] = re.sub('M.CPLAZA','MC PLAZA',bricks[c])
+						bricks[c] = re.sub('MIRAFZALKHA','MIR AFZAL KHAN',bricks[c])
+						bricks[c] = re.sub('HOSPITALROA','HOSPITAL ROAD MDN',bricks[c])
+						bricks[c] = re.sub('PARHOTI','PAR HOTI',bricks[c])
+						bricks[c] = re.sub('RASHAKI','RASHAKAI',bricks[c])
+						bricks[c] = re.sub('M.M.C','MARDAN MEDICAL COMPLEX',bricks[c])
+						bricks[c] = re.sub('COLLAGECHO','COLLAGE CHOWK',bricks[c])
+						bricks[c] = re.sub('GHARIKAPOOR','GHARI KAPURA',bricks[c])
+						bricks[c] = re.sub('NEWADDARET','NEW ADDA RETAIL',bricks[c])
+						bricks[c] = re.sub('NEWADDAWHO','NEW ADDA WHOLESALE',bricks[c])
+						bricks[c] = re.sub('B-R-WS','BANK ROAD WHOLESALE',bricks[c])
+						bricks[c] = re.sub('SHEDANOBAR','SHEDAN BAZAR',bricks[c])
+						bricks[c] = re.sub('T.BAI','TAKHT BHAI',bricks[c])
+						bricks[c] = re.sub('LUNDKHUR','LUND KHWAR',bricks[c])
+						bricks[c] = re.sub('DAKI[+]SHAKNO','DAKI AND SHAKNO',bricks[c])
+					data1 = pdf.pages[x].extract_text()
+					# split the data at new line
+					data1 = re.sub("\n","$", data1)
+					data1 = data1.split('$')
+					# print(data1)
+					# extracting only first sale from table because tabl doesn't get it
+					for i in range(16,len(data1)-3):
+						data1[i] = re.sub(r"\s\s+","#",data1[i])
+						data1[i] = data1[i].split('#')
+						products.append(data1[i][0])
+						# print(n_sales)
+					sal = []
+					sales2=[]
+					sal = data[1]
+					# print(sal[0])
+					for c in range(0,len(sal)-2):
+						sales2 = sal[c][0:index1-1]
+						sales.append(sales2)
+				data1 = data1[16][1:index1]
+				sales.insert(0,data1) 
+    
+				for p in range(0,len(products1)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products1[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				#             # print(r)
+				for r in result:
+						for t in tt_list:    
+							if r[2] == t[0]:
+								r.insert(4,t[1])
+								# print(r)
+				return result
