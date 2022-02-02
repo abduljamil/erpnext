@@ -1318,3 +1318,53 @@ def parse_pdf(pdf_file,parent_detail):
 								r.insert(4,t[1])
 								# print(r)
 				return result
+			elif dist_city =="Timergara":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				data = pdf.pages[0].extract_table()
+				for i in range(0,len(data)):
+					bricks = data[0][3:-1]
+					
+					if data[i][1] == None:
+						pass
+					else:
+						products.append(data[i][1])
+						sales.append(data[i][3:-1])
+				for i in range(0,len(products)):
+					bricks[i] = re.sub('TIMERGARA','TIMERGARA TMG',bricks[i])
+				for i in range(0,len(products)):
+					# products2[i] = re.sub('\n','',products2[i])
+					products[i] = re.sub('AFLOXAN CAP','008376',products[i])
+					products[i] = re.sub('AFLOXAN TAB 300MG','017230',products[i])
+					products[i] = re.sub('JETEPAR 10ML AMP','008999',products[i])
+					products[i] = re.sub('JETEPAR 2ML AMP:','004348',products[i])
+					products[i] = re.sub('JETEPAR CAPS','002392',products[i])
+					products[i] = re.sub('JETEPAR SYP','002188',products[i])
+					products[i] = re.sub('MAIORAD 3ML AMP','009072',products[i])
+					products[i] = re.sub('MAIORAD TAB','012961',products[i])
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0' 
+				# print(bricks)
+				# print(products)
+				# print(sales)	
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2]) 
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
