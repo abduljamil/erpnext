@@ -1368,3 +1368,115 @@ def parse_pdf(pdf_file,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 				return result
+			elif dist_city == "Bannu":
+				products = []
+				sales = []
+				bricks = []
+				result = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					# print(data)
+					products.append(data[1][1:-1])
+					# print(products)
+					for i in range(2,len(data)-1):
+						sales.append(data[i][1:-1])
+				# print(sales)
+						bricks.append(data[i][0])
+				# print(bricks)
+					for k in range(0,len(bricks)):
+						bricks[k] = bricks[k][8:]
+						if bricks[k] == 'BANNU':
+							bricks[k] = 'BANNU MAIN'
+						if bricks[k] == 'MIRANSHAH':
+							bricks[k] = 'MIRAN SHAH'
+						if bricks[k] == 'LAKKI':
+							bricks[k] = 'LAKKI MARWAT'
+				# print(bricks)
+    
+				for p in range(0,len(products)):
+					for i in range(0,len(products[p])):
+						# print(products[p][i])
+						# if '' in products[p][i]:
+						if '014010' in products[p][i]:
+							products[p][i] = '005425'
+						if '014011' in products[p][i]:
+							products[p][i] = '081838'
+						if '014013' in products[p][i]:
+							products[p][i] = '023906'
+						if '014021' in products[p][i]:
+							products[p][i] = '008999'
+						if '014022' in products[p][i]:
+							products[p][i] = '004348'
+						if '014023' in products[p][i]:
+							products[p][i] = '002188'
+						if '014024' in products[p][i]:
+							products[p][i] = '002392'
+						if '014025' in products[p][i]:
+							products[p][i] = '009072'
+						if '014027' in products[p][i]:
+							products[p][i] = '071560'
+						if '014030' in products[p][i]:
+							products[p][i] = '081274'
+						if '014033' in products[p][i]:
+							products[p][i] = '038427'
+						if '014035' in products[p][i]:
+							products[p][i] = '006783'
+						if '014036' in products[p][i]:
+							products[p][i] = '012649'
+						if '014037' in products[p][i]:
+							products[p][i] = '012649'
+						if '014038' in products[p][i]:
+							products[p][i] = '008908'
+						if '014039' in products[p][i]:
+							products[p][i] = '006782'
+						if '014040' in products[p][i]:
+							products[p][i] = '032259'
+						if '014041' in products[p][i]:
+							products[p][i] = '019133'
+						if '014042' in products[p][i]:
+							products[p][i] = '016654'
+						if '014043' in products[p][i]:
+							products[p][i] = '032255'
+						if '014044' in products[p][i]:
+							products[p][i] = '029328'
+						if '014045' in products[p][i]:
+							products[p][i] = '024819'
+						if '014046' in products[p][i]:
+							products[p][i] = '028727'
+						if '014048' in products[p][i]:
+							products[p][i] = '028728'
+						if '014049' in products[p][i]:
+							products[p][i] = '026920'
+						if '014052' in products[p][i]:
+							products[p][i] = '006406'
+				# print(products)
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0'
+			# print(sales)
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						# print(products[i][p],bricks[s],sales[s][i])
+						# print(products[p][i],bricks[s],sales[s][i])
+						child = []
+						child.append(products[p][i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						result.append(child)
+				# print(result)
+				# print(bricks)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				#print(result)
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							#print(r)
+				return result
+    
