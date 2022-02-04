@@ -1479,4 +1479,53 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(4,t[1])
 							#print(r)
 				return result
+			elif dist_city == "Dera Ismail Khan":
+				result = []
+				products = ['008999','004348','002392','002188','009072','012961']
+				
+				bricks = ['D.I.KHAN','TANK','WANA','PAHAR','DRABAN/CHOD','PROVA/RAMAK','JANDOLA','ZAFAR','PEZU/PANYALA',
+				'NEW DERA','MAKEEN',]
+
+				sales = []
+
+				data = pdf.pages[0].extract_table()
+				for x in range(0,len(data)):
+					# print(data[x][0:11])
+					sales.append(data[x][0:11])
+				# print(sales)
+				for b in range(0,len(bricks)):
+					if bricks[b] == 'PAHAR':
+						bricks[b] = 'PAHAR PUR'
+					if bricks[b] == 'DRABAN/CHOD':
+						bricks[b] = 'DRABAN'
+					if bricks[b] == 'PROVA/RAMAK':
+						bricks[b] = 'PROVA'
+					if bricks[b] == 'PEZU/PANYALA':
+						bricks[b] = 'PANI ALA'
     
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0'
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+      
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+						# print(r)
+
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							# print(r)
+				# print(result)
+				return result
