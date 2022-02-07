@@ -1269,7 +1269,7 @@ def parse_pdf(pdf_file,parent_detail):
 						bricks[c] = re.sub('PARHOTI','PAR HOTI',bricks[c])
 						bricks[c] = re.sub('RASHAKI','RASHAKAI',bricks[c])
 						bricks[c] = re.sub('M.M.C','MARDAN MEDICAL COMPLEX',bricks[c])
-						bricks[c] = re.sub('COLLAGECHO','COLLAGE CHOWK',bricks[c])
+						bricks[c] = re.sub('COLLAGECHO','COLLEGE CHOWK',bricks[c])
 						bricks[c] = re.sub('GHARIKAPOOR','GHARI KAPURA',bricks[c])
 						bricks[c] = re.sub('NEWADDARET','NEW ADDA RETAIL',bricks[c])
 						bricks[c] = re.sub('NEWADDAWHO','NEW ADDA WHOLESALE',bricks[c])
