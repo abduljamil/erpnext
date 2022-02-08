@@ -1529,3 +1529,61 @@ def parse_pdf(pdf_file,parent_detail):
 							# print(r)
 				# print(result)
 				return result
+			elif dist_city == "Abbotabad":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products = data[0][1:-1]
+					sales = data[1:-1]
+					for i in range(0,len(products)):
+						products[i] = re.sub('\n','',products[i])
+						if products[i] == '001001 JETEPAR SYP':
+							products[i] = '002188'
+						if products[i] == '001003 JETEPAR 2ML AMP':
+							products[i] = '004348'
+						if products[i] == '001004 JETEPAR 10ML AMP':
+							products[i] = '008999'
+						if products[i] == '001008 MAIORAD 3ML AMP':
+							products[i] = '009072'
+						if products[i] == '001002 JETEPAR CAP':
+							products[i] = '002392'
+				for i in range(0,len(sales)):
+					bricks.append(sales[i][0])
+					bricks[i]=bricks[i][10:]
+					sales[i] = sales[i][1:-1]
+				for i in range(0,len(bricks)):
+					if bricks[i] == 'BUTTGRAM':
+						bricks[i] = 'BATTAGRAM'
+					if bricks[i] == 'SHINKIARI/BUFFA':
+						bricks[i] = 'SHINKIARI'
+					if bricks[i] == 'GARI/BALLAKOT':
+						bricks[i] = 'GARI BALLAKOT'
+					if bricks[i] == 'DERBAND':
+						bricks[i] = 'DARBAND'
+					if bricks[i] == 'BATTAL/CHATTAR':
+						bricks[i] = 'BATTAL AND CHATTAR'
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						# print(products[i][p],bricks[s],sales[s][i])
+						# print(products[p][i],bricks[s],sales[s][i])
+						child = []
+						child.append(products[i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						child.append('ABD')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				return result
