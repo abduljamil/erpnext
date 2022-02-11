@@ -3,20 +3,6 @@
 
 frappe.ui.form.on('Brick Wise Sale', {
     setup:function(frm){
-        //check duplicate item 
-        // frm.check_dupilcate_item = function(frm,row){
-        //     frm.doc.selling_product.forEach(p=>{
-        //         if(row.product== '' || row.idx ==p.idx){
-        //             //pass
-        //         }else{
-        //             if(row.product == p.product){
-        //                 row.product = '';
-        //                 frappe.throw(__(`${p.product} already exists at row ${p.idx}.`));
-        //                 frm.refresh_field('selling_product');
-        //             }
-        //         }
-        //     })
-        // }
         //set total value sale
         frm.compute_total_value_sale = function(frm,row){
 			// console.log(frm)
@@ -38,13 +24,12 @@ frappe.ui.form.on('Brick Wise Sale', {
 		// 	// console.log(total)
 		// 	frm.set_value('total_value',total);
 		// }
+		
     },
     file:function(frm){
 		cur_frm.clear_table("selling_product");
 		cur_frm.refresh_fields();
 		if(frm.doc.file){
-			//let full_path = frappe.get_site_path('private', 'files', frm.doc.file);
-			//console.log(frm.doc.file,frm.doc.city)
 			frappe.msgprint({
 				title: __('File Upload Successfully.'),
 				indicator: 'green',
@@ -56,18 +41,23 @@ frappe.ui.form.on('Brick Wise Sale', {
 		cur_frm.clear_table("selling_product");
 		cur_frm.refresh_fields();
 		let pdf_file = frm.doc.file;
+		frappe.show_progress('Reading pdf file..', 50, 100, 'Please wait');
 		if(frm.doc.city){
-			let parent_detail= [];
+		
 			frappe.call({
 				method: "erpnext.distributor.doctype.brick_wise_sale.brick_wise_sale.parse_pdf",
 				args: {
 					'pdf_file': pdf_file,
+					'data_import':pdf_file,
 					'parent_detail': {
 						city:frm.doc.city,
 						fromDate:frm.doc.from,
 						toDate:frm.doc.to},
 				},
 				callback: function (r) {
+					if(r.message){
+						frappe.hide_progress();
+					}
 					var info = r.message;
 					//get pdf length
                     console.log(info)
@@ -80,12 +70,9 @@ frappe.ui.form.on('Brick Wise Sale', {
 					for (index = 0; index < len; index++) {
 						let element = info[index];
 						var child = cur_frm.add_child("selling_product");
-					// console.log(element)
-					// if(element[0]=='PRODUCT NAME PACK'){
-						// if(index%50 == 0){
-						// 	time = time + 1000
-						// }
-						// console.log(time)
+					if(index == len){
+						cur_dialog.hide()
+					}
 						for (let j = 0; j < element.length; j++) {
 							let nested_element = element[j];
 							// console.log(element[j])
@@ -136,7 +123,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 				message: __('Kindly mention the city name.')
 			});	
 		}
-		/**/
+	
     }
 });
 
@@ -154,6 +141,16 @@ frappe.ui.form.on('Brick Wise Sale Child',{
 			frm.compute_total_value_sale(frm,row);
 		}	
 	},
-	
+	product_price:function(frm,cdt,cdn){
+		let row = locals[cdt][cdn];
+		console.log('here')
+		if(row.sale_qty){
+			frappe.model.set_value(cdt, cdn, 'value', row.sale_qty*row.product_price);
+		}
+		if(row.value){
+			// console.log(row.value)
+			frm.compute_total_value_sale(frm,row);
+		}	
+	}
 	
 });
