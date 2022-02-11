@@ -1587,3 +1587,53 @@ def parse_pdf(pdf_file,parent_detail):
 							r.append(i[2])
 							# print(r)
 				return result
+			elif dist_city =="Chakwal":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					bricks=data[0][1:-1]
+					for i in range(0,len(bricks)):
+						bricks[i] = re.sub('\n','',bricks[i])
+						bricks[i] = re.sub('CHOA SHAYDIAYN BELT','CHOA SAIDANSHAH',bricks[i])
+						bricks[i] = re.sub('DHUDIAL BELT','DHUDYAL',bricks[i])
+						bricks[i] = re.sub('KALAR KAHAR TOWN','KALAR KAHAR',bricks[i])
+						bricks[i] = re.sub('TALAGANG BELT','TALAGANG',bricks[i])
+					for i in range(1,len(data)-5):
+						# print(data[i])
+						if data[i][0] != None:
+							# print('hi')
+							products.append(data[i][0])
+							sales.append(data[i][1:-1])
+							# print(data[i])
+					# print(products)
+					for i in range(0,len(sales)):
+						products[i] = re.sub('JETEPAR 10ML AMP','008999',products[i])
+						products[i] = re.sub('JETEPAR 2ML AMP','004348',products[i])
+						products[i] = re.sub('JETEPAR CAP','002392',products[i])
+						products[i] = re.sub('JETEPAR SYP','002188',products[i])
+						for k in range(0,len(sales[i])):
+								x = re.split("\n", sales[i][k], 1)
+								sales[i][k] = x[0]
+								if sales[i][k] == '':
+									sales[i][k] = '0'
+					# print(sales)
+					# print(products)
+     
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						child = []
+						child.append(products[s])
+						child.append(bricks[i])
+						child.append(sales[s][i])
+						child.append('CWL')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				return result
