@@ -1637,3 +1637,50 @@ def parse_pdf(pdf_file,parent_detail):
 							r.append(i[2])
 							# print(r)
 				return result
+			elif dist_city == "Kohat":
+				result = []
+				bricks = ['KOHAT 1','HANGU','DOABA','THALL','KOHAT 2','KOHAT 3','ALIZAI AND BAGHAN','PARACHINAR','BANDA DAUD SHAH','LACHI','GUMBAT','KOHAT DEVELOPMENT AUTHORITY']
+				products = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_text()
+					data = re.sub('\n',',',data)
+					data = data.split(',')
+					
+					data = data[9:-3]
+					# print(data)
+					for i in range(0,len(data)):
+						data[i] = re.sub('\s\s+',',',data[i])
+						data[i] = data[i].split(',')
+						products.append(data[i][0][1:]) 
+						sales.append(data[i][1:-2])
+				
+				for i in range(0,len(products)):
+					products[i] = re.sub('987 AFLOXAN CAP','008376',products[i])
+					products[i] = re.sub('983 JETEPAR 10ML INJ','008999',products[i])
+					products[i] = re.sub('986 JETEPAR 120ML SYP','002188',products[i])
+					products[i] = re.sub('984 JETEPAR 2ML INJ','004348',products[i])
+					products[i] = re.sub('052 JETEPAR 2ML INJ NEW','004348',products[i])
+					products[i] = re.sub('985 JETEPAR CAP','002392',products[i])
+					products[i] = re.sub('973 JETEPAR SYP NEW','002188',products[i])
+					products[i] = re.sub('989 MAIORAD AMPS','009072',products[i])
+					products[i] = re.sub('990 MAIORAD TAB','012961',products[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result     
