@@ -1,5 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+from dis import distb
 import re
 import frappe
 from frappe.utils import getdate
@@ -1683,4 +1684,54 @@ def parse_pdf(pdf_file,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
-				return result     
+				return result    
+			elif dist_city == "Jhelum":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products=data[0][1:-1]
+					sales=data[1:-1]
+					for i in range(0,len(products)):
+						products[i] = re.sub('\n','',products[i])
+						if products[i] == '004041 JETEPAR SYP':
+							products[i] = '002188'
+						if products[i] == '004039 JETEPAR 2ML INJ':
+							products[i] = '004348'
+						if products[i] == '004038 JETEPAR 10ML INJ':
+							products[i] = '008999'
+						if products[i] == '004045 MAIORAD INJ':
+							products[i] = '009072'
+						if products[i] == '004040 JETEPAR CAP':
+							products[i] = '002392'      
+					for i in range(0,len(sales)):
+						bricks.append(sales[i][0][4:])
+						if bricks[i][0]==' ':
+							bricks[i] = bricks[i][1:]
+						if bricks[i]=='JHELUM':
+							bricks[i] = 'JHELUM JHL'
+						if bricks[i]=='DADYAL & CHAKSWARI':
+							bricks[i] = 'DADYAL AND CHAKSWARI'
+						sales[i] = sales[i][1:-1]
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for p in range(0,len(bricks)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[s])
+						child.append(bricks[p])
+						child.append(sales[p][s])
+						child.append('JHL')
+						result.append(child)   
+
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result
