@@ -1735,3 +1735,61 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(1,i[1])
 							r.append(i[2])
 				return result
+			elif dist_city == "Rawalpindi":
+				products = []
+				sales = []
+				bricks = []
+				result = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products.append(data[0][1:-1])
+					if x == len(pdf.pages)-1:
+						for i in range(1,len(data)-1):
+							sales.append(data[i][1:-1])
+							bricks.append(data[i][0])
+					else:
+						for i in range(1,len(data)):
+							sales.append(data[i][1:-1])
+							bricks.append(data[i][0])
+					if x == 1:
+						for k in range(0,len(bricks)):
+							bricks[k] = bricks[k][10:]
+							if bricks[k] == 'MALL ROAD':
+								bricks[k] = 'MALL ROAD RWL'
+							if bricks[k] == 'CHAKWAL':
+								bricks[k] = 'CHAKWAL RWL'
+							if bricks[k] == 'ALI PURE FARASH':
+								bricks[k] = 'ALI PUR FARASH'
+				for p in range(0,len(products)):
+					for i in range(0,len(products[p])):
+						if '009001' in products[p][i]:
+							products[p][i] = '002188'
+						if '009002' in products[p][i]:
+							products[p][i] = '002392'
+						if '009003' in products[p][i]:
+							products[p][i] = '004348'
+						if '009004' in products[p][i]:
+							products[p][i] = '008999'
+						if '009008' in products[p][i]:
+							products[p][i] = '009072'
+					for s in range(0,len(sales)):
+						for i in range(0,len(sales[s])):
+							if sales[s][i] == '-':
+								sales[s][i] = '0'
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						child = []
+						child.append(products[p][i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
