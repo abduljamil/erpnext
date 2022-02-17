@@ -1793,3 +1793,48 @@ def parse_pdf(pdf_file,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 				return result
+			elif dist_city == "Vehari":
+				result = []
+				products = []
+				bricks = ['ADDA AREY WHEN','BUREWALA','CASH','CHAKRALA','DOKOTA','G.MORE','GAGGOO','KARAM PUR','LUDDAN',
+				'MAILSI VIHARI','MITRO','NEW CHOWK','PAKHY MORE MACHIWAL','THINGI','TIBBA SULTANPUR','VEHARI','VIJHIANWALA']
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					data1 = data
+					data = data[1:-2]
+					if x == 0:
+						for i in range(0,len(data)):
+							products.append(data[i][1])
+							sales.append(data[i][1:])
+					else:
+						if data1[0][-1] == "Total":
+							for i in range(0,len(sales)):
+								if sales[i][0] == data[i][1]:
+									sales[i] = sales[i][1:] + data[i][2:-1]
+						else:
+							sales.append(data[i][1:])
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for i in range(0,len(products)):
+					products[i] = re.sub('JETEPAR CAP 20s','002392',products[i])
+					products[i] = re.sub('JETEPAR.10ML ING 5s','008999',products[i])
+					products[i] = re.sub('JETEPAR SYP 120ml','002188',products[i])
+					products[i] = re.sub('JETEPAR.2ML INJ 10s','004348',products[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						child.append('VRI')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result
