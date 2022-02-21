@@ -1838,3 +1838,113 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(1,i[1])
 							r.append(i[2])
 				return result
+			elif dist_city == "Larkana":
+				result = []
+				bricks = []
+				bricks3 = []
+				products = []
+				sales = []
+				sales2 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_tables()
+					bricks = data[0]
+					bricks = bricks[0]
+					if x== 0:
+						bricks1 = bricks[1:]
+						products2 =data[1][0:-4]
+						for i in range(0,len(products2)):
+							products.append(products2[i][0])
+							sales.append(products2[i])
+					if x == 1:
+						bricks3 = bricks[1:-2]
+						for i in range(0,len(data)):
+							for k in range(2,len(data[i])-4):
+								sales2.append(data[i][k]) 
+				bricks = bricks1 + bricks3
+				for i in range(0,len(sales)):
+					if sales[i][0] == sales2[i][0]:
+						sales[i] = sales[i] + sales2[i][1:-2]
+						sales[i] = sales[i][1:]
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0' 
+				for i in range(0,len(products)):
+					products[i] = re.sub('MAIORAD INJ 6S [(]TP: 83.53[)]','009072',products[i])
+					products[i] = re.sub('JETEPAR 10.ML INJ 5S [(]TP: 224.26[)]','008999',products[i])
+					products[i] = re.sub('JETEPAR SYRUP 112.ML [(]TP: 177.65[)]','002188',products[i])
+					products[i] = re.sub('JETEPAR INJ 2ML 10S [(]TP: 142.21[)]','004348',products[i])
+				for i in range(0,len(bricks)):
+					bricks[i] = re.sub('BAHRM','BAHRAM',bricks[i])
+					bricks[i] = re.sub('CIVIL','CIVIL HOSPITAL LARKANA',bricks[i])
+					bricks[i] = re.sub('DAKHN','DAKHAN',bricks[i])
+					bricks[i] = re.sub('KAMBR','QAMBAR',bricks[i])
+					bricks[i] = re.sub('NAUDR','NAUDERO',bricks[i])
+					bricks[i] = re.sub('RATOD','RATO DERO',bricks[i])
+					bricks[i] = re.sub('S.Z.H','SHAIKH ZAYED HOSPITAL',bricks[i])
+					bricks[i] = re.sub('B-ROD','BAKRANI ROAD',bricks[i])
+					bricks[i] = re.sub('CATLE','CATTLE COLONY',bricks[i])
+					bricks[i] = re.sub('POLIC','POLICE SHOPING CENTRE',bricks[i])
+					bricks[i] = re.sub('MURAD','MUHALLA MURAD WAHAN',bricks[i])
+					bricks[i] = re.sub('SHDKT','SHAHDADKOT',bricks[i])
+					bricks[i] = re.sub('DAKHN','DAKHAN',bricks[i])
+					bricks[i] = re.sub('NAUDR','NAUDERO',bricks[i])
+					bricks[i] = re.sub('NASIR','NASIRABAD',bricks[i])
+					bricks[i] = re.sub('EM-RO','EMPIRE ROAD',bricks[i])
+					bricks[i] = re.sub('LAHOR','LAHORI MUHALLA',bricks[i])
+					bricks[i] = re.sub('GAR-Y','GARI YASEEN',bricks[i])
+					bricks[i] = re.sub('ARIJA','ARIJA VILLAGE',bricks[i])
+					bricks[i] = re.sub('ARZ-B','ARZI BHUTTO',bricks[i])
+					bricks[i] = re.sub('BKRNI','BAKRANI',bricks[i])
+					bricks[i] = re.sub('BANGU','BANGULDERO',bricks[i])
+					bricks[i] = re.sub('BRO-C','BERO CHANDIO',bricks[i])
+					bricks[i] = re.sub('BHANS','BHAN SYEDABAD',bricks[i])
+					bricks[i] = re.sub('DHAMR','DHAMRAH',bricks[i])
+					bricks[i] = re.sub('GAJIK','GAJI KHUHAWAR',bricks[i])
+					bricks[i] = re.sub('GRELO','GARELO',bricks[i])
+					bricks[i] = re.sub('GAR-K','GARI KHUDA BUX',bricks[i])
+					bricks[i] = re.sub('DADU','DADU LARKANA',bricks[i])
+					bricks[i] = re.sub('HAKIM','HAKIM SHAH',bricks[i])
+					bricks[i] = re.sub('HATI','HATTI',bricks[i])
+					bricks[i] = re.sub('KN-SH','KHAIRPUR NATHAN SHAH',bricks[i])
+					bricks[i] = re.sub('KAMBR','KAMBER',bricks[i])
+					bricks[i] = re.sub('KHARO','KHAIRO DERO',bricks[i])
+					bricks[i] = re.sub('KHANP','KHANPUR',bricks[i])
+					bricks[i] = re.sub('ALLAH','ALLAH ABAD',bricks[i])
+					bricks[i] = re.sub('GAJAN','GAJAN PUR CHOWK',bricks[i])
+					bricks[i] = re.sub('JALIS','JAILES BAZAR',bricks[i])
+					bricks[i] = re.sub('LADIE','LADIES JAIL',bricks[i])
+					bricks[i] = re.sub('M-CHK','MIROKHAN CHOWK',bricks[i])
+					bricks[i] = re.sub('NA-CH','NAUDERO CHOWK',bricks[i])
+					bricks[i] = re.sub('NA-RO','NAUDERO ROAD',bricks[i])
+					bricks[i] = re.sub('NAZAR','NAZAR MUHALLA',bricks[i])
+					bricks[i] = re.sub('NISHT','NISHTAR ROAD',bricks[i])
+					bricks[i] = re.sub('OLD-B','OLD BUS STAND',bricks[i])
+					bricks[i] = re.sub('PK-CH','PAKISTANI CHOWK',bricks[i])
+					bricks[i] = re.sub('PHUL','PHULL ROAD',bricks[i])
+					bricks[i] = re.sub('RAMAT','RAHMAT PUR',bricks[i])
+					bricks[i] = re.sub('SACHA','SACHAL COLONY',bricks[i])
+					bricks[i] = re.sub('STATO','STATION ROAD',bricks[i])
+					bricks[i] = re.sub('MADJI','MADEJI',bricks[i])
+					bricks[i] = re.sub('MAHOT','MAHOTA',bricks[i])
+					bricks[i] = re.sub('MROKN','MIROKHAN',bricks[i])
+					bricks[i] = re.sub('PHULJ','PHULJI',bricks[i])
+					bricks[i] = re.sub('PIARO','PIAROGOTH',bricks[i])
+					bricks[i] = re.sub('QUBO','QUBO SAEED KHAN',bricks[i])
+					bricks[i] = re.sub('RADHN','RADHAN',bricks[i])
+					bricks[i] = re.sub('SAJWL','SAJAWAL',bricks[i])
+					bricks[i] = re.sub('SEWHN','SEWHAN',bricks[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						child.append('LRK')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result
