@@ -1,5 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+from dis import distb
 import re
 import frappe
 from frappe.utils import getdate
@@ -1032,4 +1033,918 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(4,t[1])
 				# print(result)
 				return result
-		
+			elif dist_city == "Gujranwala":
+				result = []
+				products = ['008999','004348','002392','002188','009072','012961']
+				brick = []
+				sale = []
+				sales = []
+				bricks = []
+				for x in range(0,len(pdf.pages)):
+					# print(pdf.pages[0].lines)
+					data = pdf.pages[x].extract_text()
+					# print(data)
+					data = re.sub("\n","$", data)
+					# print(data)
+					# data = re.sub(r"\s\s+","",data)
+					data = data.split('$')
+					# print(data)
+					if x == len(pdf.pages)-1: # condition for lat page
+						# print("page 2")
+						for x in range(6,len(data)-5):
+							data[x] = re.sub(r"\s\s+","#",data[x]) # search for double sapce and put # after it
+							data[x] = data[x].split('#')  # split line after # and convert into different element in an array
+							data[x] = data[x].pop(0) # remove the second element from array
+							# print(data[x]) 
+							brick = re.sub('[0-9]+','',data[x])
+							# data = data.split(',')
+							bricks.append(brick)
+							sale = re.findall('[0-9]+', data[x])
+							sales.append(sale)
+							# print(sales)
+					else:
+						# print('page 1')
+						for x in range(8,len(data)-1):
+							data[x] = re.sub(r"\s\s\s+","#",data[x])
+							data[x] = data[x].split('#')
+							data[x] = data[x].pop(0)
+							# print(data[x])  
+							brick = re.sub('[0-9]+','',data[x])
+							bricks.append(brick)        
+							sale = re.findall('[0-9]+', data[x])
+							sales.append(sale)
+							# print(sales)
+				for b in range(0,len(bricks)):
+					bricks[b] = re.sub(r"\s\s\s+","#",bricks[b])
+					bricks[b] = bricks[b].split("#")
+					bricks[b] = bricks[b].pop(0)
+					if bricks[b] == "HOSPITAL  ROAD":
+						bricks[b] = "HOSPITAL ROAD"
+					if bricks[b] == "SIALKOT RAOD":
+						bricks[b] = "SIALKOT ROAD GUJRANWALA"
+					if bricks[b] == "SHAHEEN ABAD  -":
+						bricks[b] = "SHAHEEN ABAD"
+					if bricks[b] == "SIALKOT RAOD":
+						bricks[b] = "SIALKOT ROAD"
+				# print(bricks)
+				for b in range(0,len(bricks)):
+					for p in range(0,len(products)):
+						child = []
+						child.append(products[p])
+						child.append(bricks[b])
+						child.append(sales[b][p])
+						result.append(child)
+				
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				for r in result:
+						for t in tt_list:    
+							if r[2] == t[0]:
+								r.insert(4,t[1])
+								# print(r)
+				# print(result)
+				return result
+			elif dist_city == "Mandi Bahauddin":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					bricks = data[0][1:14]
+					if x == len(pdf.pages)-1:
+						for d in range(1,len(data)-2):
+							sales.append(data[d][1:14])
+							if d == len(data)-3:
+								products.append('081274')
+							elif d == len(data)-4:
+								products.append('008909')  
+							else:
+								products.append(data[d][0])
+
+					else:
+						for d in range(1,len(data)):
+							if data[d][0] != 'BLUE':
+								sales.append(data[d][1:14])
+								products.append(data[d][0])
+				# print(len(products))
+
+				for b in range(0,len(bricks)):
+					if bricks[b] == 'KUT.SH':
+						bricks[b] = 'KUTHYALA SYEDAN'
+					if bricks[b] == 'MALIK.':
+						bricks[b] = 'MALAKWAL'
+					if bricks[b] == 'QADIF':
+						bricks[b] = 'QADIRABAD'
+				# print(bricks)
+
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0'
+
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						if bricks[s] == '':
+							continue
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				# print(result)
+    
+				for r in range(0,len(result)):
+					if 'MAIORAD INJ 6AMP' in result[r][0]:
+						result[r][0] = '009072'
+					if 'JETEPAR 2ML INJ 10AMP' in result[r][0]:
+						result[r][0] = '004348'
+					if 'JETEPAR CAP 20CAP' in result[r][0]:
+						result[r][0] = '002392'
+					if 'JETEPAR 10ML/INJ 5AMP' in result[r][0]:
+						result[r][0] = '008999'
+					if 'MAIORAD 100MG TAB 30TAB' in result[r][0]:
+						result[r][0] = '012961'
+					if 'AFLOXAN 150MG CAP 20CAP' in result[r][0]:
+						result[r][0] = '008376'
+					if 'AFLOXAN 300MG TAB 30TAB' in result[r][0]:
+						result[r][0] = '017230'
+					if 'MOXILIUM 250GM 60ML' in result[r][0]:
+						result[r][0] = '012649'
+					if 'MOXILIUM 250CAP 20CAP' in result[r][0]:
+						result[r][0] = '006784'
+					if 'EBAST 10MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '023906'
+					if 'MINQAIR 5MG TAB 14TAB' in result[r][0]:
+						result[r][0] = '038426'
+					if 'MINQAIR 10MG TAB 14TAB' in result[r][0]:
+						result[r][0] = '038427'
+					if 'SUPRACEF 100MG SYRP 30ML' in result[r][0]:
+						result[r][0] = '024819'
+					if 'PROBITOR 20MGCAP 14CAP' in result[r][0]:
+						result[r][0] = '016654'
+					if 'TRAMAGESIC INJ 5AMP' in result[r][0]:
+						result[r][0] = '026920'
+					if 'JETEPAR SYRUP 112ML' in result[r][0]:
+						result[r][0] = '002188'
+					if 'MOXILIUM 125SUSPEN 45ML' in result[r][0]:
+						result[r][0] = '006783'
+					if 'VIKONON FORTE SYRUP 120ML' in result[r][0]:
+						result[r][0] = '006406'
+					if 'MOXILIUM 500MG CAP 20CAP' in result[r][0]:
+						result[r][0] = '008908'
+					if 'MOXILIUM DROPES 10ML' in result[r][0]:
+						result[r][0] = '006782'
+					if 'PC-LAC SYRUP 120ML' in result[r][0]:
+						result[r][0] = '019133'
+					if 'VIGROL FORTE 50TAB' in result[r][0]:
+						result[r][0] = '007018'
+					if 'CYANORIN FORTE 25AMP' in result[r][0]:
+						result[r][0] = '005425'
+					if 'HISTAFEX 120MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '031037'
+					if 'SAVELOX 250MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '032255'
+					if 'SAVELOX 500MG TAB 10TAB' in result[r][0]:
+						result[r][0] = '029328'
+					if 'SUPRALOX 50ML' in result[r][0]:
+						result[r][0] = '028728'
+					if 'SUPRACEF 400MG CAP 5CAP' in result[r][0]:
+						result[r][0] = '024820'
+					if 'TRAMAGESIC 50MG 20CAP' in result[r][0]:
+						result[r][0] = '029327'
+					if 'DEPROGESIC -P 10TAB' in result[r][0]:
+						result[r][0] = '081838'
+					if 'AVOR 2MG TAB 100TAB' in result[r][0]:
+						result[r][0] = '007853'
+				# print(result)
+    
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							# print(r)
+				# print(result)
+				return result
+			elif dist_city =="Mardan":
+				result = []
+				products = [] 
+				products1 = []
+				bricks = []
+				sales = []
+				n_sales = []
+				for x in range(0,len(pdf.pages)):
+					
+					data = pdf.pages[x].extract_tables()
+					# print(data)
+					bricks = data[0]
+					# print(bricks)
+					index1 = bricks[0].index('')
+					# print(index1)
+					if index1 == 8:
+						products1 = ['008999','002188','004348','002392']
+					if index1 == 14:
+						products1 = ['008999','002188','004348','002392','009072']
+					if index1 == 15:
+						products1 = ['008376','008999','002188','004348','002392','009072']
+
+					bricks = [b for b in bricks[0][1:index1]]
+					# print(bricks)
+					for c in range(0,len(bricks)):
+						bricks[c] = re.sub('\n','',bricks[c])
+						bricks[c] = re.sub('SHAWAADDA[+]N','SHEWA ADDA',bricks[c])
+						bricks[c] = re.sub('SHAHMANSOO','SHAHMANSOOR',bricks[c])
+						bricks[c] = re.sub('M.CPLAZA','MC PLAZA',bricks[c])
+						bricks[c] = re.sub('MIRAFZALKHA','MIR AFZAL KHAN',bricks[c])
+						bricks[c] = re.sub('HOSPITALROA','HOSPITAL ROAD MDN',bricks[c])
+						bricks[c] = re.sub('PARHOTI','PAR HOTI',bricks[c])
+						bricks[c] = re.sub('RASHAKI','RASHAKAI',bricks[c])
+						bricks[c] = re.sub('M.M.C','MARDAN MEDICAL COMPLEX',bricks[c])
+						bricks[c] = re.sub('COLLAGECHO','COLLEGE CHOWK',bricks[c])
+						bricks[c] = re.sub('GHARIKAPOOR','GHARI KAPURA',bricks[c])
+						bricks[c] = re.sub('NEWADDARET','NEW ADDA RETAIL',bricks[c])
+						bricks[c] = re.sub('NEWADDAWHO','NEW ADDA WHOLESALE',bricks[c])
+						bricks[c] = re.sub('B-R-WS','BANK ROAD WHOLESALE',bricks[c])
+						bricks[c] = re.sub('SHEDANOBAR','SHEDAN BAZAR',bricks[c])
+						bricks[c] = re.sub('T.BAI','TAKHT BHAI',bricks[c])
+						bricks[c] = re.sub('LUNDKHUR','LUND KHWAR',bricks[c])
+						bricks[c] = re.sub('DAKI[+]SHAKNO','DAKI AND SHAKNO',bricks[c])
+					data1 = pdf.pages[x].extract_text()
+					# split the data at new line
+					data1 = re.sub("\n","$", data1)
+					data1 = data1.split('$')
+					# print(data1)
+					# extracting only first sale from table because tabl doesn't get it
+					for i in range(16,len(data1)-3):
+						data1[i] = re.sub(r"\s\s+","#",data1[i])
+						data1[i] = data1[i].split('#')
+						products.append(data1[i][0])
+						# print(n_sales)
+					sal = []
+					sales2=[]
+					sal = data[1]
+					# print(sal[0])
+					for c in range(0,len(sal)-2):
+						sales2 = sal[c][0:index1-1]
+						sales.append(sales2)
+				data1 = data1[16][1:index1]
+				sales.insert(0,data1) 
+    
+				for p in range(0,len(products1)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products1[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				#             # print(r)
+				for r in result:
+						for t in tt_list:    
+							if r[2] == t[0]:
+								r.insert(4,t[1])
+								# print(r)
+				return result
+			elif dist_city =="Timergara":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				data = pdf.pages[0].extract_table()
+				for i in range(0,len(data)):
+					bricks = data[0][3:-1]
+					
+					if data[i][1] == None:
+						pass
+					else:
+						products.append(data[i][1])
+						sales.append(data[i][3:-1])
+				for i in range(0,len(products)):
+					bricks[i] = re.sub('TIMERGARA','TIMERGARA TMG',bricks[i])
+				for i in range(0,len(products)):
+					# products2[i] = re.sub('\n','',products2[i])
+					products[i] = re.sub('AFLOXAN CAP','008376',products[i])
+					products[i] = re.sub('AFLOXAN TAB 300MG','017230',products[i])
+					products[i] = re.sub('JETEPAR 10ML AMP','008999',products[i])
+					products[i] = re.sub('JETEPAR 2ML AMP:','004348',products[i])
+					products[i] = re.sub('JETEPAR CAPS','002392',products[i])
+					products[i] = re.sub('JETEPAR SYP','002188',products[i])
+					products[i] = re.sub('MAIORAD 3ML AMP','009072',products[i])
+					products[i] = re.sub('MAIORAD TAB','012961',products[i])
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0' 
+				# print(bricks)
+				# print(products)
+				# print(sales)	
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2]) 
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
+			elif dist_city == "Bannu":
+				products = []
+				sales = []
+				bricks = []
+				result = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					# print(data)
+					products.append(data[1][1:-1])
+					# print(products)
+					for i in range(2,len(data)-1):
+						sales.append(data[i][1:-1])
+				# print(sales)
+						bricks.append(data[i][0])
+				# print(bricks)
+					for k in range(0,len(bricks)):
+						bricks[k] = bricks[k][8:]
+						if bricks[k] == 'BANNU':
+							bricks[k] = 'BANNU MAIN'
+						if bricks[k] == 'MIRANSHAH':
+							bricks[k] = 'MIRAN SHAH'
+						if bricks[k] == 'LAKKI':
+							bricks[k] = 'LAKKI MARWAT'
+				# print(bricks)
+    
+				for p in range(0,len(products)):
+					for i in range(0,len(products[p])):
+						# print(products[p][i])
+						# if '' in products[p][i]:
+						if '014010' in products[p][i]:
+							products[p][i] = '005425'
+						if '014011' in products[p][i]:
+							products[p][i] = '081838'
+						if '014013' in products[p][i]:
+							products[p][i] = '023906'
+						if '014021' in products[p][i]:
+							products[p][i] = '008999'
+						if '014022' in products[p][i]:
+							products[p][i] = '004348'
+						if '014023' in products[p][i]:
+							products[p][i] = '002188'
+						if '014024' in products[p][i]:
+							products[p][i] = '002392'
+						if '014025' in products[p][i]:
+							products[p][i] = '009072'
+						if '014027' in products[p][i]:
+							products[p][i] = '071560'
+						if '014030' in products[p][i]:
+							products[p][i] = '081274'
+						if '014033' in products[p][i]:
+							products[p][i] = '038427'
+						if '014035' in products[p][i]:
+							products[p][i] = '006783'
+						if '014036' in products[p][i]:
+							products[p][i] = '012649'
+						if '014037' in products[p][i]:
+							products[p][i] = '012649'
+						if '014038' in products[p][i]:
+							products[p][i] = '008908'
+						if '014039' in products[p][i]:
+							products[p][i] = '006782'
+						if '014040' in products[p][i]:
+							products[p][i] = '032259'
+						if '014041' in products[p][i]:
+							products[p][i] = '019133'
+						if '014042' in products[p][i]:
+							products[p][i] = '016654'
+						if '014043' in products[p][i]:
+							products[p][i] = '032255'
+						if '014044' in products[p][i]:
+							products[p][i] = '029328'
+						if '014045' in products[p][i]:
+							products[p][i] = '024819'
+						if '014046' in products[p][i]:
+							products[p][i] = '028727'
+						if '014048' in products[p][i]:
+							products[p][i] = '028728'
+						if '014049' in products[p][i]:
+							products[p][i] = '026920'
+						if '014052' in products[p][i]:
+							products[p][i] = '006406'
+				# print(products)
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0'
+			# print(sales)
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						# print(products[i][p],bricks[s],sales[s][i])
+						# print(products[p][i],bricks[s],sales[s][i])
+						child = []
+						child.append(products[p][i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						result.append(child)
+				# print(result)
+				# print(bricks)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				#print(result)
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							#print(r)
+				return result
+			elif dist_city == "Dera Ismail Khan":
+				result = []
+				products = ['008999','004348','002392','002188','009072','012961']
+				
+				bricks = ['D.I.KHAN','TANK','WANA','PAHAR','DRABAN/CHOD','PROVA/RAMAK','JANDOLA','ZAFAR','PEZU/PANYALA',
+				'NEW DERA','MAKEEN',]
+
+				sales = []
+
+				data = pdf.pages[0].extract_table()
+				for x in range(0,len(data)):
+					# print(data[x][0:11])
+					sales.append(data[x][0:11])
+				# print(sales)
+				for b in range(0,len(bricks)):
+					if bricks[b] == 'PAHAR':
+						bricks[b] = 'PAHAR PUR'
+					if bricks[b] == 'DRABAN/CHOD':
+						bricks[b] = 'DRABAN'
+					if bricks[b] == 'PROVA/RAMAK':
+						bricks[b] = 'PROVA'
+					if bricks[b] == 'PEZU/PANYALA':
+						bricks[b] = 'PANI ALA'
+    
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0'
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+      
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+						# print(r)
+
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							# print(r)
+				# print(result)
+				return result
+			elif dist_city == "Abbotabad":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products = data[0][1:-1]
+					sales = data[1:-1]
+					for i in range(0,len(products)):
+						products[i] = re.sub('\n','',products[i])
+						if products[i] == '001001 JETEPAR SYP':
+							products[i] = '002188'
+						if products[i] == '001003 JETEPAR 2ML AMP':
+							products[i] = '004348'
+						if products[i] == '001004 JETEPAR 10ML AMP':
+							products[i] = '008999'
+						if products[i] == '001008 MAIORAD 3ML AMP':
+							products[i] = '009072'
+						if products[i] == '001002 JETEPAR CAP':
+							products[i] = '002392'
+				for i in range(0,len(sales)):
+					bricks.append(sales[i][0])
+					bricks[i]=bricks[i][10:]
+					sales[i] = sales[i][1:-1]
+				for i in range(0,len(bricks)):
+					if bricks[i] == 'BUTTGRAM':
+						bricks[i] = 'BATTAGRAM'
+					if bricks[i] == 'SHINKIARI/BUFFA':
+						bricks[i] = 'SHINKIARI'
+					if bricks[i] == 'GARI/BALLAKOT':
+						bricks[i] = 'GARI BALLAKOT'
+					if bricks[i] == 'DERBAND':
+						bricks[i] = 'DARBAND'
+					if bricks[i] == 'BATTAL/CHATTAR':
+						bricks[i] = 'BATTAL AND CHATTAR'
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						# print(products[i][p],bricks[s],sales[s][i])
+						# print(products[p][i],bricks[s],sales[s][i])
+						child = []
+						child.append(products[i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						child.append('ABD')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				return result
+			elif dist_city =="Chakwal":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					bricks=data[0][1:-1]
+					for i in range(0,len(bricks)):
+						bricks[i] = re.sub('\n','',bricks[i])
+						bricks[i] = re.sub('CHOA SHAYDIAYN BELT','CHOA SAIDANSHAH',bricks[i])
+						bricks[i] = re.sub('DHUDIAL BELT','DHUDYAL',bricks[i])
+						bricks[i] = re.sub('KALAR KAHAR TOWN','KALAR KAHAR',bricks[i])
+						bricks[i] = re.sub('TALAGANG BELT','TALAGANG',bricks[i])
+					for i in range(1,len(data)-5):
+						# print(data[i])
+						if data[i][0] != None:
+							# print('hi')
+							products.append(data[i][0])
+							sales.append(data[i][1:-1])
+							# print(data[i])
+					# print(products)
+					for i in range(0,len(sales)):
+						products[i] = re.sub('JETEPAR 10ML AMP','008999',products[i])
+						products[i] = re.sub('JETEPAR 2ML AMP','004348',products[i])
+						products[i] = re.sub('JETEPAR CAP','002392',products[i])
+						products[i] = re.sub('JETEPAR SYP','002188',products[i])
+						for k in range(0,len(sales[i])):
+								x = re.split("\n", sales[i][k], 1)
+								sales[i][k] = x[0]
+								if sales[i][k] == '':
+									sales[i][k] = '0'
+					# print(sales)
+					# print(products)
+     
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						child = []
+						child.append(products[s])
+						child.append(bricks[i])
+						child.append(sales[s][i])
+						child.append('CWL')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				return result
+			elif dist_city == "Kohat":
+				result = []
+				bricks = ['KOHAT 1','HANGU','DOABA','THALL','KOHAT 2','KOHAT 3','ALIZAI AND BAGHAN','PARACHINAR','BANDA DAUD SHAH','LACHI','GUMBAT','KOHAT DEVELOPMENT AUTHORITY']
+				products = []
+				sales = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_text()
+					data = re.sub('\n',',',data)
+					data = data.split(',')
+					
+					data = data[9:-3]
+					# print(data)
+					for i in range(0,len(data)):
+						data[i] = re.sub('\s\s+',',',data[i])
+						data[i] = data[i].split(',')
+						products.append(data[i][0][1:]) 
+						sales.append(data[i][1:-2])
+				
+				for i in range(0,len(products)):
+					products[i] = re.sub('987 AFLOXAN CAP','008376',products[i])
+					products[i] = re.sub('983 JETEPAR 10ML INJ','008999',products[i])
+					products[i] = re.sub('986 JETEPAR 120ML SYP','002188',products[i])
+					products[i] = re.sub('984 JETEPAR 2ML INJ','004348',products[i])
+					products[i] = re.sub('052 JETEPAR 2ML INJ NEW','004348',products[i])
+					products[i] = re.sub('985 JETEPAR CAP','002392',products[i])
+					products[i] = re.sub('973 JETEPAR SYP NEW','002188',products[i])
+					products[i] = re.sub('989 MAIORAD AMPS','009072',products[i])
+					products[i] = re.sub('990 MAIORAD TAB','012961',products[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result    
+			elif dist_city == "Jhelum":
+				result = []
+				products = []
+				bricks = []
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products=data[0][1:-1]
+					sales=data[1:-1]
+					for i in range(0,len(products)):
+						products[i] = re.sub('\n','',products[i])
+						if products[i] == '004041 JETEPAR SYP':
+							products[i] = '002188'
+						if products[i] == '004039 JETEPAR 2ML INJ':
+							products[i] = '004348'
+						if products[i] == '004038 JETEPAR 10ML INJ':
+							products[i] = '008999'
+						if products[i] == '004045 MAIORAD INJ':
+							products[i] = '009072'
+						if products[i] == '004040 JETEPAR CAP':
+							products[i] = '002392'      
+					for i in range(0,len(sales)):
+						bricks.append(sales[i][0][4:])
+						if bricks[i][0]==' ':
+							bricks[i] = bricks[i][1:]
+						if bricks[i]=='JHELUM':
+							bricks[i] = 'JHELUM JHL'
+						if bricks[i]=='DADYAL & CHAKSWARI':
+							bricks[i] = 'DADYAL AND CHAKSWARI'
+						sales[i] = sales[i][1:-1]
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for p in range(0,len(bricks)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[s])
+						child.append(bricks[p])
+						child.append(sales[p][s])
+						child.append('JHL')
+						result.append(child)   
+
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result
+			elif dist_city == "Rawalpindi":
+				products = []
+				sales = []
+				bricks = []
+				result = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					products.append(data[0][1:-1])
+					if x == len(pdf.pages)-1:
+						for i in range(1,len(data)-1):
+							sales.append(data[i][1:-1])
+							bricks.append(data[i][0])
+					else:
+						for i in range(1,len(data)):
+							sales.append(data[i][1:-1])
+							bricks.append(data[i][0])
+					if x == 1:
+						for k in range(0,len(bricks)):
+							bricks[k] = bricks[k][10:]
+							if bricks[k] == 'MALL ROAD':
+								bricks[k] = 'MALL ROAD RWL'
+							if bricks[k] == 'CHAKWAL':
+								bricks[k] = 'CHAKWAL RWL'
+							if bricks[k] == 'ALI PURE FARASH':
+								bricks[k] = 'ALI PUR FARASH'
+				for p in range(0,len(products)):
+					for i in range(0,len(products[p])):
+						if '009001' in products[p][i]:
+							products[p][i] = '002188'
+						if '009002' in products[p][i]:
+							products[p][i] = '002392'
+						if '009003' in products[p][i]:
+							products[p][i] = '004348'
+						if '009004' in products[p][i]:
+							products[p][i] = '008999'
+						if '009008' in products[p][i]:
+							products[p][i] = '009072'
+					for s in range(0,len(sales)):
+						for i in range(0,len(sales[s])):
+							if sales[s][i] == '-':
+								sales[s][i] = '0'
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						child = []
+						child.append(products[p][i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				for r in result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
+			elif dist_city == "Vehari":
+				result = []
+				products = []
+				bricks = ['ADDA AREY WHEN','BUREWALA','CASH','CHAKRALA','DOKOTA','G.MORE','GAGGOO','KARAM PUR','LUDDAN',
+				'MAILSI VIHARI','MITRO','NEW CHOWK','PAKHY MORE MACHIWAL','THINGI','TIBBA SULTANPUR','VEHARI','VIJHIANWALA']
+				sales = []
+				sales1 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					data1 = data
+					data = data[1:-2]
+					if x == 0:
+						for i in range(0,len(data)):
+							products.append(data[i][1])
+							sales.append(data[i][1:])
+					else:
+						if data1[0][-1] == "Total":
+							for i in range(0,len(sales)):
+								if sales[i][0] == data[i][1]:
+									sales[i] = sales[i][1:] + data[i][2:-1]
+						else:
+							sales.append(data[i][1:])
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '-':
+							sales[s][i] = '0' 
+				for i in range(0,len(products)):
+					products[i] = re.sub('JETEPAR CAP 20s','002392',products[i])
+					products[i] = re.sub('JETEPAR.10ML ING 5s','008999',products[i])
+					products[i] = re.sub('JETEPAR SYP 120ml','002188',products[i])
+					products[i] = re.sub('JETEPAR.2ML INJ 10s','004348',products[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						child.append('VRI')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result
+			elif dist_city == "Larkana":
+				result = []
+				bricks = []
+				bricks3 = []
+				products = []
+				sales = []
+				sales2 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_tables()
+					bricks = data[0]
+					bricks = bricks[0]
+					if x== 0:
+						bricks1 = bricks[1:]
+						products2 =data[1][0:-4]
+						for i in range(0,len(products2)):
+							products.append(products2[i][0])
+							sales.append(products2[i])
+					if x == 1:
+						bricks3 = bricks[1:-2]
+						for i in range(0,len(data)):
+							for k in range(2,len(data[i])-4):
+								sales2.append(data[i][k]) 
+				bricks = bricks1 + bricks3
+				for i in range(0,len(sales)):
+					if sales[i][0] == sales2[i][0]:
+						sales[i] = sales[i] + sales2[i][1:-2]
+						sales[i] = sales[i][1:]
+				for s in range(0,len(sales)):
+					for i in range(0,len(sales[s])):
+						if sales[s][i] == '':
+							sales[s][i] = '0' 
+				for i in range(0,len(products)):
+					products[i] = re.sub('MAIORAD INJ 6S [(]TP: 83.53[)]','009072',products[i])
+					products[i] = re.sub('JETEPAR 10.ML INJ 5S [(]TP: 224.26[)]','008999',products[i])
+					products[i] = re.sub('JETEPAR SYRUP 112.ML [(]TP: 177.65[)]','002188',products[i])
+					products[i] = re.sub('JETEPAR INJ 2ML 10S [(]TP: 142.21[)]','004348',products[i])
+				for i in range(0,len(bricks)):
+					bricks[i] = re.sub('BAHRM','BAHRAM',bricks[i])
+					bricks[i] = re.sub('CIVIL','CIVIL HOSPITAL LARKANA',bricks[i])
+					bricks[i] = re.sub('DAKHN','DAKHAN',bricks[i])
+					bricks[i] = re.sub('KAMBR','QAMBAR',bricks[i])
+					bricks[i] = re.sub('NAUDR','NAUDERO',bricks[i])
+					bricks[i] = re.sub('RATOD','RATO DERO',bricks[i])
+					bricks[i] = re.sub('S.Z.H','SHAIKH ZAYED HOSPITAL',bricks[i])
+					bricks[i] = re.sub('B-ROD','BAKRANI ROAD',bricks[i])
+					bricks[i] = re.sub('CATLE','CATTLE COLONY',bricks[i])
+					bricks[i] = re.sub('POLIC','POLICE SHOPING CENTRE',bricks[i])
+					bricks[i] = re.sub('MURAD','MUHALLA MURAD WAHAN',bricks[i])
+					bricks[i] = re.sub('SHDKT','SHAHDADKOT',bricks[i])
+					bricks[i] = re.sub('DAKHN','DAKHAN',bricks[i])
+					bricks[i] = re.sub('NAUDR','NAUDERO',bricks[i])
+					bricks[i] = re.sub('NASIR','NASIRABAD',bricks[i])
+					bricks[i] = re.sub('EM-RO','EMPIRE ROAD',bricks[i])
+					bricks[i] = re.sub('LAHOR','LAHORI MUHALLA',bricks[i])
+					bricks[i] = re.sub('GAR-Y','GARI YASEEN',bricks[i])
+					bricks[i] = re.sub('ARIJA','ARIJA VILLAGE',bricks[i])
+					bricks[i] = re.sub('ARZ-B','ARZI BHUTTO',bricks[i])
+					bricks[i] = re.sub('BKRNI','BAKRANI',bricks[i])
+					bricks[i] = re.sub('BANGU','BANGULDERO',bricks[i])
+					bricks[i] = re.sub('BRO-C','BERO CHANDIO',bricks[i])
+					bricks[i] = re.sub('BHANS','BHAN SYEDABAD',bricks[i])
+					bricks[i] = re.sub('DHAMR','DHAMRAH',bricks[i])
+					bricks[i] = re.sub('GAJIK','GAJI KHUHAWAR',bricks[i])
+					bricks[i] = re.sub('GRELO','GARELO',bricks[i])
+					bricks[i] = re.sub('GAR-K','GARI KHUDA BUX',bricks[i])
+					bricks[i] = re.sub('DADU','DADU LARKANA',bricks[i])
+					bricks[i] = re.sub('HAKIM','HAKIM SHAH',bricks[i])
+					bricks[i] = re.sub('HATI','HATTI',bricks[i])
+					bricks[i] = re.sub('KN-SH','KHAIRPUR NATHAN SHAH',bricks[i])
+					bricks[i] = re.sub('KAMBR','KAMBER',bricks[i])
+					bricks[i] = re.sub('KHARO','KHAIRO DERO',bricks[i])
+					bricks[i] = re.sub('KHANP','KHANPUR',bricks[i])
+					bricks[i] = re.sub('ALLAH','ALLAH ABAD',bricks[i])
+					bricks[i] = re.sub('GAJAN','GAJAN PUR CHOWK',bricks[i])
+					bricks[i] = re.sub('JALIS','JAILES BAZAR',bricks[i])
+					bricks[i] = re.sub('LADIE','LADIES JAIL',bricks[i])
+					bricks[i] = re.sub('M-CHK','MIROKHAN CHOWK',bricks[i])
+					bricks[i] = re.sub('NA-CH','NAUDERO CHOWK',bricks[i])
+					bricks[i] = re.sub('NA-RO','NAUDERO ROAD',bricks[i])
+					bricks[i] = re.sub('NAZAR','NAZAR MUHALLA',bricks[i])
+					bricks[i] = re.sub('NISHT','NISHTAR ROAD',bricks[i])
+					bricks[i] = re.sub('OLD-B','OLD BUS STAND',bricks[i])
+					bricks[i] = re.sub('PK-CH','PAKISTANI CHOWK',bricks[i])
+					bricks[i] = re.sub('PHUL','PHULL ROAD',bricks[i])
+					bricks[i] = re.sub('RAMAT','RAHMAT PUR',bricks[i])
+					bricks[i] = re.sub('SACHA','SACHAL COLONY',bricks[i])
+					bricks[i] = re.sub('STATO','STATION ROAD',bricks[i])
+					bricks[i] = re.sub('MADJI','MADEJI',bricks[i])
+					bricks[i] = re.sub('MAHOT','MAHOTA',bricks[i])
+					bricks[i] = re.sub('MROKN','MIROKHAN',bricks[i])
+					bricks[i] = re.sub('PHULJ','PHULJI',bricks[i])
+					bricks[i] = re.sub('PIARO','PIAROGOTH',bricks[i])
+					bricks[i] = re.sub('QUBO','QUBO SAEED KHAN',bricks[i])
+					bricks[i] = re.sub('RADHN','RADHAN',bricks[i])
+					bricks[i] = re.sub('SAJWL','SAJAWAL',bricks[i])
+					bricks[i] = re.sub('SEWHN','SEWHAN',bricks[i])
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						child.append('LRK')
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				return result

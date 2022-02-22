@@ -68,6 +68,8 @@
    "options": "Employee"
   },
   {
+   "depends_on": "employee",
+   "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Data",
    "label": "Designation"
@@ -97,9 +99,12 @@
    "label": "Name"
   },
   {
+   "depends_on": "employee",
+   "fetch_from": "employee.team",
    "fieldname": "team",
-   "fieldtype": "Data",
-   "label": "Team"
+   "fieldtype": "Link",
+   "label": "Team",
+   "options": "Team Management"
   },
   {
    "fieldname": "area",
@@ -333,7 +338,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-16 15:59:34.736592",
+ "modified": "2022-01-31 14:21:47.735827",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "TADA Report",
