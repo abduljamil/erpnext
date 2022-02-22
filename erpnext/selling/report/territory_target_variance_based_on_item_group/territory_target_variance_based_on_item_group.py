@@ -34,9 +34,9 @@ def execute(filters=None):
 					month_data = monthwise_data.get(month, {})
 					for i, fieldname in enumerate(["target", "achieved", "variance"]):
 						value = flt(month_data.get(fieldname))
-						period_data[i] += value
-						totals[i] += value
-				period_data[2] = period_data[0] - period_data[1]
+						period_data[i] += round(value)
+						totals[i] += round(value)
+				period_data[2] = round(period_data[0]) - round(period_data[1])
 				row += period_data
 			totals[2] = totals[0] - totals[1]
 			row += totals
