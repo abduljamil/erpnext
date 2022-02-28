@@ -48,13 +48,8 @@ frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 	
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-		console.log(column)
-		if(column.html ==="Territory" || column.html ==="Item Group"){
-			value = "<span style='position:'relative';z-index-1'>" + value + "</span>";
-		}else{
-			value = "<span style='z-index:0'>" + value + "</span>";
-		}
-		if (column.fieldname.includes('variance')) {
+		
+		if (column.fieldname.includes('var')) {
 
 			if (data[column.fieldname] < 0) {
 				value = "<span style='color:green'>" + value + "</span>";
@@ -63,6 +58,12 @@ frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 				value = "<span style='color:red'>" + value + "</span>";
 			}
 		}
+		if (column.fieldname.includes('target')||column.fieldname.includes('variance')||column.fieldname.includes('achievement')) {
+
+			value = "<span style='font-weight:bold'>" + value + "</span>";
+			
+		}
+
 
 		return value;
 	}
