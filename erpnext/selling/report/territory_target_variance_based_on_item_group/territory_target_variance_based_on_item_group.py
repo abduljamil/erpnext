@@ -54,15 +54,15 @@ def get_columns(filters):
 	group_months = False if filters["period"] == "Monthly" else True
 
 	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
-		for label in [_("Target") +" (%s)", _("Achieved") + " (%s)", _("Variance") + " (%s)"]:
+		for label in [_("Tgt") +" (%s)", _("Ach") + " (%s)", _("Var") + " (%s)"]:
 			if group_months:
 				label = label % (_(from_date.strftime("%b")) + " - " + _(to_date.strftime("%b")))
 			else:
 				label = label % _(from_date.strftime("%b"))
-			columns.append(label+":Float:120")
+			columns.append(label+":Int:90")
 
-	return columns + [_("Total Target") + ":Float:120", _("Total Achieved") + ":Float:120",
-		_("Total Variance") + ":Float:120"]
+	return columns + [_("Target") + ":Int:100", _("Achievement") + ":Int:100",
+		_("Variance") + ":Int:100"]
 
 #Get territory & item group details
 def get_territory_details(filters):
