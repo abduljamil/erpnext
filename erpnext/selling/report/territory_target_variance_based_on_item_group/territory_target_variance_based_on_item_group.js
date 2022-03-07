@@ -5,11 +5,11 @@
 frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 	"filters": [
 		{
-			fieldname:"company",
-			label: __("Company"),
+			fieldname:"territory",
+			label: __("Territory"),
 			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company")
+			options: "Territory",
+			default: frappe.defaults.get_user_default("Pakistan")
 		},
 		{
 			fieldname: "fiscal_year",
