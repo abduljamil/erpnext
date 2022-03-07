@@ -167,8 +167,6 @@ def get_territory_item_month_map(filters):
 				if territory['name'] == tt['parent_territory']:
 					name = tt['name']
 					check_territory[name] = name
-	# print(check_territory)
-	
 	for td in territory_details:
 		if td.parent_territory == check_territory.get(td.parent_territory) or td.name==check_territory.get(td.name):
 			if filters.get('territory'):
