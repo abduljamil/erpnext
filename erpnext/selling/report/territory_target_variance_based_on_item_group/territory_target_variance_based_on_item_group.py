@@ -3,7 +3,9 @@
 
 from __future__ import unicode_literals
 from dataclasses import fields
-
+from operator import contains
+import re
+from tabnanny import check
 from numpy import full
 import frappe
 from frappe import _, msgprint
@@ -96,10 +98,20 @@ def get_achieved_details(filters, territory, item_groups):
 	# start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 	values = {'territory':territory}
 	contains_digit = any(map(str.isdigit, territory))
-	# print(contains_digit)
+	filter_digit = ''
+	if filters.get('territory'):
+		filter_digit = bool(re.search(r'\d', filters.get('territory')))
+
+	# print(filter_digit, " filter")
+	# print(contains_digit, " contain")
+
+	if not filter_digit:
+		contains_digit = False
+		values ={'territory':""}
 
 	if contains_digit:
 		## get territory list 
+		print('im in if')
 		tt_list = get_territory_dict()
 		parent_brick = tt_list.get(territory)
 		nested_values = { 'parent_brick':parent_brick , 'territory':territory}
@@ -112,6 +124,7 @@ def get_achieved_details(filters, territory, item_groups):
 		return item_details
 	else:
 	# 	item_details=""
+		print('im in else')
 		item_details = frappe.db.sql("""
 			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
 				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
@@ -127,7 +140,6 @@ def get_territory_item_month_map(filters):
 	import datetime
 	territory_details = get_territory_details(filters)
 	tdd = get_target_distribution_details(filters)
-	# print(tdd)
 	item_groups = get_item_groups()
 	# print(item_groups)
 	territory_item_group_dict = {}
@@ -138,7 +150,7 @@ def get_territory_item_month_map(filters):
 	users = frappe.db.get_value("User", user, ["full_name"], as_dict=True)
 	## get all employee record
 	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory'])
-	## get all territory list
+	
 	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
 	# print(tt_list)
 	full_name = users.full_name
@@ -149,12 +161,15 @@ def get_territory_item_month_map(filters):
 	for e in employee_list:
 		if e.get('employee_name') == full_name:
 			login_user = e
-	# print(login_user)
+	##check filters and set territory
+	if filters.get('territory'):
+		print(filters.get('territory'))
+		login_user['Territory'] = filters.get('territory')
 	## get all area that login user can access
 	if login_user:
 		area = login_user.get('Territory')
 		check_territory[area] = area
-
+	## find respective territory under all area 
 	for territory  in tt_list:
 		if area == territory['parent_territory']:
 			for tt in tt_list:
@@ -162,12 +177,19 @@ def get_territory_item_month_map(filters):
 					name = tt['name']
 					check_territory[name] = name
 	# print(check_territory)
+	
 	for td in territory_details:
-		# print(check_territory,td)
 		if td.parent_territory == check_territory.get(td.parent_territory) or td.name==check_territory.get(td.name):
 			# if check_territory == td.parent_territory:
 			# print(td)
+			if filters.get('territory'):
+				for k in list(check_territory.keys()):
+					print(check_territory[k])
+					if re.findall("[0-9]", check_territory[k]):
+						del check_territory[k]
+			print(check_territory)
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
+			# print(achieved_details)
 			item_actual_details = {}
 			
 			for d in achieved_details:
@@ -210,6 +232,7 @@ def get_territory_item_month_map(filters):
 			# print(territory_item_group_dict)
 		elif full_name=='Administrator' or full_name=='Sh Abdul Rauf' or full_name=='Zafar Hameed Paracha':
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
+			print(achieved_details)
 			item_actual_details = {}
 			
 			for d in achieved_details:
