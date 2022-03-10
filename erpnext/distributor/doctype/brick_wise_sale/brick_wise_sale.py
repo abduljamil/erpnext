@@ -2109,3 +2109,61 @@ def parse_pdf(pdf_file,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 				return new_result
+			elif dist_city == "Quetta":
+				result = []
+				products = []
+				bricks = ['ALAM KHAN CHOWK','ALAMDAR ROAD','BARORI','QUETTA CANTONMENT','INSTITUTION','JINNAH ROAD KANDHARI BAZAR','HUDA SPINI ROAD','SABZAL ROAD','SIRKI ROAD GAWALMANDI CHOWK'
+				,'LIAQAT BAZAR ARCHAR_FJ ROAD','MEKANGI ROAD','MISSION ROAD','OFF JINNAH ROAD','PASHTUN ABAD','PRINCE ROAD','SARIAB ROAD','SATELLITE TOWN QTA','ZARGON ROAD',
+				'WHOLESALE QTA','CHAMAN','DALBANDIN','DUKKI','QILLA SIAFULLAH','KALAT','KHANOZAI','KHARAN','KHUZDAR','KUCHLACK','LORALAI','M_BAG','MASTUNG',
+				'MACHH','NOSHKI','PISHIN','SANJAWI','SARANAN','SIBI','ZHOB','ZIARAT']
+				sales = []
+				sales1 = []
+				sales2 = []
+				sales3 = []
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_table()
+					sales=data[2:-1]
+					for i in range(0,len(sales)):
+						products.append(sales[i][0])
+						sales1.append(sales[i][2:-2])
+						if products[i] == 'JETEPAR  SYP':
+							products[i] = '002188'
+						if products[i] == 'JETEPAR INJ. 2CC':
+							products[i] = '004348'
+						if products[i] == 'JETEPAR INJ. 10CC':
+							products[i] = '008999'
+						if products[i] == 'MAIORAD INJ':
+							products[i] = '009072'
+						if products[i] == 'JETEPAR CAPS':
+							products[i] = '002392'
+				for i in range(0,len(sales1)):
+					sales2 = []
+					for k in range(0,len(sales1[i])):
+						if sales1[i][k]!=None:
+							sales2.append(sales1[i][k])
+					sales3.append(sales2)
+					sales3[i].pop(19)
+				for s in range(0,len(sales3)):
+					for i in range(0,len(sales3[s])):
+						if sales3[s][i] == '':
+							sales3[s][i] = '0'
+				for p in range(0,len(products)):
+					for s in range(0,len(sales3[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales3[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							# print(r)
+				return result
+
