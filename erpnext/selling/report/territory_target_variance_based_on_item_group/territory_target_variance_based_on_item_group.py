@@ -154,7 +154,6 @@ def get_territory_item_month_map(filters):
 			login_user = e
 	##check filters and set territory
 	if filters.get('territory'):
-		print(filters.get('territory'))
 		login_user['Territory'] = filters.get('territory')
 	## get all area that login user can access
 	if login_user:
