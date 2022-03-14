@@ -21,7 +21,6 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	territory_item_group_dict = get_territory_item_month_map(filters)
-	# print(territory_item_group_dict)
 	item_list = get_item_groups()
 	data = []
 	for territory, territory_items in territory_item_group_dict.items():
@@ -214,7 +213,7 @@ def get_territory_item_month_map(filters):
 				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
 					.get(filters["target_on"].lower())
 				
-		elif full_name=='Administrator' or full_name=='Sh Abdul Rauf' or full_name=='Zafar Hameed Paracha':
+		elif full_name=='Administrator' or full_name=='Zafar Hameed Paracha':
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
 			print(achieved_details)
 			item_actual_details = {}
