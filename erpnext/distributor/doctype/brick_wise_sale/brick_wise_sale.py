@@ -2166,4 +2166,76 @@ def parse_pdf(pdf_file,parent_detail):
 							r.insert(4,t[1])
 							# print(r)
 				return result
-
+			elif dist_city == "Layyah":
+				result = []
+				products = []
+				bricks = ['LAYYAH LYH','CHOWK AZAM','KAROR LAL ESAN','FATEHPUR','CHOWK MUNDA','JAMAN SHAH',
+				'KOT SULTAN','PAHARPUR','EHSAN PUR','DAIRA DIN PANAH','LADHANA','KOT ADDU','SANAWAN LYH','CHAUBARA LYH','MISC LYH',]
+				sales = []
+				first_table_end = 0
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_text()
+					data = re.sub('\n','$',data)
+					data = data.split('$')
+					data = data[10:-15]
+					for i in range(0,len(data)):   
+						if data[i] == 'Group Name : GREEN':
+							second_table_start = i
+							first_table_end = i-8
+				for k in range(0,len(data)):
+					if k <= first_table_end or k > second_table_start:
+						data[k] = re.sub('[(]','$',data[k])
+						# print(data[k])
+						data[k] = data[k].split('$')
+						products.append(data[k][0][:-1])
+						data[k] = re.sub('\s+','$',data[k][1])
+						data[k] = data[k].split('$')
+						sales.append(data[k][1:-2])
+				for i in range(0,len(products)):
+					if products[i] == 'JETEPAR  10ML  AMP':
+						products[i] = '008999'
+					if products[i] == 'JETEPAR  2ML  AMP':
+						products[i] = '004348'
+					if products[i] == 'JETEPAR  CAP':
+						products[i] = '002392'
+					if products[i] == 'JETEPAR  SYP':
+						products[i] = '002188'
+					if products[i] == 'MAIORAD  AMP':
+						products[i] = '009072'
+					if products[i] == 'METRONIDAZOLE 400MG TAB':
+						products[i] = '081274'
+					if products[i] == 'CYANORIN  FORTE  AMP':
+						products[i] = '005425'
+					if products[i] == 'MOXILIUM  SYP  125MG':
+						products[i] = '006783'
+					if products[i] == 'MOXILIUM  SYP  250MG':
+						products[i] = '012649'
+					if products[i] == 'MOXILIUM  DROPS':
+						products[i] = '006782'
+					if products[i] == 'VIGROL  FORTE  TAB':
+						products[i] = '007018'
+					if products[i] == 'PC-LAC  SYP':
+						products[i] = '019133'
+					if products[i] == 'VIKONON  FORTE  SYP':
+						products[i] = '006406'
+				for i in range(len(sales)):
+					for k in range(len(sales[i])):
+						if sales[i][k] == '-':
+							sales[i][k] = '0' 
+				for p in range(0,len(products)):
+					for s in range(0,len(sales[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(sales[p][s])
+						result.append(child)
+				for r in result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+				for r in result:
+					for t in tt_list:
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+				return result
