@@ -107,6 +107,8 @@
    "options": "Team Management"
   },
   {
+   "depends_on": "territory",
+   "fetch_from": "territory.parent",
    "fieldname": "area",
    "fieldtype": "Data",
    "label": "Area"
@@ -338,7 +340,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-31 14:21:47.735827",
+ "modified": "2022-03-22 08:44:45.217511",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "TADA Report",

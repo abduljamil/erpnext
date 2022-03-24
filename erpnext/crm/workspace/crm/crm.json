@@ -1,10 +1,6 @@
 {
  "category": "Modules",
- "charts": [
-  {
-   "chart_name": "Territory Wise Sales"
-  }
- ],
+ "charts": [],
  "creation": "2020-01-23 14:48:30.183272",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -364,8 +360,8 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-26 09:29:16.527466",
- "modified_by": "Administrator",
+ "modified": "2022-03-22 10:25:43.856368",
+ "modified_by": "muhammadtaha.core@gmail.com",
  "module": "CRM",
  "name": "CRM",
  "onboarding": "CRM",
@@ -412,6 +408,12 @@
    "label": "Leave Application",
    "link_to": "Leave Application",
    "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Target Vs Achievement",
+   "link_to": "Territory Target Variance Based On Item Group",
+   "type": "Report"
   }
  ]
 }

@@ -571,8 +571,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -1511,7 +1510,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-17 20:15:26.531553",
+ "modified": "2022-03-24 11:53:48.194847",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1563,10 +1562,13 @@
    "write": 1
   },
   {
+   "create": 1,
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "Accounts User"
+   "role": "Accounts User",
+   "submit": 1,
+   "write": 1
   },
   {
    "read": 1,
