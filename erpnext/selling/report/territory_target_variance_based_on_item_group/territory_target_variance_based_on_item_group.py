@@ -103,7 +103,6 @@ def get_achieved_details(filters, territory, item_groups):
 
 	if not filter_digit:
 		contains_digit = False
-		values ={'territory':""}
 
 	if contains_digit:
 		tt_list = get_territory_dict()
@@ -123,7 +122,6 @@ def get_achieved_details(filters, territory, item_groups):
 				`tabBrick Wise Sale Child` bwc
 			where bwc.parent=bw.name and bw.city= %(territory)s
 			""",values = values ,as_dict=1)
-	
 		return item_details
 	
 
@@ -172,11 +170,9 @@ def get_territory_item_month_map(filters):
 					print(check_territory[k])
 					if re.findall("[0-9]", check_territory[k]):
 						del check_territory[k]
-			print(check_territory)
+			# print(check_territory)
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
-			# print(achieved_details)
 			item_actual_details = {}
-			
 			for d in achieved_details:
 				if td.item_group == d.product:
 					# print(td.item_group)
@@ -191,7 +187,6 @@ def get_territory_item_month_map(filters):
 					value_dict = item_actual_details[td.item_group][d.month_name]
 					value_dict.quantity += flt(d.sale_qty)
 					value_dict.amount += flt(d.value)
-			# print(td)
 			for month_id in range(1, 13):
 				month = datetime.date(2013, month_id, 1).strftime('%B')
 
@@ -213,9 +208,8 @@ def get_territory_item_month_map(filters):
 				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
 					.get(filters["target_on"].lower())
 				
-		elif full_name=='Administrator' or full_name=='Zafar Hameed Paracha':
+		elif full_name=='Administrator':
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
-			print(achieved_details)
 			item_actual_details = {}
 			
 			for d in achieved_details:
