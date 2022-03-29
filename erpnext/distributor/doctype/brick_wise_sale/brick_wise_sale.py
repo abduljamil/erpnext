@@ -1086,11 +1086,11 @@ def parse_pdf(pdf_file,parent_detail):
 						bricks[b] = "SHAHEEN ABAD"
 					if bricks[b] == "SIALKOT RAOD":
 						bricks[b] = "SIALKOT ROAD"
-					if bricks[b] == "EMAN ABAD -":
+					if bricks[b] == "EMAN ABAD  -":
 						bricks[b] = "EMAN ABAD"
-					if bricks[b] == "GAKHAR -":
+					if bricks[b] == "GAKHAR  -":
 						bricks[b] = "GAKHAR"
-					if bricks[b] == "Sialkot":
+					if bricks[b] == "SIALKOT":
 						bricks[b] = "SIALKOT ROAD GUJRANWALA"
 				# print(bricks)
 				for b in range(0,len(bricks)):
