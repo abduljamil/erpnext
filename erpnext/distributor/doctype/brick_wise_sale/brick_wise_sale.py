@@ -211,6 +211,11 @@ def parse_pdf(pdf_file,parent_detail):
 									b[c] = 'TEHZAB AAHATA'
 								elif b[c] ==  'JALLO PIND':
 									b[c] = 'JALLO PARK'
+								elif b[c] ==  'TEZAB AAHA':
+									b[c] = 'TEHZAB AAHATA'
+								elif b[c] == "THOKAR NIA":
+									b[c] = "THOKAR NAIZ BAIG"
+         
 				# print(full_array)
 				# define the item code with array so  that we can replace the name of item with code which auto get item name#define item code
 				item_code = ['008376','017230','002392','002188','004348','008999','012961','009072']
