@@ -1323,7 +1323,7 @@ def parse_pdf(pdf_file,parent_detail):
 					if bricks[b] == "GAKHAR  -":
 						bricks[b] = "GAKHAR"
 					if bricks[b] == "SIALKOT":
-						bricks[b] = "SIALKOT ROAD GUJRANWALA"
+						bricks[b] = "SIALKOT GUJRANWALA"
 				# print(bricks)
 				for b in range(0,len(bricks)):
 					for p in range(0,len(products)):
