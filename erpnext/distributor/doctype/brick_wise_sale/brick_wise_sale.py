@@ -2418,9 +2418,9 @@ def parse_pdf(pdf_file,parent_detail):
 					bricks = bricks[0][3:-2]
 					for k in range(0,len(bricks)):
 						if bricks[k] == 'DERA A':
-							bricks[k] = 'DERA A'
+							bricks[k] = 'DERA ALLAH YAR'
 						if bricks[k] == 'DERA M':
-							bricks[k] = 'DERA M'
+							bricks[k] = 'DERA MURAD JAMALI'
 						if bricks[k] == 'JCD/OU':
 							bricks[k] = 'JCD/OU'
 						if bricks[k] == 'JCD/Q-':
