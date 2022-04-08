@@ -13,6 +13,12 @@
   "city",
   "file",
   "process_pdf",
+  "product_price_variance_section",
+  "item_code",
+  "item_name",
+  "column_break_12",
+  "item_price",
+  "apply_price",
   "product_sale_detail",
   "selling_product",
   "grand_total_section",
@@ -88,11 +94,47 @@
    "fieldname": "process_pdf",
    "fieldtype": "Button",
    "label": "Process Pdf"
+  },
+  {
+   "fieldname": "product_price_variance_section",
+   "fieldtype": "Section Break",
+   "label": "Product Price Variance"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "depends_on": "item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "item_code",
+   "fetch_from": "item_code.trade_price",
+   "fieldname": "item_price",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Item Price"
+  },
+  {
+   "fieldname": "apply_price",
+   "fieldtype": "Button",
+   "label": "Apply Price"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-02 11:36:44.652875",
+ "modified": "2022-04-07 10:02:36.140491",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Brick Wise Sale",
