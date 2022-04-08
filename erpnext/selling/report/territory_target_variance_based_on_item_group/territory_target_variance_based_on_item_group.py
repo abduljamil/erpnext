@@ -10,6 +10,7 @@ from numpy import full
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
+import copy
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -21,9 +22,29 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	territory_item_group_dict = get_territory_item_month_map(filters)
+	# print(territory_item_group_dict)
+	copy_data = copy.deepcopy(territory_item_group_dict)
+	total_area_target_achieved = {}
+	if filters.get('territory'):
+		for k, v in copy_data.items():  # data is the original data dict
+			for ik, iv in v.items():
+				temp = total_area_target_achieved.get(ik, {})
+				if not temp:
+					total_area_target_achieved[ik] = iv
+				else:
+					for tk, tv in temp.items():
+						for itk, itv in tv.items():
+							if (temp[tk][itk] is None):
+								temp[tk][itk] = 0.00
+							temp[tk][itk] += float(0 if iv[tk][itk] is None else iv[tk][itk])
+	net_total = {}
+	filter_value = filters.get('territory')
+	net_total[filter_value] = total_area_target_achieved
+	# ** operator for packing and unpacking items in order
+	final_dict = {**net_total, **territory_item_group_dict}
 	item_list = get_item_groups()
 	data = []
-	for territory, territory_items in territory_item_group_dict.items():
+	for territory, territory_items in final_dict.items():
 		for item_group, monthwise_data in territory_items.items():
 			name = item_list[item_group]
 			row = [territory, name]
@@ -41,8 +62,8 @@ def execute(filters=None):
 			totals[2] = totals[0] - totals[1]
 			row += totals
 			data.append(row)
-
-	return columns, sorted(data, key=lambda x: (x[0], x[1]))
+	return columns, data
+	# return columns, sorted(data, key=lambda x: (x[0], x[1]))
 def get_columns(filters):
 	for fieldname in ["fiscal_year", "period", "target_on"]:
 		if not filters.get(fieldname):
@@ -141,7 +162,7 @@ def get_territory_item_month_map(filters):
 	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory'])
 	
 	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
-	# print(tt_list)
+	
 	full_name = users.full_name
 	## find specific login employee record
 	login_user = ''
@@ -167,17 +188,13 @@ def get_territory_item_month_map(filters):
 		if td.parent_territory == check_territory.get(td.parent_territory) or td.name==check_territory.get(td.name):
 			if filters.get('territory'):
 				for k in list(check_territory.keys()):
-					print(check_territory[k])
 					if re.findall("[0-9]", check_territory[k]):
 						del check_territory[k]
-			# print(check_territory)
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
 			item_actual_details = {}
 			for d in achieved_details:
 				if td.item_group == d.product:
-					# print(td.item_group)
 					item_group = item_groups[d.product]
-					# print(item_group)
 					item_actual_details.setdefault(td.item_group, frappe._dict())\
 						.setdefault(d.month_name, frappe._dict({
 							"quantity": 0,
@@ -214,7 +231,6 @@ def get_territory_item_month_map(filters):
 			
 			for d in achieved_details:
 				if td.item_group == d.product:
-					# print(td.item_group)
 					item_group = item_groups[d.product]
 					item_actual_details.setdefault(td.item_group, frappe._dict())\
 						.setdefault(d.month_name, frappe._dict({
@@ -243,7 +259,6 @@ def get_territory_item_month_map(filters):
 				else:
 					target_achieved.target = flt(td.target_amount) * month_percentage / 100
 
-				# print("target",target_achieved.target)
 				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
 					.get(filters["target_on"].lower())
 			
