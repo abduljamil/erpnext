@@ -159,7 +159,7 @@ def get_territory_item_month_map(filters):
 	## get user full name from db
 	users = frappe.db.get_value("User", user, ["full_name"], as_dict=True)
 	## get all employee record
-	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory'])
+	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory','employee_team_'])
 	
 	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
 	
@@ -170,6 +170,15 @@ def get_territory_item_month_map(filters):
 	for e in employee_list:
 		if e.get('employee_name') == full_name:
 			login_user = e
+	## team wise items 
+	if login_user.get('employee_team_'):
+		team_wise_items = frappe.db.get_list('Item',
+								filters={
+									'belong_to': login_user.get('employee_team_')
+								},
+								fields=['item_code', 'item_name','belong_to'],
+								as_list=True
+							)
 	##check filters and set territory
 	if filters.get('territory'):
 		login_user['Territory'] = filters.get('territory')
@@ -191,6 +200,7 @@ def get_territory_item_month_map(filters):
 					if re.findall("[0-9]", check_territory[k]):
 						del check_territory[k]
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
+			## get index list 
 			item_actual_details = {}
 			for d in achieved_details:
 				if td.item_group == d.product:
@@ -205,26 +215,27 @@ def get_territory_item_month_map(filters):
 					value_dict.quantity += flt(d.sale_qty)
 					value_dict.amount += flt(d.value)
 			for month_id in range(1, 13):
-				month = datetime.date(2013, month_id, 1).strftime('%B')
+				for team in team_wise_items:
+					if team[0] == td.item_group:
+						month = datetime.date(2013, month_id, 1).strftime('%B')
+						territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
+							.setdefault(month, frappe._dict({
+								"target": 0.0, "achieved": 0.0
+							}))
 
-				territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
-					.setdefault(month, frappe._dict({
-						"target": 0.0, "achieved": 0.0
-					}))
-
-				target_achieved = territory_item_group_dict[td.name][td.item_group][month]
-				month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
-					if td.distribution_id else 100.0/12
+						target_achieved = territory_item_group_dict[td.name][td.item_group][month]
+						month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
+							if td.distribution_id else 100.0/12
 
 
-				if (filters["target_on"] == "Quantity"):
-					target_achieved.target = flt(td.target_qty) * month_percentage / 100
-				else:
-					target_achieved.target = flt(td.target_amount) * month_percentage / 100
+						if (filters["target_on"] == "Quantity"):
+							target_achieved.target = flt(td.target_qty) * month_percentage / 100
+						else:
+							target_achieved.target = flt(td.target_amount) * month_percentage / 100
 
-				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
-					.get(filters["target_on"].lower())
-				
+						target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
+							.get(filters["target_on"].lower())
+			
 		elif full_name=='Administrator':
 			achieved_details = get_achieved_details(filters, td.name, item_groups)
 			item_actual_details = {}
@@ -243,7 +254,6 @@ def get_territory_item_month_map(filters):
 					value_dict.amount += flt(d.value)
 			for month_id in range(1, 13):
 				month = datetime.date(2013, month_id, 1).strftime('%B')
-
 				territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
 					.setdefault(month, frappe._dict({
 						"target": 0.0, "achieved": 0.0
@@ -261,9 +271,9 @@ def get_territory_item_month_map(filters):
 
 				target_achieved.achieved = item_actual_details.get(td.item_group, {}).get(month, {})\
 					.get(filters["target_on"].lower())
-			
+		
 	return territory_item_group_dict
-
+	
 def get_item_groups():
 	return dict(frappe.get_all("Item", fields=["name","item_name"], as_list=1))
 
