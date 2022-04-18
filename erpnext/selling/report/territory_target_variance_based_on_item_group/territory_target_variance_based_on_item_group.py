@@ -159,7 +159,7 @@ def get_territory_item_month_map(filters):
 	## get user full name from db
 	users = frappe.db.get_value("User", user, ["full_name"], as_dict=True)
 	## get all employee record
-	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory','employee_team_'])
+	employee_list = frappe.db.get_list("Employee",fields=['name','employee_name','Territory','team'])
 	
 	tt_list = frappe.db.get_list("Territory",fields=['name','parent_territory'])
 	
@@ -171,10 +171,10 @@ def get_territory_item_month_map(filters):
 		if e.get('employee_name') == full_name:
 			login_user = e
 	## team wise items 
-	if login_user.get('employee_team_'):
+	if login_user.get('team'):
 		team_wise_items = frappe.db.get_list('Item',
 								filters={
-									'belong_to': login_user.get('employee_team_')
+									'belong_to': login_user.get('team')
 								},
 								fields=['item_code', 'item_name','belong_to'],
 								as_list=True
@@ -215,7 +215,9 @@ def get_territory_item_month_map(filters):
 					value_dict.quantity += flt(d.sale_qty)
 					value_dict.amount += flt(d.value)
 			for month_id in range(1, 13):
+				## team wise items permission -- start
 				for team in team_wise_items:
+				## team wise items permission -- end
 					if team[0] == td.item_group:
 						month = datetime.date(2013, month_id, 1).strftime('%B')
 						territory_item_group_dict.setdefault(td.name, {}).setdefault(td.item_group, {})\
