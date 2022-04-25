@@ -2055,8 +2055,47 @@ def parse_pdf(pdf_file,parent_detail):
 							bricks[k] = 'MIRAN SHAH'
 						if bricks[k] == 'LAKKI':
 							bricks[k] = 'LAKKI MARWAT'
-				# print(bricks)
-    
+						if bricks[k] == '- LAKKI GATE':
+							bricks[k] = 'LAKKI GATE'
+						if bricks[k] == '- DHQ':
+							bricks[k] = 'DHQ BNU'
+						if bricks[k] == '- ZHQ':
+							bricks[k] = 'ZHQ'
+						if bricks[k] == '- RAILWAY ROAD':
+							bricks[k] = 'RAILWAY ROAD'
+						if bricks[k] == '- GHALA MANDI':
+							bricks[k] = 'GHALA MANDI'
+						if bricks[k] == '- DAS CHWOK':
+							bricks[k] = 'DAS CHOWK'
+						if bricks[k] == '- KGN':
+							bricks[k] = 'KGN'
+						if bricks[k] == '- MANGAL MELA':
+							bricks[k] = 'MANGAL MELA'
+						if bricks[k] == '- AMBERI KALA':
+							bricks[k] = 'AMBERI KALA'
+						if bricks[k] == '- DOMAIL':
+							bricks[k] = 'DOMAIL'
+						if bricks[k] == '- MIRANSHAH':
+							bricks[k] = 'MIRANSHAH'
+						if bricks[k] == '- MIR ALI':
+							bricks[k] = 'MIR ALI'
+						if bricks[k] == '- NAURANG':
+							bricks[k] = 'NAURANG'
+						if bricks[k] == '- GAMBILA':
+							bricks[k] = 'GAMBILA'
+						if bricks[k] == '- TAJORI':
+							bricks[k] = 'TAJORI'
+						if bricks[k] == '- LAKKI':
+							bricks[k] = 'LAKKI MARWAT'
+						if bricks[k] == '- KARAK':
+							bricks[k] = 'KARAK'
+						if bricks[k] == '- LATAMBER':
+							bricks[k] = 'LATAMBER'
+						if bricks[k] == '- TAKHT E NASRATI':
+							bricks[k] = 'TAKHT E NASRATI'
+						if bricks[k] == 'MIRANSHAH':
+							bricks[k] = 'MIRAN SHAH'
+
 				for p in range(0,len(products)):
 					for i in range(0,len(products[p])):
 						# print(products[p][i])
@@ -2113,6 +2152,17 @@ def parse_pdf(pdf_file,parent_detail):
 							products[p][i] = '026920'
 						if '014052' in products[p][i]:
 							products[p][i] = '006406'
+						if '014015' in products[p][i]:
+							products[p][i] ='031037'
+						if '014018' in products[p][i]:
+							products[p][i] ='035295'
+						if '014026' in products[p][i]:
+							products[p][i] ='012961'
+						if '014034' in products[p][i]:
+							products[p][i] ='038426'
+						if '014051' in products[p][i]:
+							products[p][i] ='007018'
+
 				# print(products)
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
