@@ -97,21 +97,25 @@ frappe.ui.form.on('Brick Wise Sale', {
 		}
 	},
     process_pdf:function(frm){
+		let isCheck = false;
 		cur_frm.clear_table("selling_product");
 		cur_frm.refresh_fields();
 		let pdf_file = frm.doc.file;
 		frappe.show_progress('Reading pdf file..', 50, 100, 'Please wait');
 		if(frm.doc.city){
-		
+			if(frm.doc.having_different_bricks>0){
+				isCheck = true;
+			}
 			frappe.call({
 				method: "erpnext.distributor.doctype.brick_wise_sale.brick_wise_sale.parse_pdf",
 				args: {
 					'pdf_file': pdf_file,
-					'data_import':pdf_file,
+					'parse_check':isCheck,
 					'parent_detail': {
 						city:frm.doc.city,
 						fromDate:frm.doc.from,
-						toDate:frm.doc.to},
+						toDate:frm.doc.to,
+					},
 				},
 				callback: function (r) {
 					if(r.message){
