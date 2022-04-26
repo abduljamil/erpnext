@@ -16,19 +16,20 @@ class BrickWiseSale(Document):
 	pass
 
 @frappe.whitelist(allow_guest=True)
-def parse_pdf(pdf_file,parent_detail):
+def parse_pdf(pdf_file,parse_check,parent_detail):
 	parent_details = json.loads(parent_detail)
 	dist_city = parent_details["city"]
-	try:
-		doc = frappe.get_last_doc('Brick Wise Sale',filters={"city":dist_city})
-		first_date = doc.get("from")
-		second_date = parent_details["fromDate"]
-		new_record = getdate(second_date)
-		if first_date == new_record:
-			name = doc.get("name")
-			frappe.delete_doc("Brick Wise Sale",name)
-	except:
-		pass
+	if not parse_check:
+		try:
+			doc = frappe.get_last_doc('Brick Wise Sale',filters={"city":dist_city})
+			first_date = doc.get("from")
+			second_date = parent_details["fromDate"]
+			new_record = getdate(second_date)
+			if first_date == new_record:
+				name = doc.get("name")
+				frappe.delete_doc("Brick Wise Sale",name)
+		except:
+			pass
 	tt_list = frappe.db.get_all('Territory',fields=['territory_name','parent_territory'],as_list=True)
 	# print(tt_list)
 	item_list = frappe.db.get_all('Item',fields=['name','item_name','trade_price','item_type','item_power'],as_list=True)
@@ -755,24 +756,6 @@ def parse_pdf(pdf_file,parent_detail):
 		return result
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	else:
 		with pdfplumber.open(path) as pdf:
 			if dist_city == 'Lahore':
@@ -888,7 +871,6 @@ def parse_pdf(pdf_file,parent_detail):
 					if  filter_array[a][0]=='PRODUCT NAME PACK' and filter_array[a][len(filter_array[a])-1]=='TOTAL':
 						for i in range(0,11):
 							filter_array[a+i].pop()
-				# print(filter_array)
 				# remove rows which not contain anny sale
 				final_array = []
 				for c in filter_array:
@@ -937,26 +919,17 @@ def parse_pdf(pdf_file,parent_detail):
 				result = []
 				for x in range(0,len(pdf.pages)):
 					data = pdf.pages[x].extract_table()
-					# print(data[x][0])
 					if type(data)!=type(None) and data[x][0]== 'Product Name':
 						for i in range(2,len(data)-2):
 							products.append(data[i][0])
-						# print(products)
 						bricks = data[0][2:]
-						# print(bricks)
 						for p in range(0,len(products)):
 							sales.append(data[2+p][2:])
-						# print(sales)
-					# size = 10
-					# progress = x / size * 100
-					# publish_progress(percent=progress, title="Reading the file")
-				
+						
 				for s in sales:
 					for i in range(0,len(s)):
 						if s[i] =='':
 							s[i] = '0'
-				# print(products )
-				# print(bricks)
 				db_bricks = ['SHEIKHU PURA', 'FAROOQA ABAD','KHANQAH DOGRAN','SUKHE KE','PINDI BHATTIAN','SAFDARA ABAD','MANA WALA',
 							'WARBUR TON','NANKANA SAHIB','BUCHEKI','MORE KHUNDA','FAIZA BAD','SHARAK PUR','BEGUM KOT',
 							'MURIDKEE','NARANG MANDI','JANDIALA SHER KHAN']
@@ -993,7 +966,6 @@ def parse_pdf(pdf_file,parent_detail):
 						if r[0] == i[0]:
 							r.insert(1,i[1])
 							r.append(i[2])
-				# print(len(result))
 				# for brick parent
 				for r in result:
 					for t in tt_list:
@@ -1235,21 +1207,16 @@ def parse_pdf(pdf_file,parent_detail):
 						products.append(data[p][0]) 
 						sales.append(data[p][1:-2])
 					for i in sales:
-						# print(i)
 						for a in range(0,len(i)):
-							# print(i[a])
 							if i[a] == '':
 								i[a] = '0'
-					# print(bricks)
 					for p in range(0,len(products)):
 						for b in range(0,len(bricks)):
-								# print(products[p],bricks[b],sales[p][b]
-								child = []
-								child.append(products[p])
-								child.append(bricks[b])
-								child.append(sales[p][b])
-								result.append(child)
-					# print(result)
+							child = []
+							child.append(products[p])
+							child.append(bricks[b])
+							child.append(sales[p][b])
+							result.append(child)
 					# for jetepar syrup and 2ml inj
 					for r in result:
 						if r[0] ==  'JETEPAR 2ML INJ 10S':
@@ -1505,9 +1472,6 @@ def parse_pdf(pdf_file,parent_detail):
 
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
-						# print(products[i],bricks[s],sales[s][i])
-					
-
 						child = []
 						child.append(products[i])
 						child.append(bricks[s])
@@ -1946,8 +1910,6 @@ def parse_pdf(pdf_file,parent_detail):
 					# split the data at new line
 					data1 = re.sub("\n","$", data1)
 					data1 = data1.split('$')
-					# print(data1)
-					# extracting only first sale from table because tabl doesn't get it
 					for i in range(16,len(data1)-3):
 						data1[i] = re.sub(r"\s\s+","#",data1[i])
 						data1[i] = data1[i].split('#')
@@ -2098,8 +2060,6 @@ def parse_pdf(pdf_file,parent_detail):
 
 				for p in range(0,len(products)):
 					for i in range(0,len(products[p])):
-						# print(products[p][i])
-						# if '' in products[p][i]:
 						if '014010' in products[p][i]:
 							products[p][i] = '005425'
 						if '014011' in products[p][i]:
@@ -2163,23 +2123,17 @@ def parse_pdf(pdf_file,parent_detail):
 						if '014051' in products[p][i]:
 							products[p][i] ='007018'
 
-				# print(products)
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
 						if sales[s][i] == '-':
 							sales[s][i] = '0'
-			# print(sales)
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
-						# print(products[i][p],bricks[s],sales[s][i])
-						# print(products[p][i],bricks[s],sales[s][i])
 						child = []
 						child.append(products[p][i])
 						child.append(bricks[s])
 						child.append(sales[s][i])
 						result.append(child)
-				# print(result)
-				# print(bricks)
 				for r in result:
 					for i in item_list:
 						if r[0] == i[0]:
