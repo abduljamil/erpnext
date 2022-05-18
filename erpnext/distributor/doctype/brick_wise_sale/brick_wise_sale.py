@@ -3401,7 +3401,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				result = []
 				new_result = []
 				products = []
-				bricks = ['PIPLAN','ISA KHEL','KAMAR MASHANI','WAN BHACHRAN','LAWA','MAINWALI MWL','TRUG','Bug Missing Brick','HARNOLI','MUSAKHEL','HAFIZ WALA','SHADIA','QUAIDABAD MWL'
+				bricks = ['PIPLAN','ISA KHEL','KAMAR MASHANI','WAN BHACHRAN','LAWA','MAINWALI MWL','TRUG','MAKERWAL','HARNOLI','MUSAKHEL','HAFIZ WALA','SHADIA','QUAIDABAD MWL'
 				,'DHQ MIANWALI','CHAKRALA MWL','KUNDIAN','DILLY WALI','ISKANDERABAD','KALABAGH']
 				bricks2 = ['KOT CHANDNA']
 				sales = []
