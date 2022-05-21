@@ -364,7 +364,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 	elif dist_city == "Hyderabad":
 		bricks = []
 		data = []
-		# data1 = []
+		new_result = []
 		result = []
 		sales = []
 		products = []
@@ -470,15 +470,22 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				child.append(bricks[s])
 				child.append(sales[s][i])
 				result.append(child)
-		for r in result:
+		for r in  range(0,len(result)):
+			for i in item_list:
+				if result[r][0] == i[0]:
+					if result[r][2] != '0':
+						new_result.append(result[r])
+					# print(r)
+		for r in new_result:
 			for i in item_list:
 				if r[0] == i[0]:
 					r.insert(1,i[1])
-					r.append(i[2])
-		for r in result:
-			for t in tt_list:
-				if r[2] == t[0]:
-					r.insert(4,t[1])
+					r.append(i[2]) 
+		for r in new_result:
+				for t in tt_list:    
+					if r[2] == t[0]:
+						r.insert(4,t[1])
+						# print(r)
 		return result
 	elif dist_city == "Thatta":
 		bricks = []
@@ -682,6 +689,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 	elif dist_city == "Nawab Shah":
 		bricks = []
 		data = []
+		new_result = []
 		result = []
 		sales = []
 		products = []
@@ -691,25 +699,36 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 		for i in range(0,len(df)):
 				if df.iat[i,0] == 'town':
 					start_data_var = i
+					# print(df.iat[i,0])
 				if not pd.isna(df.iat[i,0]) and not pd.isna(df.iat[i,1]) and not pd.isna(df.iat[i,2]) and i > start_data_var:
 					data.append(df.iat[i,1])
 					data.append(df.iat[i,0])
 					repeating_bricks_var = df.iat[i,0]
-					data.append(df.iat[i,2])
+					# print(repeating_bricks_var)
+					data.append(str(df.iat[i,2]))
 					result.append(data)
 					data = []
+					# print(result)
+					# print(data)
+						# var_for_products = i
 				elif pd.isna(df.iat[i,0]) and not pd.isna(df.iat[i,1]) and not pd.isna(df.iat[i,2]) and i > start_data_var:
+					# print(repeating_bricks_var)   
 					data.append(df.iat[i,1]) 
 					data.append(repeating_bricks_var)
-					data.append(df.iat[i,2])
+					
+					data.append(str(df.iat[i,2]))
+					# print(data)
 					result.append(data)
 					data = []
 				elif not pd.isna(df.iat[i,0]) and pd.isna(df.iat[i,1]) and pd.isna(df.iat[i,2]) and i > start_data_var:
 					repeating_bricks_var = df.iat[i,0]
 				
 				if df.iat[i,0] == 'grand total. ':
+					# print('hi')
 					break
+		# print(result)
 		for i in range(0,len(result)):
+			# for x in range(0,len(result[i])):
 			if result[i][0].strip() == 'jetepar 10cc inj' or result[i][0].strip() == 'jetepar 10cc':
 				result[i][0] = '008999'
 			if result[i][0].strip() == 'jetepar 2cc inj':
@@ -744,15 +763,23 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				result[i][1] = 'DAULAT PUR'
 			if result[i][1] == 'NAWABSHAH':
 				result[i][1] = 'NAWABSHAH NWS'
-		for r in result:
+			# print(result[i][2],result[i][3])
+		# print(result)
+		for r in  range(0,len(result)):
 			for i in item_list:
-				if r[0] == i[0]: 
+				if result[r][0] == i[0]:
+					if result[r][2] != '0':
+						new_result.append(result[r])
+					# print(r)
+		for r in new_result:
+			for i in item_list:
+				if r[0] == i[0]:
 					r.insert(1,i[1])
-					r.append(i[2])
-		for r in result:
-			for t in tt_list:
-				if r[2] == t[0]:
-					r.insert(4,t[1])
+					r.append(i[2]) 
+		for r in new_result:
+				for t in tt_list:    
+					if r[2] == t[0]:
+						r.insert(4,t[1])
 		return result
 
 
@@ -1144,34 +1171,193 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					products = []
 					bricks = []
 					sales = []
+					new_result = []
 					data = pdf.pages[x].extract_table()
+					# print(data)
 					product = data[0][1:]
 					products.append(product)
 					# print(products)
 					for i in range(2,len(data)): ## for skipping total row
 						bricks.append(data[i][0])
+						# print(bricks)
 						sale = data[i][1:]
 						sales.append(sale)
-				for p in range(0,len(products)):
-					products[p] = list(filter(None,products[p])) ##remove none value
-				bricks = list(filter(None,bricks))
-				for s in range(0,len(sales)):
-					sales[s] = ['0' if x == '' else x for x in sales[s]] ## change '' with '0'
-				only_sale = [sales[s] for s in range(0,len(sales)) if '\n' not in sales[s][0]]
-				## remove the total of territory wise
-				for p in products:
-					for s in range(0,len(only_sale)):
-						if len(only_sale[s])-len(p) == 1:
-							only_sale[s] = only_sale[s][:-1]
-				for b in range(0,len(bricks)):
-					for s in range(0,len(only_sale[b])): 
-						child = []
-						child.append(products[0][s])
-						child.append(bricks[b])
-						# print(products[0][s])
-						child.append(only_sale[b][s])
-						result.append(child)
-				return result
+						# print(sales)
+					for p in range(0,len(products)):
+						products[p] = list(filter(None,products[p])) ##remove none value
+					bricks = list(filter(None,bricks))
+					for s in range(0,len(sales)):
+						sales[s] = ['0' if x == '' else x for x in sales[s]] ## change '' with '0'
+					
+					only_sale = [sales[s] for s in range(0,len(sales)) if '\n' not in sales[s][0]]
+					## remove the total of territory wise
+					for p in products:
+						for s in range(0,len(only_sale)):
+							if len(only_sale[s])-len(p) == 1:
+								only_sale[s] = only_sale[s][:-1]
+					for b in range(len(bricks)):
+						if "AL-ASIF SQUARE" in bricks[b]:
+							bricks[b] = "AL ASIF SQUARE"
+						if "AZAM-BASTI,MEHMOODABAD" in bricks[b]:
+							bricks[b] = "AZAM-BASTI AND MEHMOODABAD"
+						if "CIVIL HOSPITAL" in bricks[b]:
+							bricks[b] = "CIVIL HOSPITAL KHI"
+						if "CLIFTON,DEFENCE" in bricks[b]:
+							bricks[b] = "CLIFTON AND DEFENCE"
+						if "FEDERAL. B.AREA" in bricks[b]:
+							bricks[b] = "FEDERAL B AREA"
+						if "GULISTAN-E-JAUHAR" in bricks[b]:
+							bricks[b] = "GULISTAN E JAUHAR"
+						if "GULSHAN-E-IQBAL" in bricks[b]:
+							bricks[b] = "GULSHAN E IQBAL KHI"
+						if "J.P.M.C, CANTT STATION" in bricks[b]:
+							bricks[b] = "J.P.M.C AND CANTT STATION"
+						if "KAHTOOR,GADAP." in bricks[b]:
+							bricks[b] = "KAHTOOR AND GADAP"
+						if "LANDHI,QUAIDABAD,OLD MUZAFABAD" in bricks[b]:
+							bricks[b] = "LANDHI AND QUAIDABAD AND OLD MUZAFABAD"
+						if "LIAQATABAD" in bricks[b]:
+							bricks[b] = "LIAQUATABAD"
+						if "LYARI,CHAKIWARA" in bricks[b]:
+							bricks[b] = "LYARI AND CHAKIWARA"
+						if "P.I.B,NEW TOWN" in bricks[b]:
+							bricks[b] = "PIR ILAHI BUKSH AND NEW TOWN"
+						if "RANCHORE LINE, USMANABAD" in bricks[b]:
+							bricks[b] = "RANCHORE LANE AND USMANABAD"
+						if "SADDAR" in bricks[b]:
+							bricks[b] = "SADDAR KHI"
+						if "SHAH FAISAL COLONY" in bricks[b]:
+							bricks[b] = "SHAH FAISAL COLONY KHI"
+						if "SOILDER BAZAR,GARDEN WEST" in bricks[b]:
+							bricks[b] = "SOILDER BAZAR AND GARDEN WEST"
+						if "TOWER,BURNS ROAD" in bricks[b]:
+							bricks[b] = "TOWER AND BURNS ROAD"
+						if "WINDER,UTHAL,BELA,COASTLY BELT." in bricks[b]:
+							bricks[b] = "WINDER AND UTHAL AND BELA AND COASTLY BELT"
+					# print(products)
+
+					for b in range(len(products[0])):
+						if "CNORN-FRT-I" in products[0][b]:
+							products[0][b] = "005425"
+						if "DPROGSIC-P" in products[0][b]:
+							products[0][b] = "081838"
+						if "EBAST 10MG-" in products[0][b]:
+							products[0][b] = "023906"
+						if "HISFIX180MG" in products[0][b]:
+							products[0][b] = "031038"
+						if "HISFX-180MG" in products[0][b]:
+							products[0][b] = "031038"
+						if "HISTFX-120M" in products[0][b]:
+							products[0][b] = "031037"
+						if "GISRIP 2MG T" in products[0][b]:
+							products[0][b] = "035295"
+						if "ISRP-1MG T" in products[0][b]:
+							products[0][b] = "035294"
+						if "JETEPAR CAP" in products[0][b]:
+							products[0][b] = "002392"
+						if "JETEPAR SYR" in products[0][b]:
+							products[0][b] = "002188"
+						if "JTPAR-INJC- 2" in products[0][b]:
+							products[0][b] = "004348"
+						if "JTPR 10ML" in products[0][b]:
+							products[0][b] = "008999"
+						if "MAIORAD IN" in products[0][b]:
+							products[0][b] = "009072"
+						if "MAIORAD-IN" in products[0][b]:
+							products[0][b] = "009072"
+
+
+						if "MALTM  PLS" in products[0][b]:
+							products[0][b] = "071560"
+						if "DMAORAD-TAB" in products[0][b]:
+							products[0][b] = "012961"
+						if "METRONI 200" in products[0][b]:
+							products[0][b] = "008909"
+						if "MINGIR-10MG" in products[0][b]:
+							products[0][b] = "038427"
+						if "MNGAR TAB-" in products[0][b]:
+							products[0][b] = "038426"
+
+						if "MOXILIUM-D" in products[0][b]:
+							products[0][b] = "006782"
+						if "RMOXILM-125M" in products[0][b]:
+							products[0][b] = "006783"
+						if "MOXLIM 500-" in products[0][b]:
+							products[0][b] = "008908"
+						if "MOXLIM-500" in products[0][b]:
+							products[0][b] = "008908"
+						if "MOXLUM-250" in products[0][b]:
+							products[0][b] = "006784"
+						if "MTRNIDAZ T" in products[0][b]:
+							products[0][b] = "081274"
+						if "BMXLM- 250MG" in products[0][b]:
+							products[0][b] = "006784"
+						if "OBEXL-20MG" in products[0][b]:
+							products[0][b] = "032259"
+						if "PC-LC-SYRUP" in products[0][b]:
+							products[0][b] = "019133"
+
+
+						if "PROBTOR 20M" in products[0][b]:
+							products[0][b] = "016654"
+						if "PROBTOR-20M" in products[0][b]:
+							products[0][b] = "016654"
+						if "SAVELX 250M" in products[0][b]:
+							products[0][b] = "032255"
+						if "SAVLOX-500" in products[0][b]:
+							products[0][b] = "029328"
+						if "SPRCEF-DS SY" in products[0][b]:
+							products[0][b] = "028727"
+						if "SPRCEF-DS-SY" in products[0][b]:
+							products[0][b] = "028727"
+						if "SUPARCF-SUS" in products[0][b]:
+							products[0][b] = "024819"
+						if "SUPRCEF 400" in products[0][b]:
+							products[0][b] = "024820"
+						if "SUPRLOX SYR" in products[0][b]:
+							products[0][b] = "028728"
+						if "TRAMAGES 5" in products[0][b]:
+							products[0][b] = "029327"
+						if "0TRAMAGSIC" in products[0][b]:
+							products[0][b] = "026920"
+						if "VIGROL FORT" in products[0][b]:
+							products[0][b] = "007018"
+						if "VIKNN-FORT" in products[0][b]:
+							products[0][b] = "006406"
+					# print(products)
+					for b in range(0,len(bricks)):
+						for s in range(0,len(only_sale[b])): 
+							child = []
+							child.append(products[0][s])
+							child.append(bricks[b])
+							# print(bricks[b])
+							child.append(only_sale[b][s])
+							result.append(child) 
+				for r in range(len(result)): # this script add the two sales in each box(e.g 5+6)
+					if '+' in result[r][2]:
+						temp_sale = result[r][2]
+						temp_sale = temp_sale.split('+')
+						temp_sale = int(temp_sale[0]) + int(temp_sale[1])
+						temp_sale = str(temp_sale)
+						result[r][2] = temp_sale
+				for r in  range(0,len(result)):
+					for i in item_list:
+						if result[r][0] == i[0]:
+							if result[r][2] != '0':
+								new_result.append(result[r])
+				for r in new_result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2])
+							# print(r)
+
+				for r in new_result:
+					for t in tt_list:    
+						if r[2] == t[0]:
+							r.insert(4,t[1])
+							#print(r)
+				return new_result
 			elif dist_city=='Sahiwal':
 				products = []
 				bricks = []
