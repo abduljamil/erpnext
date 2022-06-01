@@ -1,5 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+from dataclasses import fields
 from dis import distb
 import re
 import frappe
@@ -14,7 +15,6 @@ import json
 scope_obj = "" 
 class BrickWiseSale(Document):
 	pass
-
 @frappe.whitelist(allow_guest=True)
 def parse_pdf(pdf_file,parse_check,parent_detail):
 	parent_details = json.loads(parent_detail)
@@ -35,6 +35,14 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 	item_list = frappe.db.get_all('Item',fields=['name','item_name','trade_price','item_type','item_power'],as_list=True)
 	arr = re.split('/',pdf_file)
 	path = frappe.get_site_path(arr[1],arr[2],arr[3])
+	green_items = frappe.db.get_all('Item',fields=['name','belong_to'] ,filters={'belong_to': "Green"})
+	def green_team_bricks(result):
+		for k in result:
+			for i in green_items:
+				if k[0] == i['name']:
+					k[2] = k[2] + ' ' + 'GT'
+		return result
+
 	if dist_city =='Gujrat':
 		result = []
 		products = ['008376','017230','008999','004348','002392','002188','009072','012961']
@@ -131,6 +139,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					r.insert(4,t[1])
 					# print(r)
 		# print(result)
+		result = green_team_bricks(result)
 		return result
 	elif dist_city == "Sukkur":
 		bricks = []
@@ -355,11 +364,11 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 			for t in tt_list:
 				if r[2] == t[0]:
 					r.insert(4,t[1])
-					print(r)
+					# print(r)
 		# for r in result:
 		#     if r[4] != 'SKR1':
 		#         print(r[2])
-
+		result = green_team_bricks(result)
 		return result
 	elif dist_city == "Hyderabad":
 		bricks = []
@@ -486,7 +495,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					if r[2] == t[0]:
 						r.insert(4,t[1])
 						# print(r)
-		return result
+		new_result = green_team_bricks(new_result)
+		return new_result
 	elif dist_city == "Thatta":
 		bricks = []
 		data = []
@@ -595,6 +605,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 			for t in tt_list:
 				if r[2] == t[0]:
 					r.insert(4,t[1])
+		result = green_team_bricks(result)
 		return result
 	elif dist_city =="Mir Pur Khas":
 		bricks = []
@@ -685,6 +696,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 			for t in tt_list:
 				if r[2] == t[0]:
 					r.insert(4,t[1])
+		result = green_team_bricks(result)
 		return result
 	elif dist_city == "Nawab Shah":
 		bricks = []
@@ -780,7 +792,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				for t in tt_list:    
 					if r[2] == t[0]:
 						r.insert(4,t[1])
-		return result
+		new_result = green_team_bricks(new_result)
+		return new_result
 
 
 	else:
@@ -935,11 +948,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							if i[0]==b[a]:
 								b.insert(a+1,i[1])
 								b.append(i[2])
-				
+				result = green_team_bricks(result)
+				return result
 
-				# # print(x)
-				return result;
-			##Sheikhupura 
 			elif dist_city== 'Sheikhupura':
 				products = []
 				sales = []
@@ -998,6 +1009,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1]) ## insert brick parent into index 4
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == 'Kasur':
 				products = []
@@ -1109,6 +1121,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if end_result[r][2] == t[0]:
 							end_result[r].insert(4,t[1]) ## insert brick parent into index 4
+				end_result = green_team_bricks(end_result)
 				return end_result
 			elif dist_city == 'Okara':
 				products = []
@@ -1164,6 +1177,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == 'Karachi':
 				result = []
@@ -1357,6 +1371,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							#print(r)
+				new_result = green_team_bricks(new_result)
 				return new_result
 			elif dist_city=='Sahiwal':
 				products = []
@@ -1435,6 +1450,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						for t in tt_list:
 							if r[2] == t[0]:
 								r.insert(4,t[1])
+					result = green_team_bricks(result)
 					return result
 			elif dist_city == "Sialkot":
 				bricks = []
@@ -1675,9 +1691,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							# print(r)
-
-				# print(len(bricks))
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Narowal":
 				products = []
 				bricks = []
@@ -1832,8 +1848,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
-				# print(result)
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Gujranwala":
 				result = []
 				products = ['008999','004348','002392','002188','009072','012961']
@@ -1913,8 +1930,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							if r[2] == t[0]:
 								r.insert(4,t[1])
 								# print(r)
-				# print(result)
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Mandi Bahauddin":
 				result = []
 				new_result = []
@@ -2048,7 +2066,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				new_result = green_team_bricks(new_result)
 				return new_result
+
 			elif dist_city =="Mardan":
 				result = []
 				products = [] 
@@ -2129,7 +2149,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							if r[2] == t[0]:
 								r.insert(4,t[1])
 								# print(r)
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city =="Timergara":
 				result = []
 				products = []
@@ -2179,7 +2201,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Bannu":
 				products = []
 				sales = []
@@ -2332,7 +2356,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							#print(r)
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Dera Ismail Khan":
 				result = []
 				products = ['008999','004348','002392','002188','009072','012961']
@@ -2381,7 +2407,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							# print(r)
-				# print(result)
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Abbotabad":
 				result = []
@@ -2446,6 +2472,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							r.insert(1,i[1])
 							r.append(i[2])
 							# print(r)
+				result = green_team_bricks(result)
 				return result
 			elif dist_city =="Chakwal":
 				result = []
@@ -2510,6 +2537,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							r.insert(1,i[1])
 							r.append(i[2])
 							# print(r)
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Kohat":
 				result = []
@@ -2557,7 +2585,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result    
+				
 			elif dist_city == "Jhelum":
 				result = []
 				products = []
@@ -2614,7 +2644,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[0] == i[0]:
 							r.insert(1,i[1])
 							r.append(i[2])
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Rawalpindi":
 				products = []
 				sales = []
@@ -2696,7 +2728,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				new_result = green_team_bricks(new_result)
 				return new_result
+
 			elif dist_city == "Vehari":
 				result = []
 				products = []
@@ -2734,14 +2768,16 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						child.append(products[p])
 						child.append(bricks[s])
 						child.append(sales[p][s])
-						child.append('VRI')
+						# child.append('VRI')
 						result.append(child)
 				for r in result:
 					for i in item_list:
 						if r[0] == i[0]:
 							r.insert(1,i[1])
 							r.append(i[2])
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Larkana":
 				result = []
 				bricks = []
@@ -2859,6 +2895,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[0] == i[0]:
 							r.insert(1,i[1])
 							r.append(i[2])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Peshawar":
 				products = []
@@ -3014,6 +3051,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				new_result = green_team_bricks(new_result)
 				return new_result
 			elif dist_city == "Quetta":
 				result = []
@@ -3077,6 +3115,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							# print(r)
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Jacobabad":
 				result = []
@@ -3136,7 +3175,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						if r[2] == t[0]:
 							r.insert(4,t[1])
 							# print(r)
+				result = green_team_bricks(result)
 				return result
+			
 			elif dist_city == "Layyah":
 				result = []
 				products = []
@@ -3209,7 +3250,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
+
 			elif dist_city == "Toba Tek Singh":
 				result = []
 				products = []
@@ -3290,7 +3333,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
-							print(r)
+							# print(r)
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Dera Ghazi Khan":
 				result = []
@@ -3349,6 +3393,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Jhang":
 				result = []
@@ -3426,6 +3471,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city =="Sargodha":
 				result = []
@@ -3582,6 +3628,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Mianwali":
 				result = []
@@ -3651,7 +3698,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				for r in new_result:
 					for t in tt_list:    
 						if r[2] == t[0]:
-							r.insert(4,t[1])			
+							r.insert(4,t[1])
+				new_result = green_team_bricks(new_result)			
 				return new_result
 			elif dist_city =="Bhakkar":
 				result = []
@@ -3700,7 +3748,204 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
+
+			elif dist_city =="Mingora":
+				result = []
+				new_result = []
+				products = []
+				bricks = []
+				bricks1 = []
+				bricks3 = []
+				sales = []
+				final_sale = []
+				sales5 = []
+				mingora1 = True	
+				mingora3 = False
+				temp_var = 1
+				for x in range(0,len(pdf.pages)):
+					data = pdf.pages[x].extract_text()
+					data = re.sub('\n','$',data)
+					data = data.split('$')
+					if x == 0 or x == 1 :
+						bricks1 = data[8]
+						bricks1 = re.sub('\s+','$',bricks1)
+						bricks1 = bricks1.split('$')
+						if x == 1:
+							bricks3 = bricks3 + bricks1[4:-2]
+						else:
+							bricks3 = bricks1[4:]
+					if data[8][-10:]== 'Total Sale':
+						sales3 = data[10:-2]
+						for i in range(len(sales1)):
+							sales4 = re.sub('\s','$',sales3[i])
+							sales4 = sales4.split('$')
+							sales5.append(sales4)
+					else:
+						sales1 = data[10:-2]
+						for i in range(len(sales1)):
+							sales2 = re.sub('\s','$',sales1[i])
+							sales2 = sales2.split('$')
+							sales.append(sales2)
+				for i in range(len(sales)):
+					if sales[i][0] == sales5[i][0]:
+						sales[i] = sales[i] + sales5[i][-14:-2]
+						products.append(sales[i][0])
+						sales[i] = sales[i][-32:]
+						# print(sales[i])
+				for i in range(len(sales)):
+					sales[i] = [int(x) for x in sales[i]]
+					temp_sale = []
+					for k in range(0,len(sales[i]),2):
+						temp_sale.append(sales[i][k]+sales[i][k+1])
+					final_sale.append(temp_sale)
+					final_sale[i] = [str(x) for x in final_sale[i]]
+				for i in range(0,len(products)):
+					if products[i] == '2700':
+						products[i] = '008999'
+					if products[i] == '2701':
+						products[i] = '004348'
+					if products[i] == '2702':
+						products[i] = '002392'
+					if products[i] == '2703':
+						products[i] = '002188'
+					if products[i] == '2727':
+						products[i] = '008376'
+					if products[i] == '2728':
+						products[i] = '017230'
+					if products[i] == '2737':
+						products[i] = '009072'
+					if products[i] == '2738':
+						products[i] = '012961'
+					if products[i] == '2705':
+						products[i] = '024819'
+					if products[i] == '2706':
+						products[i] = '028727'
+					if products[i] == '2707':
+						products[i] = '024820'
+					if products[i] == '2708':
+						products[i] = '006406'
+					if products[i] == '2709':
+						products[i] = '007018'
+					if products[i] == '2710':
+						products[i] = '005425'
+					if products[i] == '2713':
+						products[i] = '028729'
+					if products[i] == '2714':
+						products[i] = '016654'
+					if products[i] == '2730':
+						products[i] = '006783'
+					if products[i] == '2731':
+						products[i] = '012649'
+					if products[i] == '2732':
+						products[i] = '008908'
+					if products[i] == '2733':
+						products[i] = '006784'
+					if products[i] == '2734':
+						products[i] = '006782'
+					if products[i] == '2739':
+						products[i] = '026920'
+					if products[i] == '2740':
+						products[i] = '029327'
+					if products[i] == '2741':
+						products[i] = '028728'
+					if products[i] == '2754':
+						products[i] = '019133'
+					if products[i] == '2756':
+						products[i] = '038426'
+					if products[i] == '2757':
+						products[i] = '038426'
+					if products[i] == '2759':
+						products[i] = '032259'
+					if products[i] == '2760':
+						products[i] = '032255'
+					if products[i] == '2761':
+						products[i] = '029328'
+					if products[i] == '7153':
+						products[i] = '081838'
+					if products[i] == '7154':
+						products[i] = '081274'
+				for i in range(0,len(bricks3)):
+					if 'MINGORA' in bricks3[i] and mingora1 == True:
+						bricks3[i] = 'MINGORA 1'
+						bricks.append(bricks3[i])
+						mingora1 = False
+
+					if 'MINGORA' in bricks3[i] and mingora3 == True:
+						bricks3[i] = 'MINGORA 3'
+						bricks.append(bricks3[i])
+
+					if 'BARIKOT' in bricks3[i]:
+						bricks3[i] = 'BARIKOT'
+						bricks.append(bricks3[i])
+					if 'BUTKHELA' in bricks3[i]:
+						bricks3[i] = 'BATKHELA'
+						bricks.append(bricks3[i])
+					if 'BUNIR' in bricks3[i]:
+						bricks3[i] = 'BUNER'
+						bricks.append(bricks3[i])
+					if 'BESHAM' in bricks3[i]:
+						bricks3[i] = 'BISHAM'
+						bricks.append(bricks3[i])
+					if 'MATTA' in bricks3[i]:
+						bricks3[i] = 'MATTA SWAT'
+						bricks.append(bricks3[i])
+					if 'K.KHELA-4BAG' in bricks3[i]:
+						bricks3[i] = 'KHWAZA KHELA'
+						bricks.append(bricks3[i])
+					if 'MINGORA-' in bricks3[i]:
+						bricks3[i] = 'MINGORA 2'
+						bricks.append(bricks3[i])
+					if 'MAD.BAH.FATH' in bricks3[i]:
+						bricks3[i] = 'MADYAN AND BAHRAIN AND FATEHPUR'
+						bricks.append(bricks3[i])
+					if 'PURAN' in bricks3[i]:
+						bricks3[i] = 'PURAN'
+						bricks.append(bricks3[i])
+					if 'SAIDU+CENTER' in bricks3[i]:
+						bricks3[i] = 'SAIDU AND CENTER'
+						bricks.append(bricks3[i])
+					if 'COUNTER' in bricks3[i]:
+						bricks3[i] = 'COUNTER SALE'
+						bricks.append(bricks3[i])
+					if 'TIMARGARA' in bricks3[i]:
+						bricks3[i] = 'TIMARGARA MGR'
+						bricksnew_result = green_team_bricks(new_result).append(bricks3[i])
+						mingora3 = True
+					if 'SOLD' in bricks3[i]:
+						bricks3[i] = 'SOLD AREA'
+						bricks.append(bricks3[i])
+
+					if 'KABAL' in bricks3[i]:
+						bricks3[i] = 'KABAL'
+						bricks.append(bricks3[i])
+
+				for p in range(0,len(products)):
+					for s in range(0,len(final_sale[p])):
+						child = []
+						child.append(products[p])
+						child.append(bricks[s])
+						child.append(final_sale[p][s])
+						result.append(child)
+				for r in  range(0,len(result)):
+					for i in item_list:
+						if result[r][0] == i[0]:
+							if result[r][2] != '0':
+								new_result.append(result[r])  
+				for r in new_result:
+					for i in item_list:
+						if r[0] == i[0]:
+							r.insert(1,i[1])
+							r.append(i[2]) 
+							# print(r)
+				for r in new_result:
+						for t in tt_list:    
+							if r[2] == t[0]:
+								r.insert(4,t[1])
+				# print(new_result)
+				new_result = green_team_bricks(new_result)
+				return new_result
 			elif dist_city =="MULTAN":
 				result = []
 				products = []
@@ -3754,6 +3999,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
 			elif dist_city == "Rahim Yar Khan":
 				products = []
@@ -3874,8 +4120,10 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					for t in tt_list:
 						if r[2] == t[0]:
 							r.insert(4,t[1])
+				result = green_team_bricks(result)
 				return result
-			elif dist_city == "Bahawalnagar" or "Bahalwalpur":
+
+			elif dist_city == "Bahawalnagar" or "Bahawalpur":
 				sales =[]
 				bricks = ['BAHAWALNAGAR CITY','DUNGA BUNGA','HAROONABAD','FAQIR WALA','KHICHI WALA','FORT ABBAS','MAROT','MADRASA','CHISHTIAN','DAHRANWALA','MINCHINABAD','MCLEOD GANJ','MANDI SADQ GANJ']
 				bahaawalpur_bricks = ['BAHAWALPUR A','BAHAWALPUR B','BAHAWALPUR C','BAHAWALPUR D','KHAIRPUR','HASILPUR','LODHRAN','KAHROR PAKKA','YAZMAN CITY','TAILWALA','AHMEDPUR','UCH SHARIF','MUBARAKPUR']
