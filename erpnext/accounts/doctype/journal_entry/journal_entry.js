@@ -3,7 +3,7 @@
 
 frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
-
+var balance_value = 0;
 
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
@@ -450,16 +450,31 @@ frappe.ui.form.on("Journal Entry Account", {
 		erpnext.journal_entry.set_account_balance(frm, dt, dn);
 	},
 
+
 	account: function(frm, dt, dn) {
 		erpnext.journal_entry.set_account_balance(frm, dt, dn);
 	},
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, 'debit_in_account_currency',row.debit_in_account_currency)
+		if(row.debit_in_account_currency){
+			frappe.model.set_value(cdt, cdn, 'balance_1',row.debit_in_account_currency + balance_value)
+			balance_value = row.balance_1
+
+		}
 	},
 
 	credit_in_account_currency: function(frm, cdt, cdn) {
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, 'credit_in_account_currency',row.credit_in_account_currency)
+		if(row.credit_in_account_currency){
+			frappe.model.set_value(cdt, cdn, 'balance_1',balance_value - row.credit_in_account_currency)
+			balance_value = row.balance_1
+
+		}
 	},
 
 	debit: function(frm, dt, dn) {
