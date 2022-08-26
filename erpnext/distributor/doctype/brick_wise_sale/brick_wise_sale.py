@@ -3065,142 +3065,137 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				return result
 			elif dist_city == "Peshawar":
 				products = []
-				products1 = []
-				p_sales = []
-				d_sales = []
-				sales = []
 				bricks = []
-				bricks1 = []
+				sales = []
 				result = []
+				brick = []
 				new_result = []
 				for x in range(0,len(pdf.pages)):
 					data = pdf.pages[x].extract_table()
-					if data[0][-1] == 'Total Amount':
-						products.append(data[0][1:-1])
+					products = data[0][1:]
+					products.remove('Total Amount')
+					for p in range(0,len(products)):
+						if '006002' in products[p]:
+							products[p] = '028729'
+						if '006003' in products[p]:
+							products[p] = '005425'
+						if '006004' in products[p]:
+							products[p] = '023906'
+						if '006009' in products[p]:
+							products[p] = '038426'
+						if '006011' in products[p]:
+							products[p] = '008908'
+						if '006012' in products[p]:
+							products[p] = '006782'
+						if '006013' in products[p]:
+							products[p] = '006783'
+						if '006014' in products[p]:
+							products[p] = '012649'
+						if '006015' in products[p]:
+							products[p] = '019133'
+						if '006017' in products[p]:
+							products[p] = '032255'
+						if '006020' in products[p]:
+							products[p] = '028727'
+						if '006021' in products[p]:
+							products[p] = '024819'
+						if '006022' in products[p]:
+							products[p] = '028728'
+						if '006023' in products[p]:
+							products[p] = '029327'
+						if '006024' in products[p]:
+							products[p] = '026920'
+						if '006025' in products[p]:
+							products[p] = '007018'
+						if '006026' in products[p]:
+							products[p] = '006406'
+						if '006041' in products[p]:
+							products[p] = '008376'
+						if '006042' in products[p]:
+							products[p] = '017230'
+						if '006043' in products[p]:
+							products[p] = '008999'
+						if '006044' in products[p]:
+							products[p] = '004348'
+						if '006045' in products[p]:
+							products[p] = '002392'
+						if '006046' in products[p]:
+							products[p] = '002188'
+						if '006047' in products[p]:
+							products[p] = '009072'
+						if '006048' in products[p]:
+							products[p] = '012961'
+						if '006064' in products[p]:
+							products[p] = '035294'
+						if '006065' in products[p]:
+							products[p] = '035295'
+						if '006068' in products[p]:
+							products[p] = '032259'
+						if '006069' in products[p]:
+							products[p] = '081838'
+						if '006070' in products[p]:
+							products[p] = '081274'
+						if '006071' in products[p]:
+							products[p] = '008909'
+						if '006016' in products[p]:
+							products[p] = '016654'
+						if '006005' in products[p]:
+							products[p] = '031037'
+						# if '' in products[p]:
+						#     product[p] = ''
+					if x == len(pdf.pages)-1:
+						for b in range(1,len(data)-1):
+							brick.append(data[b][0])
+
+						for s in range(1,len(data)-1):
+							sales.append(data[s][1:-1])
 					else:
-						products.append(data[0][1:])
-					for i in range(0,len(data)):
-						if data[0][-1] == 'Total Amount' and data[-1][0] == 'Total':
-							if i == 0 or i == len(data)-1:
-								pass
-							else:
-								
-								if data[i][0] not in bricks:
-									p_sales.append(data[i][:])
-									bricks.append(data[i][0])
-								else:
-									d_sales.append(data[i][:-1])
-						elif data[0][-1] == 'Total Amount':
-							if i == 0:
-								pass
-							else:
-								
-								if data[i][0] not in bricks:
-									p_sales.append(data[i][:])
-									bricks.append(data[i][0])
-								else:
-									d_sales.append(data[i][:-1])
-						elif data[-1][0] == 'Total':
-							if i == 0 or i == len(data)-1:
-								pass
-							else:
-								
-								if data[i][0] not in bricks:
-									p_sales.append(data[i][:])
-									bricks.append(data[i][0])
-								else:
-									d_sales.append(data[i][:-1])
-						else:
-							if i == 0:
-								pass
-							else:
-								
-								if data[i][0] not in bricks:
-									bricks.append(data[i][0])
-									p_sales.append(data[i][:])
-								else:
-									d_sales.append(data[i][:-1])
-				for i in range(0,len(p_sales)):
-					if p_sales[i][0] == d_sales[i][0]:
-						p_sales[i] = p_sales[i]+d_sales[i][1:]
-					sales.append(p_sales[i][1:])
-     
-				for i in range(0,len(bricks)):
-					bricks1.append(bricks[i][10:])
-					bricks1[i] = re.sub('\n','',bricks1[i])
-					bricks1[i] = re.sub('QUDRAT ELAHI MARKET','QUDRAT ELAHI',bricks1[i])
-					bricks1[i] = re.sub('AL HAYAT MRKET','AL HAYAT MARKET',bricks1[i])
-					bricks1[i] = re.sub('GHULAM SAID PLAZA','GHULAM SAID',bricks1[i])
-					bricks1[i] = re.sub('SOEKARNO SQAURE','SOEKARNO SQUARE',bricks1[i])
-					bricks1[i] = re.sub('KHYBER MEDICAL CENTR','KHYBER MEDICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('RAHEEM MEDICAL','RAHEEM MEDICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('BAZAR-E-KALAN','BAZAR E KALAN',bricks1[i])
-					bricks1[i] = re.sub('K.T.H','KHYBER TEACHING HOSPITAL',bricks1[i])
-					bricks1[i] = re.sub('LRH','LADY READING HOSPITAL',bricks1[i])
-					bricks1[i] = re.sub('H.A.M.C','HAYATABAD MEDICAL COMPLEX',bricks1[i])
-					bricks1[i] = re.sub('BADA BAIR','BADABER',bricks1[i])
-					bricks1[i] = re.sub('NOTHIA','NOTHIA QADEEM',bricks1[i])
-					bricks1[i] = re.sub('KHATAK MEDICAL CENTR','KHATAK MEDICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('AL SHIFA SURG CENTER','AL SHIFA SURGICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('KHUSHAAL CENTER','KHUSHAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('MOHMAND MEDICAL CENT','MOHMAND MEDICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('RAHEEM MEDICAL CENTER CENTR','RAHEEM MEDICAL CENTER',bricks1[i])
-					bricks1[i] = re.sub('SIKANDAR PURA','SIKANDER PURA',bricks1[i])
-					bricks1[i] = re.sub('NASEER TEACHING HOSP','NASEER TEACHING HOSPITAL',bricks1[i])
-					bricks1[i] = re.sub('TARANGZAI','TAURANG ZAI',bricks1[i])
-					bricks1[i] = re.sub('KOHAT RAOD','KOHAT ROAD',bricks1[i])
-					# bricks1[i] = re.sub('','',bricks1[i])
+						for b in range(1,len(data)):
+							brick.append(data[b][0])
 
-				products1.insert(1,products[0:int(len(products)/2)])
-				products1 = [b for b in products1[0][:]]
-    
-				for i in range(1,len(products1)):
-					products2 = products1[0]+products1[i]
-
-				for i in range(0,len(products2)):
-					products2[i] = re.sub('006002','028729',products2[i][0:6])
-					products2[i] = re.sub('006003','005425',products2[i])
-					products2[i] = re.sub('006004','023906',products2[i])
-					products2[i] = re.sub('006009','038426',products2[i])
-					products2[i] = re.sub('006011','008908',products2[i])
-					products2[i] = re.sub('006012','006782',products2[i])
-					products2[i] = re.sub('006013','006783',products2[i])
-					products2[i] = re.sub('006014','012649',products2[i])
-					products2[i] = re.sub('006015','019133',products2[i])
-					products2[i] = re.sub('006017','032255',products2[i])
-					products2[i] = re.sub('006020','028727',products2[i])
-					products2[i] = re.sub('006021','024819',products2[i])
-					products2[i] = re.sub('006022','028728',products2[i])
-					products2[i] = re.sub('006023','029327',products2[i])
-					products2[i] = re.sub('006024','026920',products2[i])
-					products2[i] = re.sub('006025','007018',products2[i])
-					products2[i] = re.sub('006026','006406',products2[i])
-					products2[i] = re.sub('006041','008376',products2[i])
-					products2[i] = re.sub('006042','017230',products2[i])
-					products2[i] = re.sub('006043','008999',products2[i])
-					products2[i] = re.sub('006044','004348',products2[i])
-					products2[i] = re.sub('006045','002392',products2[i])
-					products2[i] = re.sub('006046','002188',products2[i])
-					products2[i] = re.sub('006047','009072',products2[i])
-					products2[i] = re.sub('006048','012961',products2[i])
-					products2[i] = re.sub('006064','035294',products2[i])
-					products2[i] = re.sub('006065','035295',products2[i])
-					products2[i] = re.sub('006068','032259',products2[i])
-					products2[i] = re.sub('006069','081838',products2[i])
-					products2[i] = re.sub('006070','081274',products2[i])
-					products2[i] = re.sub('006071','008909',products2[i])
+						for s in range(1,len(data)):
+							sales.append(data[s][1:-1])
+				# print(bricks)
+				for s in sales:
+					for i in range(0,len(s)):
+						if s[i] =='-':
+							s[i] = '0'
+							# print(s[i])
+				# print(sales)
+				for i in range(0,len(brick)):
+					bricks.append(brick[i][10:])
+					bricks[i] = re.sub('\n','',bricks[i])
+					bricks[i] = re.sub('QUDRAT ELAHI MARKET','QUDRAT ELAHI',bricks[i])
+					bricks[i] = re.sub('AL HAYAT MRKET','AL HAYAT MARKET',bricks[i])
+					bricks[i] = re.sub('GHULAM SAID PLAZA','GHULAM SAID',bricks[i])
+					bricks[i] = re.sub('SOEKARNO SQAURE','SOEKARNO SQUARE',bricks[i])
+					bricks[i] = re.sub('KHYBER MEDICAL CENTR','KHYBER MEDICAL CENTER',bricks[i])
+					bricks[i] = re.sub('RAHEEM MEDICAL','RAHEEM MEDICAL CENTER',bricks[i])
+					bricks[i] = re.sub('BAZAR-E-KALAN','BAZAR E KALAN',bricks[i])
+					bricks[i] = re.sub('K.T.H','KHYBER TEACHING HOSPITAL',bricks[i])
+					bricks[i] = re.sub('LRH','LADY READING HOSPITAL',bricks[i])
+					bricks[i] = re.sub('H.A.M.C','HAYATABAD MEDICAL COMPLEX',bricks[i])
+					bricks[i] = re.sub('BADA BAIR','BADABER',bricks[i])
+					bricks[i] = re.sub('NOTHIA','NOTHIA QADEEM',bricks[i])
+					bricks[i] = re.sub('KHATAK MEDICAL CENTR','KHATAK MEDICAL CENTER',bricks[i])
+					bricks[i] = re.sub('AL SHIFA SURG CENTER','AL SHIFA SURGICAL CENTER',bricks[i])
+					bricks[i] = re.sub('KHUSHAAL CENTER','KHUSHAL CENTER',bricks[i])
+					bricks[i] = re.sub('MOHMAND MEDICAL CENT','MOHMAND MEDICAL CENTER',bricks[i])
+					bricks[i] = re.sub('RAHEEM MEDICAL CENTER CENTR','RAHEEM MEDICAL CENTER',bricks[i])
+					bricks[i] = re.sub('SIKANDAR PURA','SIKANDER PURA',bricks[i])
+					bricks[i] = re.sub('NASEER TEACHING HOSP','NASEER TEACHING HOSPITAL',bricks[i])
+					bricks[i] = re.sub('TARANGZAI','TAURANG ZAI',bricks[i])
+					bricks[i] = re.sub('KOHAT RAOD','KOHAT ROAD',bricks[i])
+				# print(products)
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
-						if sales[s][i] == '-':
-							sales[s][i] = '0'  
-
-				for p in range(0,len(bricks1)):
-					for s in range(0,len(sales[p])):
+						# print(products[i],bricks[s],sales[s][i])
 						child = []
-						child.append(products2[s])
-						child.append(bricks1[p])
-						child.append(sales[p][s])
+						child.append(products[i])
+						child.append(bricks[s])
+						child.append(sales[s][i])
 						result.append(child)
+
 
 				for r in  range(0,len(result)):
 					for i in item_list:
@@ -4673,6 +4668,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				result = []
 				products = []
 				new_result = []
+				info = []
 				for x in range(0,len(pdf.pages)):
 					data = pdf.pages[x].extract_text()
 					data = re.sub("\n","$", data)
