@@ -13,7 +13,8 @@
   "from_date",
   "to_date",
   "section_break_6",
-  "work_schedule_detail"
+  "work_schedule_detail",
+  "comment"
  ],
  "fields": [
   {
@@ -60,11 +61,16 @@
    "fieldname": "employee",
    "fieldtype": "Data",
    "label": "Employee Name"
+  },
+  {
+   "fieldname": "comment",
+   "fieldtype": "Text",
+   "label": "Comment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-10 00:17:15.953936",
+ "modified": "2022-08-18 16:00:42.305255",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Monthly Work Schedule",
@@ -79,6 +85,42 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
    "share": 1,
    "write": 1
   }

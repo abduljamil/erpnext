@@ -34,17 +34,20 @@
   {
    "fieldname": "distributor_name",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Distributor Name",
    "options": "Customer"
   },
   {
    "fieldname": "from",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "From"
   },
   {
    "fieldname": "to",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "To"
   },
   {
@@ -57,6 +60,7 @@
    "fetch_from": "distributor_name.territory",
    "fieldname": "city",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "City",
    "options": "Territory"
   },
@@ -134,7 +138,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-07 10:02:36.140491",
+ "modified": "2022-07-05 14:31:37.076329",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Brick Wise Sale",

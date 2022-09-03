@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "creation": "2022-09-03 12:01:24.710304",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "order_no",
+  "distributor",
+  "station",
+  "products",
+  "quantity",
+  "amount",
+  "total"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "columns": 1,
+   "fieldname": "order_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Order No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "distributor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Distributor",
+   "options": "Customer"
+  },
+  {
+   "columns": 1,
+   "fieldname": "station",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Station"
+  },
+  {
+   "columns": 1,
+   "fieldname": "products",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Products",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity"
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-03 12:01:24.710304",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Distribution Order Record Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}
