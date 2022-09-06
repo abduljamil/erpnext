@@ -56,7 +56,7 @@ frm.compute_total = function(frm,row){
                     let element = dateArray[index];
                     //get day by date
                     var a = new Date(element);
-                    if(a.getDay()!==0){
+                    if(a.getDay()!==7){
                         var weekDays = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
                         var child = cur_frm.add_child("expense_report");
                         frappe.model.set_value(child.doctype, child.name, "day", weekDays[a.getDay()]);

@@ -22,7 +22,7 @@ frappe.ui.form.on('Monthly Work Schedule', {
 				var tomorrow = new Date(frm.doc.from_date);
 				tomorrow.setDate(currentDate);
 				dateArray.push(tomorrow);
-				currentDate = currentDate+1
+				currentDate = currentDate+1;
 			}
 			if(dateArray!=[]){
 				//map the date array 
@@ -30,7 +30,7 @@ frappe.ui.form.on('Monthly Work Schedule', {
 					let element = dateArray[index];
 					//get day by date
 					var a = new Date(element);
-					if(a.getDay()!==0){
+					if(a.getDay()!==7){
 						var weekDays = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 						var child = cur_frm.add_child("work_schedule_detail");
 						frappe.model.set_value(child.doctype, child.name, "day", weekDays[a.getDay()]);
