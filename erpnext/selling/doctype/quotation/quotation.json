@@ -611,6 +611,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "10",
    "fieldname": "additional_discount_percentage",
    "fieldtype": "Float",
    "label": "Additional Discount Percentage",
@@ -933,7 +934,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-10-30 13:58:59.212060",
+ "modified": "2022-09-22 09:04:42.311335",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

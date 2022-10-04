@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "creation": "2022-09-17 13:07:33.043772",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "distributor",
+  "price"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "fieldname": "distributor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Distributor",
+   "options": "Customer"
+  },
+  {
+   "columns": 2,
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-17 13:10:55.350850",
+ "modified_by": "Administrator",
+ "module": "Distributor",
+ "name": "Distributors wise Products Prices Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

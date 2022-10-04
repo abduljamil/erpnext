@@ -105,7 +105,7 @@
   {
    "fieldname": "landline",
    "fieldtype": "Data",
-   "label": "Landline "
+   "label": "Landline"
   },
   {
    "fieldname": "mobile",
@@ -152,7 +152,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Assigned To",
+   "label": "Assigned To TM",
    "options": "Employee"
   },
   {
@@ -165,7 +165,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-18 14:58:30.469726",
+ "modified": "2022-10-04 13:57:09.065664",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Doctor List",
@@ -184,7 +184,9 @@
    "write": 1
   }
  ],
+ "search_fields": "doctor_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "doctor_name",
  "track_changes": 1
 }
