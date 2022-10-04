@@ -1,5 +1,5 @@
 {
- "actions": "",
+ "actions": [],
  "creation": "2017-02-17 13:07:35.686409",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -136,35 +136,27 @@
    "default": "We're here to help",
    "fieldname": "greeting_title",
    "fieldtype": "Data",
-   "label": "Greeting Title",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Greeting Title"
   },
   {
    "fieldname": "column_break_19",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "Browse help topics",
    "fieldname": "greeting_subtitle",
    "fieldtype": "Data",
-   "label": "Greeting Subtitle",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Greeting Subtitle"
   },
   {
    "fieldname": "greetings_section_section",
    "fieldtype": "Section Break",
-   "label": "Greetings Section",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Greetings Section"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-11 13:08:38.473616",
+ "modified": "2022-10-04 15:38:16.726397",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
@@ -177,6 +169,33 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }
