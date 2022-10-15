@@ -8,9 +8,10 @@
   "manager_id",
   "manager_name",
   "team",
+  "territory",
   "column_break_3",
   "date",
-  "territory",
+  "to_date",
   "section_break_6",
   "accompanied_with",
   "section_break_10",
@@ -63,10 +64,12 @@
   },
   {
    "depends_on": "manager_id",
-   "fetch_from": "manager_id.employee_team",
+   "fetch_from": "manager_id.team",
    "fieldname": "team",
    "fieldtype": "Data",
-   "label": "Team"
+   "hidden": 1,
+   "label": "Team",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_3",
@@ -75,7 +78,7 @@
   {
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "From Date"
   },
   {
    "depends_on": "manager_id",
@@ -252,11 +255,16 @@
    "fieldname": "dispatch_date",
    "fieldtype": "Date",
    "label": "Dispatch Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-07 15:01:51.293928",
+ "modified": "2022-10-07 10:44:49.736935",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Manager Report",

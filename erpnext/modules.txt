@@ -29,3 +29,4 @@ Payroll
 Telephony
 Distributor
 Export
+Reports

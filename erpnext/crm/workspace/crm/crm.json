@@ -360,8 +360,8 @@
    "type": "Link"
   }
  ],
- "modified": "2022-03-22 10:25:43.856368",
- "modified_by": "muhammadtaha.core@gmail.com",
+ "modified": "2022-10-06 13:09:58.285729",
+ "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
  "onboarding": "CRM",
@@ -383,6 +383,12 @@
    "doc_view": "",
    "label": "Monthly Work Schedule",
    "link_to": "Monthly Work Schedule",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Manager Report",
+   "link_to": "Manager Report",
    "type": "DocType"
   },
   {
