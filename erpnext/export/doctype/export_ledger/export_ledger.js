@@ -32,16 +32,17 @@ setup:function(frm){
 
 
 },
-total_debit : function(frm){
+total_debit:function(frm){
 	
-	if(total_debit || total_credit){
+	if(frm.doc.total_debit || frm.doc.total_credit){
+		// console.log('0')
 		frm.set_value('difference', frm.doc.total_debit - frm.doc.total_credit);
 	}
 
 },
 
 total_credit : function(frm){
-	if(total_debit || total_credit){
+	if(frm.doc.total_debit || frm.doc.total_credit){
 		frm.set_value('difference', frm.doc.total_debit - frm.doc.total_credit);
 	}
 
