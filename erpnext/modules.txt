@@ -30,3 +30,4 @@ Telephony
 Distributor
 Export
 Reports
+Data Entry

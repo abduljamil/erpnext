@@ -6,8 +6,10 @@
  "engine": "InnoDB",
  "field_order": [
   "export_manager",
+  "party_name",
   "starting_date",
   "column_break_3",
+  "exp_manager",
   "country",
   "ending_date",
   "section_break_6",
@@ -23,8 +25,9 @@
   {
    "fieldname": "export_manager",
    "fieldtype": "Link",
-   "label": "Export Manager",
-   "options": "Employee"
+   "label": "Export Manager ID",
+   "options": "Employee",
+   "print_hide": 1
   },
   {
    "fieldname": "starting_date",
@@ -37,9 +40,8 @@
   },
   {
    "fieldname": "country",
-   "fieldtype": "Link",
-   "label": "Country",
-   "options": "Territory"
+   "fieldtype": "Data",
+   "label": "Country"
   },
   {
    "fieldname": "ending_date",
@@ -83,11 +85,24 @@
    "fieldname": "difference",
    "fieldtype": "Currency",
    "label": "Difference (Dr - Cr)"
+  },
+  {
+   "depends_on": "export_manager",
+   "fetch_from": "export_manager.employee_name",
+   "fieldname": "exp_manager",
+   "fieldtype": "Data",
+   "label": "Export Manager"
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Link",
+   "label": "Party Name",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-28 15:41:36.748955",
+ "modified": "2022-10-20 10:15:30.500496",
  "modified_by": "Administrator",
  "module": "Export",
  "name": "Export Ledger",
@@ -95,13 +110,23 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Export Manager",
    "share": 1,
    "write": 1
   }

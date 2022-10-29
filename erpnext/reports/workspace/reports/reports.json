@@ -14,7 +14,7 @@
  "is_standard": 1,
  "label": "Reports",
  "links": [],
- "modified": "2022-10-14 12:28:01.069388",
+ "modified": "2022-10-19 12:02:12.491809",
  "modified_by": "Administrator",
  "module": "Reports",
  "name": "Reports",
@@ -35,7 +35,7 @@
    "type": "Report"
   },
   {
-   "doc_view": "",
+   "doc_view": "List",
    "label": "Accounts Receivable Summary",
    "link_to": "Accounts Receivable Summary",
    "type": "Report"
@@ -47,13 +47,13 @@
    "type": "Report"
   },
   {
-   "doc_view": "",
+   "doc_view": "List",
    "label": "Accounts Payable Summary",
    "link_to": "Accounts Payable Summary",
    "type": "Report"
   },
   {
-   "doc_view": "",
+   "doc_view": "List",
    "label": "Accounts Payable",
    "link_to": "Accounts Payable",
    "type": "Report"

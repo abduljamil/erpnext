@@ -264,7 +264,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-07 10:44:49.736935",
+ "modified": "2022-10-25 15:30:22.956628",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Manager Report",
@@ -321,5 +321,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "manager_name",
  "track_changes": 1
 }
