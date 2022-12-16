@@ -2471,6 +2471,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							products[p][i] ='038426'
 						if '014051' in products[p][i]:
 							products[p][i] ='007018'
+						if '014005' in products[p][i]:
+							products[p][i] ='007853'
 
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
