@@ -29,7 +29,8 @@
    "fetch_if_empty": 1,
    "fieldname": "area",
    "fieldtype": "Data",
-   "label": "Area"
+   "label": "Area",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -60,7 +61,8 @@
    "fetch_from": "employee_name.employee_name",
    "fieldname": "employee",
    "fieldtype": "Data",
-   "label": "Employee Name"
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
    "fieldname": "comment",
@@ -70,7 +72,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-18 16:00:42.305255",
+ "modified": "2022-12-16 09:56:50.544162",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Monthly Work Schedule",

@@ -42,8 +42,7 @@
    "no_copy": 1,
    "oldfieldname": "year_start_date",
    "oldfieldtype": "Date",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "year_end_date",
@@ -51,8 +50,7 @@
    "in_list_view": 1,
    "label": "Year End Date",
    "no_copy": 1,
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "companies",
@@ -82,7 +80,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2022-11-18 15:47:36.279933",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",

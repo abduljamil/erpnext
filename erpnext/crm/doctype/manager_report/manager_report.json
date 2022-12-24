@@ -60,7 +60,8 @@
    "fieldname": "manager_name",
    "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Manager Name"
+   "label": "Manager Name",
+   "read_only": 1
   },
   {
    "depends_on": "manager_id",
@@ -69,7 +70,8 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Team",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -86,7 +88,8 @@
    "fieldname": "territory",
    "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Territory"
+   "label": "Territory",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",
@@ -264,7 +267,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-25 15:30:22.956628",
+ "modified": "2022-12-16 09:59:46.800081",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Manager Report",

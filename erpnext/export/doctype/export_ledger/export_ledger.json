@@ -12,6 +12,7 @@
   "exp_manager",
   "country",
   "ending_date",
+  "currency",
   "section_break_6",
   "ledger_record",
   "section_break_8",
@@ -98,11 +99,17 @@
    "fieldtype": "Link",
    "label": "Party Name",
    "options": "Customer"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-20 10:15:30.500496",
+ "modified": "2022-11-26 13:33:16.931814",
  "modified_by": "Administrator",
  "module": "Export",
  "name": "Export Ledger",

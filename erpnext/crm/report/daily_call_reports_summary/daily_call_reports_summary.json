@@ -1,0 +1,52 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-12-03 13:39:57.653416",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "PCW - Letter Head",
+ "modified": "2022-12-03 16:23:30.059234",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Daily Call Reports Summary",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT \n    `tabDaily Call Report`.`manager_name` as \"Manager Name\", \n    `tabDaily Call Report`.`territory` as \"Territory\", \n    `tabDaily Call Report`.`area` as \"Area\",\n    `tabCall Report Detail`.`doctor_name` as \"Doctor Name\",\n    Count(*) as \"Total Visits\"\nFROM \n    `tabDaily Call Report`\nINNER JOIN `tabCall Report Detail` ON `tabCall Report Detail`.parent=`tabDaily Call Report`.name\nWHERE \n    `tabCall Report Detail`.`last_day_of_visit` BETWEEN %(from_date)s AND %(to_date)s\nGROUP BY\n    `tabCall Report Detail`.`doctor_name`",
+ "ref_doctype": "Daily Call Report",
+ "report_name": "Daily Call Reports Summary",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ]
+}

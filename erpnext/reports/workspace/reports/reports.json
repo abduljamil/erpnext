@@ -14,7 +14,7 @@
  "is_standard": 1,
  "label": "Reports",
  "links": [],
- "modified": "2022-10-19 12:02:12.491809",
+ "modified": "2022-12-08 09:38:53.981925",
  "modified_by": "Administrator",
  "module": "Reports",
  "name": "Reports",
@@ -56,6 +56,18 @@
    "doc_view": "List",
    "label": "Accounts Payable",
    "link_to": "Accounts Payable",
+   "type": "Report"
+  },
+  {
+   "doc_view": "List",
+   "label": "Customer Ledger Summary",
+   "link_to": "Customer Ledger Summary",
+   "type": "Report"
+  },
+  {
+   "doc_view": "List",
+   "label": "Daily Call Reports Summary",
+   "link_to": "Daily Call Reports Summary",
    "type": "Report"
   }
  ]

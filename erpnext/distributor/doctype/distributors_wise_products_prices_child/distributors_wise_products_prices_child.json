@@ -6,8 +6,10 @@
  "engine": "InnoDB",
  "field_order": [
   "product",
+  "product_name",
   "distributor",
-  "price"
+  "price",
+  "territory"
  ],
  "fields": [
   {
@@ -32,12 +34,28 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Price"
+  },
+  {
+   "depends_on": "product",
+   "fetch_from": "product.item_name",
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Name"
+  },
+  {
+   "depends_on": "distributor",
+   "fetch_from": "distributor.territory",
+   "fieldname": "territory",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Territory"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-17 13:10:55.350850",
+ "modified": "2022-10-31 15:43:01.124724",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Distributors wise Products Prices Child",

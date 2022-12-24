@@ -5,18 +5,53 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "dummy"
+  "dummy",
+  "name1",
+  "column_break_3",
+  "age",
+  "section_break_5",
+  "parent_name",
+  "employee_name"
  ],
  "fields": [
   {
    "fieldname": "dummy",
    "fieldtype": "Data",
    "label": "dummy"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "parent_name",
+   "fieldtype": "Data",
+   "label": "Parent Name"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Link",
+   "label": "Employee Name",
+   "options": "Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-22 08:59:16.223719",
+ "modified": "2022-11-18 15:38:34.559916",
  "modified_by": "Administrator",
  "module": "Data Entry",
  "name": "dummy",

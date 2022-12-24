@@ -22,6 +22,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "territory_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -123,7 +124,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-08 17:10:03.767426",
+ "modified": "2022-12-22 15:02:50.108450",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
