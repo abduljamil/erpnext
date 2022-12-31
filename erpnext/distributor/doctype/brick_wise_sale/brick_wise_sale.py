@@ -529,22 +529,25 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				products.append(data[0])
 				sales.append(data[1:])
 		for i in range(0,len(products)):
-			if products[i][0:-13] == 'AFLOXON 150 CAP 20,S':
+			if 'AFLOXON 150 CAP 20,S' in products[i]:
 				products[i] = '008376'
-			if products[i][0:-13] == 'AFLOXON 300MG TAB 30,S':
+			if 'AFLOXON 300MG TAB 30,S' in products[i]:
 				products[i] = '017230'
-			if products[i][0:-13] == 'JETEPAR 10ML INJ 5,S':
+			if 'JETEPAR 10ML INJ 5,S' in products[i]:
 				products[i] = '008999'
-			if products[i][0:-13] == 'JETEPAR 2ML AMPULES 10,S':
+			if 'JETEPAR 2ML AMPULES 10,S' in products[i]:
 				products[i] = '004348'
-			if products[i][0:-13] == 'JETEPAR CAP 20,S':
+			if 'JETEPAR CAP 20,S' in products[i]:
 				products[i] = '002392'
-			if products[i][0:-13] == 'JETEPAR SYP 112ML':
+			if 'JETEPAR SYP' in products[i]:
 				products[i] = '002188'
-			if products[i][0:-12] == 'MAIORAD INJ 3ML 6,S':
+			if 'MAIORAD INJ 3ML 6,S' in products[i]:
 				products[i] = '009072'
-			if products[i][0:-13] == 'MAIORAD TAB 30,S':
+			if 'MAIORAD TAB 30,S' in products[i]:
 				products[i] = '012961'
+			if 'JETEPAR SYRUP 112ML (TP: 244.22)' in products[i]:
+				products[i] = '002188'
+			
 
 		for i in range(0,len(bricks)):
 			if bricks[i] == 'BAGHN':
