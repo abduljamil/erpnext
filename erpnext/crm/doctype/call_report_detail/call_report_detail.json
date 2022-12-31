@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "creation": "2021-07-16 10:24:09.408469",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "doctor_id",
+  "doctor_name",
+  "address",
+  "specialization",
+  "last_day_of_visit"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctor_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Doctor's ID",
+   "options": "Doctor List"
+  },
+  {
+   "depends_on": "doctor_id",
+   "fetch_from": "doctor_id.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctor's Name"
+  },
+  {
+   "depends_on": "doctor_id",
+   "fetch_from": "doctor_id.primary_address",
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address"
+  },
+  {
+   "depends_on": "doctor_id",
+   "fetch_from": "doctor_id.specialization",
+   "fieldname": "specialization",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Specialization"
+  },
+  {
+   "fieldname": "last_day_of_visit",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Last Day of Visit"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-31 12:09:23.272290",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Call Report Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

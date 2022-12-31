@@ -48,14 +48,6 @@
    "options": "Territory"
   },
   {
-   "depends_on": "brick",
-   "fetch_from": "brick.parent",
-   "fieldname": "city",
-   "fieldtype": "Link",
-   "label": "City",
-   "options": "Territory"
-  },
-  {
    "depends_on": "city",
    "fetch_from": "city.parent",
    "fieldname": "area",
@@ -160,11 +152,18 @@
    "fieldname": "new_tm_name",
    "fieldtype": "Data",
    "label": "New TM Name"
+  },
+  {
+   "depends_on": "brick",
+   "fetch_from": "brick.parent",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-06 15:45:33.668482",
+ "modified": "2022-12-24 11:01:24.507146",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Doctor List",

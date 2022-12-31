@@ -1,0 +1,159 @@
+{
+ "_assign": "[\"adil.jabbar@gmail.com\"]",
+ "actions": [],
+ "creation": "2021-07-16 09:06:15.145776",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "manager_id",
+  "territory",
+  "area",
+  "column_break_4",
+  "manager_name",
+  "month",
+  "date",
+  "section_break_7",
+  "call_report_detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "manager_id",
+   "fieldtype": "Link",
+   "label": "Manager ID",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "manager_id",
+   "fetch_from": "manager_id.territory",
+   "fetch_if_empty": 1,
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Territory",
+   "options": "Territory",
+   "read_only": 1
+  },
+  {
+   "depends_on": "territory",
+   "fetch_from": "territory.parent",
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Area",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "manager_id",
+   "fetch_from": "manager_id.employee_name",
+   "fieldname": "manager_name",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Manager Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "call_report_detail",
+   "fieldtype": "Table",
+   "label": "Call Report Detail",
+   "options": "Call Report Detail"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-12-31 12:12:11.596987",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Daily Call Report",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "manager_name",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "manager_name",
+ "track_changes": 1
+}

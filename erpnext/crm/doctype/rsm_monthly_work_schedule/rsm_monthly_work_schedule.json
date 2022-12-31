@@ -57,7 +57,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-08 11:57:33.521101",
+ "modified": "2022-12-26 16:17:11.686769",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "RSM Monthly Work Schedule",
@@ -84,6 +84,18 @@
    "read": 1,
    "report": 1,
    "role": "Regional Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
    "share": 1,
    "write": 1
   }
