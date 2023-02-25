@@ -424,7 +424,7 @@
  "idx": 7,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-08 12:20:44.740621",
+ "modified": "2023-01-14 11:21:45.542276",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -483,6 +483,17 @@
    "read": 1,
    "report": 1,
    "role": "Regional Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1,
    "write": 1
   }

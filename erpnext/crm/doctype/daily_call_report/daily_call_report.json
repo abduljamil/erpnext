@@ -21,7 +21,8 @@
    "fieldname": "manager_id",
    "fieldtype": "Link",
    "label": "Manager ID",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "depends_on": "manager_id",
@@ -32,8 +33,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Territory",
-   "options": "Territory",
-   "read_only": 1
+   "options": "Territory"
   },
   {
    "depends_on": "territory",
@@ -42,8 +42,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Area",
-   "read_only": 1
+   "label": "Area"
   },
   {
    "fieldname": "column_break_4",
@@ -84,7 +83,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-31 12:12:11.596987",
+ "modified": "2023-01-25 15:45:32.245787",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Daily Call Report",

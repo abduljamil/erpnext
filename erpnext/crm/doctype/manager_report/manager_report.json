@@ -51,8 +51,10 @@
   {
    "fieldname": "manager_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Manager ID",
-   "options": "Employee"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "depends_on": "manager_id",
@@ -88,8 +90,7 @@
    "fieldname": "territory",
    "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Territory",
-   "read_only": 1
+   "label": "Territory"
   },
   {
    "fieldname": "section_break_6",
@@ -267,7 +268,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-16 09:59:46.800081",
+ "modified": "2023-02-08 15:55:22.301450",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Manager Report",

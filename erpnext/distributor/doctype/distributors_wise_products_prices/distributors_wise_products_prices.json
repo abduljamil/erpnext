@@ -11,16 +11,16 @@
   {
    "fieldname": "distributors_wise_products_prices_child",
    "fieldtype": "Table",
-   "label": "Distributors wise Products Prices",
-   "options": "Distributors wise Products Prices Child"
+   "label": "Distributors Wise Products Prices",
+   "options": "Distributors Wise Products Prices Child"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-20 14:36:20.025192",
+ "modified": "2023-02-13 15:14:17.561039",
  "modified_by": "Administrator",
  "module": "Distributor",
- "name": "Distributors wise Products Prices",
+ "name": "Distributors Wise Products Prices",
  "owner": "Administrator",
  "permissions": [
   {

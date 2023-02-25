@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-04-02 22:54:08.286832",
+ "modified": "2023-01-09 15:03:11.754200",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Territory Target Variance Based On Item Group",
@@ -33,6 +33,9 @@
   },
   {
    "role": "Stock User"
+  },
+  {
+   "role": "Data Entry Operator"
   }
  ]
 }

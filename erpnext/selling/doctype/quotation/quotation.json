@@ -15,10 +15,13 @@
   "quotation_to",
   "party_name",
   "customer_name",
+  "book_sr_no",
   "column_break1",
   "amended_from",
   "company",
   "transaction_date",
+  "order_year",
+  "order_month",
   "valid_till",
   "order_type",
   "contact_section",
@@ -927,6 +930,26 @@
    "label": "Lost Reasons",
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "book_sr_no",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Book Sr. No"
+  },
+  {
+   "fieldname": "order_year",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Order Year",
+   "options": "\n2021\n2022\n2023\n2024\n2025\n2026\n2027\n2028\n2029\n2030"
+  },
+  {
+   "fieldname": "order_month",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Order Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -934,7 +957,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2022-09-22 09:04:42.311335",
+ "modified": "2023-02-24 09:45:41.200004",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -9,6 +9,7 @@
   "distributor_name",
   "from",
   "to",
+  "fiscal_year",
   "column_break_5",
   "city",
   "file",
@@ -134,11 +135,18 @@
    "fieldname": "apply_price",
    "fieldtype": "Button",
    "label": "Apply Price"
+  },
+  {
+   "default": "2022",
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-04 15:48:43.102332",
+ "modified": "2023-02-18 12:07:29.900518",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Brick Wise Sale",
