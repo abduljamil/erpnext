@@ -9,6 +9,12 @@ frappe.listview_settings['Attendance'] = {
 			return [__(doc.status), "orange", "status,=," + doc.status];
 		} else if (doc.status == "Field") {
 			return [__(doc.status), "green", "status,=," + doc.status];
+		} else if (doc.status == "Local Working") {
+			return [__(doc.status), "green", "status,=," + doc.status];
+		} else if (doc.status == "On Tour Working") {
+			return [__(doc.status), "green", "status,=," + doc.status];
+		} else if (doc.status == "Special Assignment") {
+			return [__(doc.status), "green", "status,=," + doc.status];
 		}
 	},
 	onload: function(list_view) {
@@ -61,7 +67,7 @@ frappe.listview_settings['Attendance'] = {
 						label: __("Status"),
 						fieldtype: "Select",
 						fieldname: "status",
-						options: ["Present", "Absent", "Half Day", "Work From Home"],
+						options: ["Present", "Absent", "On Leave", "Half Day", "Work From Home", "Field", "Local Working", "On Tour Working", "Special Assignment"],
 						hidden:1,
 						reqd: 1,
 
