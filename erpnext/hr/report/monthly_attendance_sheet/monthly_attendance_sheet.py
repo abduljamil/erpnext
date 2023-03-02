@@ -15,10 +15,10 @@ status_map = {
 	"On Leave": "L",
 	"Present": "P",
 	"Field":"F",
-	"Work From Home": "WFH"
-	"Local Working": "LW"
-	"On Tour Working": "TW"
-	"Special Assignment": "SA"
+	"Work From Home": "WFH",
+	"Local Working": "LW",
+	"On Tour Working": "TW",
+	"Special Assignment": "SA",
 	}
 
 day_abbr = [
