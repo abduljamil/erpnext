@@ -185,11 +185,13 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				products[i] = '002188'
 			if products[i][0:-12] == 'MAIORAD INJ N/R 6X3':
 				products[i] = '009072'
+			if products[i][0:-12] == 'JETEPAR CAPSULE 1X20 (TP: 131.15)':
+				products[i] = '002392'
 		# print(bricks)
 		for i in range(0,len(bricks)):
-			if bricks[i] == 'A.PUR' and Second_sheet_var == True:
+			if bricks[i] == 'A.PUR':
 				bricks[i] = 'ADIL PUR'
-			if bricks[i] == 'AWAHN'and Second_sheet_var == True:
+			if bricks[i] == 'AWAHN':
 				bricks[i] = 'ALI WAHAN'
 			if bricks[i] == 'CLKTR' and Second_sheet_var == True:
 				bricks[i] = 'CLOCK TOWER SKR2'
@@ -197,23 +199,23 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				bricks[i] = 'CITY COURT'
 			if bricks[i] == 'CVSUK' and Second_sheet_var == True:
 				bricks[i] = 'CIVIL SUKKUR SKR2'
-			if bricks[i] == 'DHRKI' and Second_sheet_var == True:
+			if bricks[i] == 'DHRKI':
 				bricks[i] = 'DAHARKI'
-			if bricks[i] == 'GHTKI' and Second_sheet_var == True:
+			if bricks[i] == 'GHTKI':
 				bricks[i] = 'GHOTKI'
-			if bricks[i] == 'GRIBA' and Second_sheet_var == True:
+			if bricks[i] == 'GRIBA':
 				bricks[i] = 'GARIBABAD'
 			if bricks[i] == 'K.KOT' and Second_sheet_var == True:
 				bricks[i] = 'KANDH KOT'
-			if bricks[i] == 'KNDRA' and Second_sheet_var == True:
+			if bricks[i] == 'KNDRA':
 				bricks[i] = 'KANDHRA'
-			if bricks[i] == 'KPMHR' and Second_sheet_var == True:
+			if bricks[i] == 'KPMHR':
 				bricks[i] = 'KHANPUR MEHAR'
-			if bricks[i] == 'MPM' and Second_sheet_var == True:
+			if bricks[i] == 'MPM':
 				bricks[i] = 'MIRPUR MATHELO'
-			if bricks[i] == 'OLDSK' and Second_sheet_var == True:
+			if bricks[i] == 'OLDSK':
 				bricks[i] = 'OLD SUKKUR'
-			if bricks[i] == 'PAQIL' and Second_sheet_var == True:
+			if bricks[i] == 'PAQIL':
 				bricks[i] = 'PANO AKIL'
 			if bricks[i] == 'ROHRI' and Second_sheet_var == True:
 				bricks[i] = 'ROHRI'
@@ -1378,8 +1380,6 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							products[0][b] = "032259"
 						if "PC-LC-SYRUP" in products[0][b]:
 							products[0][b] = "019133"
-
-
 						if "PROBTOR 20M" in products[0][b]:
 							products[0][b] = "016654"
 						if "PROBTOR-20M" in products[0][b]:
@@ -2409,6 +2409,10 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							bricks[k] = 'TAKHT E NASRATI'
 						if bricks[k] == 'MIRANSHAH':
 							bricks[k] = 'MIRAN SHAH'
+						if bricks[k] == '- SURANI GT':
+							bricks[k] = 'SURANI GT'
+						if bricks[k] == '- SURANI':
+							bricks[k] = 'SURANI'
 
 				for p in range(0,len(products)):
 					for i in range(0,len(products[p])):
@@ -2526,6 +2530,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks[b] = 'PROVA'
 					if bricks[b] == 'PEZU/PANYALA':
 						bricks[b] = 'PANI ALA'
+					if bricks[b] == 'D.I.KHAN':
+						bricks[b] = 'DIKHAN'
     
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
