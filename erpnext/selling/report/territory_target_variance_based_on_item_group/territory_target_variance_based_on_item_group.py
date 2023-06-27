@@ -130,19 +130,19 @@ def get_achieved_details(filters, territory, item_groups):
 		parent_brick = tt_list.get(territory)
 		nested_values = { 'parent_brick':parent_brick , 'territory':territory}
 		item_details = frappe.db.sql("""
-		select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
+		select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, bwc.fiscal_year,
 			MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
 			`tabBrick Wise Sale Child` bwc
-		where bwc.parent=bw.name and bw.city=%(parent_brick)s and bwc.brick_parent=%(territory)s
-		""",values = nested_values ,as_dict=1)
+		where bwc.parent=bw.name and bw.city=%(parent_brick)s and bwc.brick_parent=%(territory)s and bwc.fiscal_year= %(fiscal_year)s
+		""",values={**nested_values, "fiscal_year": filters["fiscal_year"]}, as_dict=1)
 		return item_details
 	else:
 		item_details = frappe.db.sql("""
-			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, 
+			select bwc.product, bwc.product_name, bwc.sale_qty,bwc.value, bwc.fiscal_year,
 				MONTHNAME(bw.to) as month_name from `tabBrick Wise Sale` bw, 
 				`tabBrick Wise Sale Child` bwc
-			where bwc.parent=bw.name and bw.city= %(territory)s
-			""",values = values ,as_dict=1)
+			where bwc.parent=bw.name and bw.city= %(territory)s and bwc.fiscal_year= %(fiscal_year)s
+			""",values={**values, "fiscal_year": filters["fiscal_year"]}, as_dict=1)
 		return item_details
 	
 
