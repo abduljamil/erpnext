@@ -175,18 +175,21 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				sales.append(data[1:])
 
 		for i in range(0,len(products)):
-			if products[i][0:-13] == 'AFLOXAN CAPSULE 2X10':
-				products[i] = '008376'
-			if products[i][0:-13] == 'JETEPAR 10ML INJ N/R 10ML':
-				products[i] = '008999'
-			if products[i][0:-13] == 'JETEPAR 2ML INJECTION 1X10':
-				products[i] = '004348'
-			if products[i][0:-13] == 'JETEPAR SYR N/RATE 120ML':
+
+			if 'JETEPAR SYR' in products[i]:
 				products[i] = '002188'
-			if products[i][0:-12] == 'MAIORAD INJ N/R 6X3':
-				products[i] = '009072'
-			if products[i][0:-12] == 'JETEPAR CAPSULE 1X20 (TP: 131.15)':
+			if 'JETEPAR CAPSULE' in products[i]:
 				products[i] = '002392'
+			if 'MAIORAD INJ' in products[i]:
+				products[i] = '009072'
+			if 'JETEPAR 2ML' in products[i]:
+				products[i] = '004348'
+			if 'JETEPAR 10ML' in products[i]:
+				products[i] = '008999'
+			if 'AFLOXAN CAPSULE' in products[i]:
+				products[i] = '008376'
+
+	
 		# print(bricks)
 		for i in range(0,len(bricks)):
 			if bricks[i] == 'A.PUR':
