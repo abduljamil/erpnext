@@ -188,8 +188,12 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				products[i] = '008999'
 			if 'AFLOXAN CAPSULE' in products[i]:
 				products[i] = '008376'
+			# if '' in products[i]:
+			# 	products[i] = ''
+			# if '' in products[i]:
+			# 	products[i] = ''
 
-	
+
 		# print(bricks)
 		for i in range(0,len(bricks)):
 			if bricks[i] == 'A.PUR':
@@ -4576,7 +4580,17 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					products1[i] = re.sub('006014','008999',products1[i])
 					products1[i] = re.sub('006015','012961',products1[i])
 					products1[i] = re.sub('006016','009072',products1[i])
+
+
+					products1[i] = re.sub('031001','002188',products1[i])
+					products1[i] = re.sub('031002','009072',products1[i])
+					products1[i] = re.sub('031003','012961',products1[i])
+					products1[i] = re.sub('031004','002392',products1[i])
+					products1[i] = re.sub('006016','009072',products1[i])
     
+
+
+
 				for i in range(0,len(bricks)):
 					bricks1.append(bricks[i][10:])
 					bricks1[i] = re.sub('\n','',bricks1[i])
