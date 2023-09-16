@@ -72,6 +72,22 @@ frappe.ui.form.on('Brick Wise Sale', {
 		// }
 		
     },
+
+	refresh: function(frm) {
+        // This event occurs when the document is loaded
+        if (frm.doc.fiscal_year) {
+            // Get the value from the parent field
+            var parentValue = frm.doc.fiscal_year;
+			// console.log(parentValue)
+
+            // Loop through the child table and set the value in each row
+            $.each(frm.doc.selling_product || [], function(i, row) {
+				frappe.model.set_value(row.doctype, row.name, 'fiscal_year', parentValue);
+            });
+        }
+    },
+
+
 	apply_price: function(frm){
 
 		cur_frm.clear_table("selling_product");
