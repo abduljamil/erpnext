@@ -2361,8 +2361,9 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				for x in range(0,len(pdf.pages)):
 					data = pdf.pages[x].extract_table()
 					# print(data)
-					products.append(data[1][1:-1])
-					# print(products)
+					#change the zero below to 1 if any error occurs in product
+					products.append(data[0][1:-1])
+					# print(data[0])
 					for i in range(2,len(data)-1):
 						sales.append(data[i][1:-1])
 				# print(sales)
@@ -2420,7 +2421,6 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							bricks[k] = 'SURANI GT'
 						if bricks[k] == '- SURANI':
 							bricks[k] = 'SURANI'
-
 				for p in range(0,len(products)):
 					for i in range(0,len(products[p])):
 						if '014010' in products[p][i]:
@@ -2487,6 +2487,7 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 							products[p][i] ='007018'
 						if '014005' in products[p][i]:
 							products[p][i] ='007853'
+						# print(products[p][i])
 
 				for s in range(0,len(sales)):
 					for i in range(0,len(sales[s])):
