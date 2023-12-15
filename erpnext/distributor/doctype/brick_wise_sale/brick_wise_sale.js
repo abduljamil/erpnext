@@ -72,6 +72,21 @@ frappe.ui.form.on('Brick Wise Sale', {
 		// }
 		
     },
+	
+	calculate: function(frm) {
+        // Loop through each row in the child table
+        frm.doc.selling_product.forEach(function(row) {
+            // Your calculation logic for each row goes here
+            // For example, calculate the value based on sale_qty and product_price
+            if (row.sale_qty && row.product_price) {
+                frappe.model.set_value(row.doctype, row.name, 'value', row.sale_qty * row.product_price);
+            }
+        });
+
+        // Recalculate the total value sale
+        frm.compute_total_value_sale(frm);
+    },
+
 
 	refresh: function(frm) {
         // This event occurs when the document is loaded
