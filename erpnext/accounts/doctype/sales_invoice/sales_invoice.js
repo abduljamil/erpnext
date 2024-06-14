@@ -407,6 +407,13 @@ less_freight_claim_percentage: function(frm) {
 
 },
 
+doctor_discount: function(frm){
+	if(frm.doctor_discount){
+		cur_frm.set_value('grand_total', frm.grand_total-frm.doctor_discount)
+	}
+
+},
+
 
 
 	pos_profile: function() {
