@@ -408,8 +408,9 @@ less_freight_claim_percentage: function(frm) {
 },
 
 doctor_discount: function(frm){
-	if(frm.doctor_discount){
-		cur_frm.set_value('grand_total', frm.grand_total-frm.doctor_discount)
+	if(frm.doctor_discount||frm.grand_total){
+		gt=cur_frm.grand_total
+		cur_frm.set_value('grand_total', gt-frm.doctor_discount)
 	}
 
 },

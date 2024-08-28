@@ -1249,6 +1249,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks[b] = 'DHQ 1'
 					if 'JABOKA+NOL PLOT+KOHLA+MUPLAKA+BAM' in bricks[b]:
 						bricks[b] = 'JABOKA'
+					if 'D\nA\nO\nR\nT \nG' in bricks[b]:
+						bricks[b] = 'DAORTG'
     
     
 				for p in range(0,len(products)):
@@ -2890,25 +2892,64 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						for i in range(1,len(data)):
 							sales.append(data[i][1:-1])
 							bricks.append(data[i][0])
-					if x == 1:
-						for k in range(0,len(bricks)):
-							bricks[k] = bricks[k][10:]
-							if bricks[k] == 'MALL ROAD':
-								bricks[k] = 'MALL ROAD RWL'
-							if bricks[k] == 'CHAKWAL':
-								bricks[k] = 'CHAKWAL RWL'
-							if bricks[k] == 'ALI PURE FARASH':
-								bricks[k] = 'ALI PUR FARASH'
-							if bricks[k] == 'BUNNI CHOWK':
-								bricks[k] = 'BANNI CHOWK'
-							if bricks[k] == 'JAMIA MASJID ROAD':
-								bricks[k] = 'JAMIA MASJID ROAD'
-							if bricks[k] == 'KHAYABAN-E-SIR \nSYED':
-								bricks[k] = 'KHAYABAN E SIR SYED'
-							if bricks[k] == 'CHAKLALA SCHEME \nIII':
-								bricks[k] = 'CHAKLALA SCHEME III'
-							if bricks[k] == 'JAMIA MASJID \nROAD':
-								bricks[k] = 'JAMIA MASJID ROAD'
+					# if x == 1: comment the code due to error (bricks wasn't changing(27/08/24))
+					for k in range(0,len(bricks)):
+						bricks[k] = bricks[k][10:]
+						if bricks[k] == 'MALL ROAD':
+							bricks[k] = 'MALL ROAD RWL'
+						if bricks[k] == 'CHAKWAL':
+							bricks[k] = 'CHAKWAL RWL'
+						if bricks[k] == 'ALI PURE FARASH':
+							bricks[k] = 'ALI PUR FARASH'
+						if bricks[k] == 'BUNNI CHOWK':
+							bricks[k] = 'BANNI CHOWK'
+						if bricks[k] == 'JAMIA MASJID ROAD':
+							bricks[k] = 'JAMIA MASJID ROAD'
+						if bricks[k] == 'KHAYABAN-E-SIR \nSYED':
+							bricks[k] = 'KHAYABAN E SIR SYED'
+						if bricks[k] == 'CHAKLALA SCHEME \nIII':
+							bricks[k] = 'CHAKLALA SCHEME III'
+						if bricks[k] == 'JAMIA MASJID \nROAD':
+							bricks[k] = 'JAMIA MASJID ROAD'
+						# change in bricks from here (27/9/24)
+						if '1010104' in bricks[k] :
+							bricks[k] = 'G-10'
+						if '1010105' in bricks[k] :
+							bricks[k] = 'G-11'
+						if '1010112' in bricks[k] :
+							bricks[k] = 'I-8'
+						if '1010206' in bricks[k] :
+							bricks[k] = 'BARA KAHU'
+						if '1010209' in bricks[k] :
+							bricks[k] = 'ALI PUR FARASH'
+						if '1020101' in bricks[k] :
+							bricks[k] = 'CHANDNI CHOWK'
+						if '1020102' in bricks[k] :
+							bricks[k] = 'SAID PURE ROAD'
+						if '1020103' in bricks[k] :
+							bricks[k] = 'BOHAR BAZAR'
+						if '1020111' in bricks[k] :
+							bricks[k] = 'SADIQABAD'
+						if '1020201' in bricks[k] :
+							bricks[k] = 'SADDAR'
+						if '1020206' in bricks[k] :
+							bricks[k] = 'KAMALABAD'
+						if '1020211' in bricks[k] :
+							bricks[k] = 'CHAKLALA SCHEME III'
+						if '1020212' in bricks[k] :
+							bricks[k] = 'BAHRIA'
+						if '1020216' in bricks[k] :
+							bricks[k] = 'MALL ROAD RWL'
+						if '1030201' in bricks[k] :
+							bricks[k] = 'WAH CANTT'
+						if '1040101' in bricks[k] :
+							bricks[k] = 'ATTOCK'
+						if '1040501' in bricks[k] :
+							bricks[k] = 'KAMRA'
+						if '1050101' in bricks[k] :
+							bricks[k] = 'GUJAR KHAN'
+						if '1050301' in bricks[k] :
+							bricks[k] = 'KAHUTA'
         
 				for p in range(0,len(products)):
 					for i in range(0,len(products[p])):

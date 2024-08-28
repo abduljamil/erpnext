@@ -58,7 +58,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 				// console.log(d)
                 total = total + d.value;
             });
-			if(total>0){
+			if(total){
             frm.set_value('total_value',total);
         }}
 		//set total stock value
