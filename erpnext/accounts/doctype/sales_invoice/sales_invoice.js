@@ -416,13 +416,12 @@ refresh: function(frm) {
 		// Process child table data
 		cur_frm.doc.order_details.forEach(function(row) {
 			var child_order_no = row.order_no;
-			// console.log(child_order_no)
+			console.log(child_order_no)
 			// frm.set_value('order_no',child_order_no)
 			// console.log("Order No:", row.order_no);
-			if (child_order_no[0]) {
+			if (child_order_no) {
 
 				cur_frm.set_value('order_no', child_order_no);
-				frm.save()
 				// console.log("Order No set to parent field:", child_order_no);
 			} else {
 				console.log("No order number found in child table.");
