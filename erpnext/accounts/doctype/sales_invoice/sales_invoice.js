@@ -412,9 +412,9 @@ refresh: function(frm) {
 	// Debugging: Ensure frm and frm.doc are defined
 	// console.log("Form loaded:", frm);
 	
-	if (cur_frm.doc.order_detail) {
+	if (cur_frm.doc.order_details) {
 		// Process child table data
-		cur_frm.doc.order_detail.forEach(function(row) {
+		cur_frm.doc.order_details.forEach(function(row) {
 			var child_order_no = row.order_no;
 			// console.log(child_order_no)
 			// frm.set_value('order_no',child_order_no)
