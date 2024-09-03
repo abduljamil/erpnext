@@ -407,13 +407,41 @@ less_freight_claim_percentage: function(frm) {
 
 },
 
-doctor_discount: function(frm){
-	if(frm.doctor_discount||frm.grand_total){
-		gt=cur_frm.grand_total
-		cur_frm.set_value('grand_total', gt-frm.doctor_discount)
-	}
 
+refresh: function(frm) {
+	// Debugging: Ensure frm and frm.doc are defined
+	// console.log("Form loaded:", frm);
+	
+	if (cur_frm.doc.order_detail) {
+		// Process child table data
+		cur_frm.doc.order_detail.forEach(function(row) {
+			var child_order_no = row.order_no;
+			// console.log(child_order_no)
+			// frm.set_value('order_no',child_order_no)
+			// console.log("Order No:", row.order_no);
+			if (child_order_no[0]) {
+
+				cur_frm.set_value('order_no', child_order_no);
+				frm.save()
+				// console.log("Order No set to parent field:", child_order_no);
+			} else {
+				console.log("No order number found in child table.");
+			}
+		});
+
+	} else {
+		console.log("Form document or child table is undefined.");
+	}
 },
+
+
+// doctor_discount: function(frm){
+// 	if(frm.doctor_discount||frm.grand_total){
+// 		gt=cur_frm.grand_total
+// 		cur_frm.set_value('grand_total', gt-frm.doctor_discount)
+// 	}
+
+// },
 
 
 
