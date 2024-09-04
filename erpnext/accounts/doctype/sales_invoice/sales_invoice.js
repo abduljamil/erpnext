@@ -407,27 +407,27 @@ less_freight_claim_percentage: function(frm) {
 
 },
 
-refresh: function() {
-    if (cur_frm.doc.order_details) {
-        var order_no_set = false; // Flag to check if order_no was set
-        cur_frm.doc.order_details.forEach(function(row) {
-            var child_order_no = row.order_no;
-            if (child_order_no) {
-                cur_frm.set_value('order_no', child_order_no);
-                console.log("Order No set to parent field:", child_order_no);
-                order_no_set = true;
-            }
-        });
+// refresh: function() {
+//     if (cur_frm.doc.order_details) {
+//         var order_no_set = false; // Flag to check if order_no was set
+//         cur_frm.doc.order_details.forEach(function(row) {
+//             var child_order_no = row.order_no;
+//             if (child_order_no) {
+//                 cur_frm.set_value('order_no', child_order_no);
+//                 console.log("Order No set to parent field:", child_order_no);
+//                 order_no_set = true;
+//             }
+//         });
 
-        if (cur_frm.doc.docstatus === 1 && order_no_set) {
-            // If the document is already submitted, just update the field in the UI
-            cur_frm.refresh_field('order_no');
-            // frappe.show_alert({ message: __('Order No updated for viewing in submitted document'), indicator: 'blue' });
-        }
-    } else {
-        console.log("Form document or child table is undefined.");
-    }
-},
+//         if (cur_frm.doc.docstatus === 1 && order_no_set) {
+//             // If the document is already submitted, just update the field in the UI
+//             cur_frm.refresh_field('order_no');
+//             // frappe.show_alert({ message: __('Order No updated for viewing in submitted document'), indicator: 'blue' });
+//         }
+//     } else {
+//         console.log("Form document or child table is undefined.");
+//     }
+// },
 
 
 // doctor_discount: function(frm){
