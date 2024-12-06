@@ -11,7 +11,7 @@ status_map = {
 	"Absent": "A",
 	"Half Day": "HD",
 	"Holiday": "<b>H</b>",
-	"Weekly Off": "<b>WO</b>",
+	"Weekly Off": "<b>SUN</b>",
 	"On Leave": "L",
 	"Present": "P",
 	"Field":"F",
