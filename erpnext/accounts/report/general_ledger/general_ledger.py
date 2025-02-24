@@ -162,7 +162,7 @@ def get_gl_entries(filters, accounting_dimensions):
         select
             `tabGL Entry`.name as gl_entry, posting_date, account, party_type, party,
             voucher_type, voucher_no, {dimension_fields}
-            cost_center, project,
+            cost_center, project, odc.tr__rr_no, odc.tr_date, order_no,
             against_voucher_type, against_voucher, account_currency,
             remarks, against, is_opening, `tabGL Entry`.creation {select_fields}
         from `tabGL Entry`
