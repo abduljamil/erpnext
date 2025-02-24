@@ -166,7 +166,7 @@ def get_gl_entries(filters, accounting_dimensions):
             against_voucher_type, against_voucher, account_currency,
             remarks, against, is_opening, `tabGL Entry`.creation {select_fields}
         from `tabGL Entry`
-        left join `tabOrder Details Child` odc on odc.parent = `tabGL Entry`.voucher_no
+        left join `tabSales Details Table` odc on odc.parent = `tabGL Entry`.voucher_no
         where company=%(company)s {conditions}
         {order_by_statement}
         """.format(
