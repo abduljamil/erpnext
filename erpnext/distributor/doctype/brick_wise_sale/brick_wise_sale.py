@@ -5338,6 +5338,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks1[i] = 'FATEH PUR PUNJABIAN'
 					if bricks1[i] == 'RAJAN PUR KALAN':
 						bricks1[i] = 'RAJAN PUR'
+					if bricks1[i] == 'KHAN PUR CITY 2':
+						bricks1[i] = 'KHAN PUR CITY 2'
 
 					
 
