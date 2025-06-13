@@ -1850,56 +1850,28 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks[b] = 'ORA CHOWK KNG'
 					if '1010608' in bricks[b] :
 						bricks[b] = 'MUBARAK PURA KHADIM ALI ROAD'
-					# if '' in bricks[b] :
-					# 	bricks[b] = ''
 
 					# bricks code changed
 					if '2010101' in bricks[b] :
-						bricks[b] = 'COMMISSIONER ROAD'
-					# if '1010105' in bricks[b] :
-					# 	bricks[b] = 'MURRAY COLLEGE ROAD'
-					# if '1010203' in bricks[b] :
-					# 	bricks[b] = 'DEFENCE ROAD SIALKOT'
-					# if '1010204' in bricks[b] :
-					# 	bricks[b] = 'SHAHAB PURA'
-					# if '1010208' in bricks[b] :
-					# 	bricks[b] = 'RODAS ROAD'
-					# if '1010219' in bricks[b] :
-					# 	bricks[b] = 'SARDAR BEGUM CHOWK'
-					# if '1010220' in bricks[b] :
-					# 	bricks[b] = 'ALAM CHOWK SHAHAB PURA ROAD'
+						bricks[b] = 'COMMISSIONER ROAD'				
 					if '2010504' in bricks[b] :
 						bricks[b] = 'ABBOTT ROAD'
 					if '2010501' in bricks[b] :
 						bricks[b] = 'PARIS ROAD'
-					# if '1010304' in bricks[b] :
-					# 	bricks[b] = 'GREEN WOOD STREET'
 					if '2010502' in bricks[b] :
 						bricks[b] = 'RAILWAY ROAD SIALKOT'
-					# if '1020104' in bricks[b] :
-					# 	bricks[b] = 'PASRUR ROAD 2'
 					if '2010806' in bricks[b] :
 						bricks[b] = 'KHADIM ALI ROAD'
 					if '2010401' in bricks[b] :
 						bricks[b] = 'PULL AIK'
-					# if '1010403' in bricks[b] :
-					# 	bricks[b] = 'PASRUR ROAD SIALKOT'
 					if '2010402' in bricks[b] :
 						bricks[b] = 'ZAFARWAL ROAD'
-					# if '1010406' in bricks[b] :
-					# 	bricks[b] = 'AIMNA ABAD ROAD'
-					# if '1010416' in bricks[b] :
-					# 	bricks[b] = 'ISLAMABAD MOHALLA'
-					# if '1010601' in bricks[b] :
-					# 	bricks[b] = 'GOHAD PUR / MURAD PUR ROAD'
 					if '2010703' in bricks[b] :
 						bricks[b] = 'KASHMIR ROAD SIALKOT'
 					if '2010805' in bricks[b] :
 						bricks[b] = 'CHRISTIAN TOWN / HUNTER PURA'
 					if '2010202' in bricks[b] :
 						bricks[b] = 'SADAR BAZAR CANTT SIALKOT'
-					# if '1010702' in bricks[b] :
-					# 	bricks[b] = 'JINNAH ISLAMIA COLLEGE ROAD'
 					if '2020107' in bricks[b] :
 						bricks[b] = 'KOTLI LOHARAN EAST'
 					if '2020105' in bricks[b] :
@@ -1912,174 +1884,82 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks[b] = 'KOTLI LOHARAN WEST'
 					if '2020201' in bricks[b] :
 						bricks[b] = 'PULI TOP KHANA'
-					# if '1010902' in bricks[b] :
-					# 	bricks[b] = 'BHARTH'
 					if '2020205' in bricks[b] :
 						bricks[b] = 'MARAKI WAL'
 					if '2020202' in bricks[b] :
 						bricks[b] = 'KHAROTA SYEDAN'
-					# if '1010906' in bricks[b] :
-					# 	bricks[b] = 'SHADIWAL'
 					if '2010207' in bricks[b] :
 						bricks[b] = 'DALUWALI'
 					if '2020406' in bricks[b] :
 						bricks[b] = 'JHAI'
-					# if '1011003' in bricks[b] :
-					# 	bricks[b] = 'JUNG MORE'
 					if '2020305' in bricks[b] :
 						bricks[b] = 'SAID PUR'
 					if '2020207' in bricks[b] :
 						bricks[b] = 'GONDAL'
 					if '2020306' in bricks[b] :
 						bricks[b] = 'BAJ WAT'
-					# if '1011101' in bricks[b] :
-					# 	bricks[b] = 'DUBURJI MALIAN'
 					if '3020103' in bricks[b] :
 						bricks[b] = 'MIANI ADDA'
 					if '3020104' in bricks[b] :
 						bricks[b] = 'GHOYAN KI'
 					if '3020106' in bricks[b] :
 						bricks[b] = 'ADDA KAMAL PUR'
-					# if '1011106' in bricks[b] :
-					# 	bricks[b] = 'BHALLOWALI SIALKOT'
 					if '2010604' in bricks[b] :
 						bricks[b] = 'HAJI PURA'
 					if '2010303' in bricks[b] :
 						bricks[b] = 'RANGPURA'
 					if '2010304' in bricks[b] :
 						bricks[b] = 'CIRCULAR ROAD SIALKOT'
-					# if '1011208' in bricks[b] :
-					# 	bricks[b] = 'IMAM SAB'
 					if '3010103' in bricks[b] :
 						bricks[b] = 'NISBAT ROAD'
-					# if '1020105' in bricks[b] :
-					# 	bricks[b] = 'PULL NAHAR'
-					# if '1020106' in bricks[b] :
-					# 	bricks[b] = 'DASKA SIAL KOT'
-					# if '1020107' in bricks[b] :
-					# 	bricks[b] = 'SOHAWA STOP'
-					# if '1020108' in bricks[b] :
-					# 	bricks[b] = 'CIVIL HOSPITAL ROAD SIALKOT'
 					if '3010202' in bricks[b] :
 						bricks[b] = 'CHUNGI # 8'
 					if '3010101' in bricks[b] :
 						bricks[b] = 'COLLEGE ROAD SIAL KOT'
 					if '3010204' in bricks[b] :
 						bricks[b] = 'SAMBRIAL ROAD'
-					# if '1020301' in bricks[b] :
-					# 	bricks[b] = 'MOTRA'
-					# if '1020302' in bricks[b] :
-					# 	bricks[b] = 'ADAMKAY'
 					if '3020202' in bricks[b] :
 						bricks[b] = 'JAMKE CHEEMA'
-					# if '1020305' in bricks[b] :
-					# 	bricks[b] = 'BHOPAL WALA VILLAGE'
 					if '3020109' in bricks[b] :
 						bricks[b] = 'MUNDEKE GORAYA'
 					if '3020111' in bricks[b] :
 						bricks[b] = 'KOTLI BAWA'
 					if '2010709' in bricks[b] :
 						bricks[b] = 'MODEL TOWN UGOKI'
-					# if '1030702' in bricks[b] :
-					# 	bricks[b] = 'MAIN BAZAR UGOKI'
 					if '2010706' in bricks[b] :
 						bricks[b] = 'SHAHAB PURA CHOWK'
 					if '2010704' in bricks[b] :
 						bricks[b] = 'SUBLIME CHOWK'
-					# if '1030707' in bricks[b] :
-					# 	bricks[b] = 'FATEH GARH SIALKOT'
 					if '2010707' in bricks[b] :
 						bricks[b] = 'ADALAT GARH'
 					if '3020302' in bricks[b] :
 						bricks[b] = 'SAMBRIAL MORE'
 					if '2010701' in bricks[b] :
 						bricks[b] = 'LARI ADDA SIALKOT'
-					# if '1031005' in bricks[b] :
-					# 	bricks[b] = 'JETHI KAY ROAD'
-					# if '1031006' in bricks[b] :
-					# 	bricks[b] = 'BAIGO WALA SIALKOT'
-					# if '1040902' in bricks[b] :
-					# 	bricks[b] = 'MURIDKE ROAD'
 					if '4020101' in bricks[b] :
 						bricks[b] = 'QILA AHMED ABAD'
-					# if '1040907' in bricks[b] :
-					# 	bricks[b] = 'DHAMTHAL SIALKOT'
 					if '2020605' in bricks[b] :
 						bricks[b] = 'GALI ABSHAR WALI CHWND'
-					# if '1050804' in bricks[b] :
-					# 	bricks[b] = 'MAIN ROAD CHWND'
-					# if '1050901' in bricks[b] :
-					# 	bricks[b] = 'HAIDRI CHOWK'
-					# if '1050902' in bricks[b] :
-					# 	bricks[b] = 'MAIN ROAD BDN'
-					# if '' in bricks[b] :
-					# 	bricks[b] = 'MAIN BAZAR BDN'
-					# if '1050904' in bricks[b] :
-					# 	bricks[b] = 'GUNNA BDN'
 					if '2020608' in bricks[b] :
 						bricks[b] = 'KACHEHRI ROAD'
 					if '2020609' in bricks[b] :
 						bricks[b] = 'KALAS WALA ROAD'
-					# if '1051006' in bricks[b] :
-					# 	bricks[b] = 'PURANA BAZAR'
-					# if '1051007' in bricks[b] :
-					# 	bricks[b] = 'CHAWINDA PHATAK'
 					if '2010502' in bricks[b] :
 						bricks[b] = 'RAIL WAY ROAD SKG'
-					# if '1060705' in bricks[b] :
-					# 	bricks[b] = 'NOOR KOT ROAD'
-					# if '1060706' in bricks[b] :
-					# 	bricks[b] = 'DARMAN ROAD'
 					if '2020402' in bricks[b] :
 						bricks[b] = 'LANGRE WALI'
 					if '2020502' in bricks[b] :
 						bricks[b] = 'ADDA MAHAL'
-					# if '1070808' in bricks[b] :
-					# 	bricks[b] = 'SALAN KAY'
-					# if '1070809' in bricks[b] :
-					# 	bricks[b] = 'MEH RAJKE'
 					if '2020508' in bricks[b] :
 						bricks[b] = 'CHAUBARA'
-					# if '1070813' in bricks[b] :
-					# 	bricks[b] = 'PHALORA'
 					if '2020511' in bricks[b] :
 						bricks[b] = 'SIALKOT BHAGOWAL'
-					# if '1070815' in bricks[b] :
-					# 	bricks[b] = 'GOPAL PUR'
-					# if '1010409' in bricks[b] :
-					# 	bricks[b] = 'NAWAN PIND'
-					# if '1010616' in bricks[b] :
-					# 	bricks[b] = 'PAKKA GARHA'
-					# if '1010804' in bricks[b] :
-					# 	bricks[b] = 'CHAKRALA MARALA'
-					# if '1010903' in bricks[b] :
-					# 	bricks[b] = 'BHOTH'
 					if '2020301' in bricks[b] :
 						bricks[b] = 'KUBAY CHAK'
-					# if '1011107' in bricks[b] :
-					# 	bricks[b] = '1011107 - CEO-KAY SKT-J'
-					# if '1020101' in bricks[b] :
-					# 	bricks[b] = 'JASSAR WALA'
-					# if '1031002' in bricks[b] :
-					# 	bricks[b] = 'BABU GHULAM NABI ROAD SAMBRIAL'
-					# if '1031007' in bricks[b] :
-					# 	bricks[b] = 'RANDHIR MOR SAMBRIAL'
-					# if '1040904' in bricks[b] :
-					# 	bricks[b] = 'DHQ ROAD NWL'
-					# if '1040909' in bricks[b] :
-					# 	bricks[b] = 'MANDI THROO'
 					if '2020603' in bricks[b] :
 						bricks[b] = 'LARI ADDA CHWND'
 					if '2020607' in bricks[b] :
 						bricks[b] = 'MAIN BAZAR PSR'
-					# if '1070806' in bricks[b] :
-					# 	bricks[b] = 'KHARDANA MOR'
-					# if '1070810' in bricks[b] :
-					# 	bricks[b] = 'WAGHA KNG'
-					# if '1070812' in bricks[b] :
-					# 	bricks[b] = 'GADGOR KNG'
-					# if '' in bricks[b] :
-					# 	bricks[b] = ''
 					if '2010204' in bricks[b] :
 						bricks[b] = 'CHOWK GANTA GHUR'
 					if '2010404' in bricks[b] :
@@ -2196,6 +2076,8 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 						bricks[b] = 'DHQ ROAD NWL'
 					if '4010103' in bricks[b] :
 						bricks[b] = 'ZAFAR WAL ROAD NWL'
+					if '2020104' in bricks[b] :
+						bricks[b] = 'CHAKRALA MARALA'
 					
 
 				for s in range(0,len(sales)):
