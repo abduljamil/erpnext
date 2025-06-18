@@ -3933,81 +3933,124 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 				bricks = []
 				brick = []
 				product = []
-				flag_1 = False
-				for x in range(0,len(pdf.pages)):
+				is_team_section = False  # Renamed for clarity
+
+				for x in range(len(pdf.pages)):
 					data = pdf.pages[x].extract_text()
 					bricks = pdf.pages[x].extract_table()
+					if not bricks or not bricks[0]:
+						continue
 					bricks = bricks[0]
-					bricks = bricks[1:-1]
-					data = re.sub("\n","$", data)
-					data = data.split('$')
-					for i in range(len(bricks)):
-						if bricks[i] != '':
-							brick.append(bricks[i])
-					for i in range(0,len(data)):
-						find_Blue = re.search(r"BLUE", data[i-1])
-						if find_Blue != None:
-							flag_1 = True
-						find_group = re.search(r"Group Total", data[i])
-						if find_group != None:
-							flag_1 = False
-						if flag_1 == True:
-							sales.append(data[i])
-					for i in range(0,len(sales)):
-						sales[i] = re.sub("\'S","$", sales[i])
-						sales[i] = re.sub("ML","$", sales[i])
-						sales[i] = sales[i].split('$')
-						products.append(sales[i][0])
-						sales[i] = sales[i][-1][1:]
-						sales[i] = re.sub("\s+","$", sales[i])
-						sales[i] = sales[i].split('$')
-						sales[i] = sales[i][0:len(brick)]
-					for i in range(0,len(products)):
-					
-						if 'JETEPAR CAP' in products[i]:
-							products[i] = '002392'
-						if 'JETEPAR 10' in products[i]:
-							products[i] = '008999'
-						if 'JETEPAR 2' in products[i]:
-							products[i] = '004348'
-						if 'JETEPAR SYP' in products[i]:
-							products[i] = '002188'
-						if 'MAIORAD  3' in products[i]:
-							products[i] = '009072'
-						if 'MAIORAD TAB' in products[i]:
-							products[i] = '012961'
+					bricks = bricks[1:-1]  # skip first (Packing) and last (T.Qty.)
 
-					for i in range(0,len(brick)):
-						if brick[i] == 'GOJRA':
-							brick[i] = 'GOJRA TTS'
-						if brick[i] == 'KAMAL':
-							brick[i] = 'KAMAL CHOWK'
-						if brick[i] == 'PIR M':
-							brick[i] = 'PIR MAHAL'
-						if brick[i] == 'RAJAN':
-							brick[i] = 'RAJANA'
-						if brick[i] == 'S/WAL':
-							brick[i] = 'SAHIWAL TTS'
-						if brick[i] == 'TOBA':
-							brick[i] = 'TOBA TEK SINGH TTS'
-				for p in range(0,len(products)):
-					for s in range(0,len(sales[p])):
+					# Replace all empty or blank strings with default value
+					bricks = ['TOBA TEK SINGH TTS' if not b or not b.strip() else b.strip() for b in bricks]
+					brick = bricks  # assign cleaned bricks list
+
+					data = re.sub("\n", "$", data)
+					data = data.split('$')
+
+					for i in range(len(data)):
+						# Detect start of Blue or Green team section
+						if re.search(r"(BLUE TEAM|GREEN TEAM)", data[i-1]):
+							is_team_section = True
+						# Detect end of product block
+						if re.search(r"Group Total", data[i]):
+							is_team_section = False
+						if is_team_section:
+							sales.append(data[i])
+
+				for i in range(len(sales)):
+					sales[i] = re.sub("'S", "$", sales[i])
+					sales[i] = re.sub("ML", "$", sales[i])
+					sales[i] = re.sub("AMP", "$", sales[i])
+					sales[i] = sales[i].split('$')
+					products.append(sales[i][0])
+					sales[i] = sales[i][-1][1:]
+					sales[i] = re.sub(r"\s+", "$", sales[i])
+					sales[i] = sales[i].split('$')
+					# Remove unwanted data before brick-wise quantities
+					s_index = next((idx for idx, val in enumerate(sales[i]) if val.endswith('S')), -1)
+					if s_index != -1:
+						sales[i] = sales[i][s_index+1:]
+
+					# Now ensure exactly 15 values
+					if len(sales[i]) < len(brick):
+						# Pad with "0" if missing values
+						sales[i] += ["0"] * (len(brick) - len(sales[i]))
+					elif len(sales[i]) > len(brick):
+						# Trim extra values
+						sales[i] = sales[i][:len(brick)]
+
+
+
+					print(sales[i])
+
+				# Map product names to item codes
+				for i in range(len(products)):
+					if 'JETEPAR CAP' in products[i]:
+						products[i] = '002392'
+					if 'JETEPAR 10' in products[i]:
+						products[i] = '008999'
+					if 'JETEPAR 2' in products[i]:
+						products[i] = '004348'
+					if 'JETEPAR SYP' in products[i]:
+						products[i] = '002188'
+					if 'MAIORAD  3' in products[i]:
+						products[i] = '009072'
+					if 'MAIORAD TAB' in products[i]:
+						products[i] = '012961'
+					if 'MOXILIUM  CAP' in products[i]:
+						products[i] = '006784'  # Add correct codes if needed
+					if 'MOXILIUM SYP 125MG' in products[i]:
+						products[i] = '006783'
+					if 'MOXILIUM SYP 250MG' in products[i]:
+						products[i] = '012649'
+					if 'P.C.LAC SYP' in products[i]:
+						products[i] = '019133'
+					if 'TRAMAGESIC' in products[i]:
+						products[i] = '026920'
+					if 'METRONIDAZOLE' in products[i]:
+						products[i] = '081274'
+
+				# Fix brick names
+				for i in range(len(brick)):
+					if brick[i] == 'GOJRA':
+						brick[i] = 'GOJRA TTS'
+					if brick[i] == 'KAMAL':
+						brick[i] = 'KAMAL CHOWK'
+					if brick[i] == 'PIR M':
+						brick[i] = 'PIR MAHAL'
+					if brick[i] == 'RAJAN':
+						brick[i] = 'RAJANA'
+					if brick[i] == 'S/WAL':
+						brick[i] = 'SAHIWAL TTS'
+					if brick[i] == 'TOBA':
+						brick[i] = 'TOBA TEK SINGH TTS'
+
+				# Build result
+				for p in range(len(products)):
+					for s in range(len(sales[p])):
 						child = []
-						child.append(products[p])
-						child.append(brick[s])
-						child.append(sales[p][s])
+						child.append(products[p])      # item code
+						child.append(brick[s])         # brick name
+						child.append(sales[p][s])      # quantity
 						result.append(child)
+
+				# Enrich result with item_list info
 				for r in result:
 					for i in item_list:
 						if r[0] == i[0]:
-							r.insert(1,i[1])
-							r.append(i[2])
+							r.insert(1, i[1])  # item name
+							r.append(i[2])     # item group
+
+				# Enrich result with team info
 				for r in result:
 					for t in tt_list:
-						if r[2] == t[0]:
-							r.insert(4,t[1])
-							# print(r)
-				result = green_team_bricks(result)
+						if r[2] == t[0]:  # match on quantity or brick code if needed
+							r.insert(4, t[1])
+
+				result = green_team_bricks(result)  # Apply final custom filtering
 				return result
 			elif dist_city == "Dera Ghazi Khan":
 				result = []
