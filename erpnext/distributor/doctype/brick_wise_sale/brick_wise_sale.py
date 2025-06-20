@@ -3684,17 +3684,20 @@ def parse_pdf(pdf_file,parse_check,parent_detail):
 					bricks[i] = re.sub('D A O R T G','DAORT G',bricks[i])
 					bricks[i] = re.sub('ABASEEN MEDICAL CENT','ABASEEN MEDICAL CENTER',bricks[i])
 					bricks[i] = re.sub('MOLVI GEE HOSPITAL','MOLVI JEE HOSPITAL',bricks[i])
-				
 
 				# print(products)
-				for s in range(0,len(sales)):
-					for i in range(0,len(sales[s])):
-						# print(products[i],bricks[s],sales[s][i])
-						child = []
-						child.append(products[i])
-						child.append(bricks[s])
-						child.append(sales[s][i])
-						result.append(child)
+				for s in range(0, len(sales)):
+					for i in range(0, len(sales[s])):
+						try:
+							child = []
+							child.append(products[i])      # Product code
+							child.append(bricks[s])        # Brick name
+							child.append(sales[s][i])      # Sale qty or price
+							result.append(child)
+						except IndexError:
+							print(f"⚠️ IndexError at s={s}, i={i}, len(products)={len(products)}, len(sales[{s}])={len(sales[s])}, len(bricks)={len(bricks)}")
+						continue
+
 
 
 				for r in  range(0,len(result)):
