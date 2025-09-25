@@ -3,12 +3,18 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import InactiveEmployeeStatusError
+from erpnext.hr.utils import get_holiday_list_for_employee
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
     get_datetime, getdate, nowdate, today, unique, get_link_to_form)
+
+# Compatibility fix for live server
+class InactiveEmployeeStatusError(frappe.ValidationError): pass
+
+class DuplicateDeclarationError(frappe.ValidationError): pass
+
 
 # Wrapper for live server Frappe 13.7.0 compatibility
 from erpnext.hr.doctype.employee.employee import get_holidays_for_employee
