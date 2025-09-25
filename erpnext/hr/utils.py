@@ -3,7 +3,8 @@
 
 import erpnext
 import frappe
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, InactiveEmployeeStatusError
+from erpnext.hr.utils import get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import InactiveEmployeeStatusError
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
