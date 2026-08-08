@@ -1,64 +1,59 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+function build_doctor_code(frm) {
+	let brick_code = frm.doc.brick ? (frm.doc.brick.match(/\b(\w)/g) || []).join('') : '';
+	let city = frm.doc.city || '';
+	let area_code = frm.doc.area ? (frm.doc.area.match(/\b(\w)/g) || []).join('') : '';
+	let zone_code = frm.doc.zone ? (frm.doc.zone.match(/\b(\w)/g) || []).join('') : '';
+
+	let parts = [zone_code, area_code, city, brick_code].filter(Boolean);
+	frm.set_value('doctor_code', parts.join('-'));
+}
+
 frappe.ui.form.on('Doctor List', {
-	before_save:function(frm){
-		if(frm.doc.doctor_code){
-			let check = frm.doc.doctor_code;
-			var count = (check.match(/-/g) || []).length;
-			if(count == 3){
-				return 
-			}else{
-				frappe.throw({
-					title:__('Error'),
-					indicator:"red",
-					message:__('Kindly Fill the brick,city,area and zone to proceed further.')
-				})
-			}
-		}
-	},
-	brick:function(frm){
-		if(frm.doc.brick){
-			let check = frm.doc.brick;
-			// console.log(check.match(/\b(\w)/g))
-			let match =  check.match(/\b(\w)/g)
-			// console.log(match.join(''))
-			let brick_code = match.join('')
-			frm.set_value('doctor_code',brick_code)
-			console.log(frm.doc.doctor_code)
-		}
-	},
-	city:function(frm){
-		if(frm.doc.city){
-			// console.log(frm.doc.city)
-			let city = frm.doc.city;
-			// let city_match = city.match(/\b(\w)/g);
-			// let city_code = city_match.join('');
-			frm.set_value('doctor_code', city+ "-" +frm.doc.doctor_code)
-
-			console.log(frm.doc.doctor_code)
-		}
-	},
-	area:function(frm){
-		if(frm.doc.area){
-			let area = frm.doc.area;
-			let area_match = area.match(/\b(\w)/g)
-			let area_code = area_match.join('')
-			let zone_code = '';
-			if(frm.doc.zone){
-				let zone = frm.doc.zone;
-				let zone_match = zone.match(/\b(\w)/g)
-				zone_code = zone_match.join('')
-			}
-			if(area_code && zone_code){
-				console.log(zone_code,area_code)
-				frm.set_value('doctor_code',zone_code+"-"+area_code +"-"+ frm.doc.doctor_code)
-			
-			}
-			console.log(frm.doc.doctor_code)
+	before_save: function(frm) {
+		if (!frm.doc.brick || !frm.doc.city || !frm.doc.area || !frm.doc.zone) {
+			frappe.throw({
+				title: __('Error'),
+				indicator: "red",
+				message: __('Kindly Fill the brick, city, area and zone to proceed further.')
+			});
 		}
 	},
 
-	
-	
+	brick: function(frm) {
+		if (!frm.doc.brick) {
+			frm.set_value('city', '');
+			frm.set_value('area', '');
+			frm.set_value('zone', '');
+			build_doctor_code(frm);
+			return;
+		}
+
+		frappe.call({
+			method: 'get_territory_hierarchy',
+			args: { territory: frm.doc.brick },
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('city', r.message.city || '');
+					frm.set_value('area', r.message.area || '');
+					frm.set_value('zone', r.message.zone || '');
+				}
+				build_doctor_code(frm);
+			}
+		});
+	},
+
+	city: function(frm) {
+		build_doctor_code(frm);
+	},
+
+	area: function(frm) {
+		build_doctor_code(frm);
+	},
+
+	zone: function(frm) {
+		build_doctor_code(frm);
+	}
 });
