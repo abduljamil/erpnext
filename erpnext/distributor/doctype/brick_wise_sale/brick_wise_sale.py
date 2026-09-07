@@ -514,6 +514,14 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[i] = "KADAN"
             if bricks[i] == "LATIFABAD NO 8":
                 bricks[i] = "LATIFABAD 8"
+            if bricks[i] == "LATIFABAD NO 8":
+                bricks[i] = "LATIFABAD 8"
+            if bricks[i] == " AUTO BHAN ROAD":
+                bricks[i] = "AUTO BAHN ROAD"
+            if bricks[i] == "RUKKAN BURIRA":
+                bricks[i] = "RUKAN BURIRA"
+            if bricks[i] == "JAMSHORRO":
+                bricks[i] = "JAMSHORO"
 
         for i in range(len(sales)):
             for k in range(len(sales[i])):
@@ -635,6 +643,8 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[i] = "PATHAN COLONY"
             if bricks[i] == "GULMANDA":
                 bricks[i] = "GUL MANDA"
+            if bricks[i] == "DABHEEJI":
+                bricks[i] = "DHABEEJI"
 
         for i in range(len(sales)):
             for k in range(len(sales[i])):
@@ -719,6 +729,8 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[b] = "DIPLO"
             if bricks[b] == "ISLAMKOT ":
                 bricks[b] = "ISLAMKOT"
+            if bricks[b] == "JHILORI":
+                bricks[b] = "JHULURI"
 
         print(bricks)
 
@@ -1190,6 +1202,8 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             b[c] = "RAI WIND"
                         if b[c] == "THM":
                             b[c] = "THENG MORE"  # print(bricks)
+                        if b[c] == "KS3":
+                            b[c] = "KASUR 3"  # print(bricks)
                 ## set sale value only
                 for s in sales:
                     for i in range(0, len(s)):
@@ -2170,6 +2184,16 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                         bricks[b] = "ZAFAR WAL ROAD NWL"
                     if "2020104" in bricks[b]:
                         bricks[b] = "CHAKRALA MARALA"
+                    if "2010305" in bricks[b]:
+                        bricks[b] = "ADDA PASRURIAN"
+                    if "2010710" in bricks[b]:
+                        bricks[b] = "ADDA PASRURIAN"
+                    if "4020201" in bricks[b]:
+                        bricks[b] = "MAIN BAZAR ZAFARWAL"
+                    if "4020206" in bricks[b]:
+                        bricks[b] = "THQ ROAD"
+                    if "2020404" in bricks[b]:
+                        bricks[b] = "RANGER ROAD"
 
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
@@ -3433,6 +3457,12 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                                 bricks[k] = "ADYALA ROAD"
                             if "1060301" in bricks[k]:
                                 bricks[k] = "PINDI GHEB"
+                            if "1020208" in bricks[k]:
+                                bricks[k] = "DHAMIAL CHAKRI"
+                            if "1020113" in bricks[k]:
+                                bricks[k] = "DHOKE KALA KHAN"
+                            if "1020119" in bricks[k]:
+                                bricks[k] = "MARIR HASSAN"
 
                 for p in range(0, len(products)):
                     for i in range(0, len(products[p])):
