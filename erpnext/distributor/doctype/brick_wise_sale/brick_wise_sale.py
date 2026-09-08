@@ -732,7 +732,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
             if bricks[b] == "JHILORI":
                 bricks[b] = "JHULURI"
 
-        print(bricks)
+        # print(bricks)
 
         for i in range(0, len(products)):
             if products[i] == "JT10C":
@@ -768,118 +768,173 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
         result = green_team_bricks(result)
         return result
     elif dist_city == "Nawab Shah":
-        bricks = []
-        data = []
-        new_result = []
-        result = []
-        sales = []
         products = []
-        start_data_var = 1000
-        Second_sheet_var = False
-        df = pd.read_excel(path)
-        for i in range(0, len(df)):
-            if df.iat[i, 0] == "town":
-                start_data_var = i
-                # print(df.iat[i,0])
-            if (
-                not pd.isna(df.iat[i, 0])
-                and not pd.isna(df.iat[i, 1])
-                and not pd.isna(df.iat[i, 2])
-                and i > start_data_var
-            ):
-                data.append(df.iat[i, 1])
-                data.append(df.iat[i, 0])
-                repeating_bricks_var = df.iat[i, 0]
-                # print(repeating_bricks_var)
-                data.append(str(df.iat[i, 2]))
-                result.append(data)
-                data = []
-                # print(result)
-                # print(data)
-                # var_for_products = i
-            elif (
-                pd.isna(df.iat[i, 0])
-                and not pd.isna(df.iat[i, 1])
-                and not pd.isna(df.iat[i, 2])
-                and i > start_data_var
-            ):
-                # print(repeating_bricks_var)
-                data.append(df.iat[i, 1])
-                data.append(repeating_bricks_var)
+        bricks = []
+        sales = []
+        result = []
+        df = pd.read_excel(path, header=None)
 
-                data.append(str(df.iat[i, 2]))
-                # print(data)
-                result.append(data)
-                data = []
-            elif (
-                not pd.isna(df.iat[i, 0])
-                and pd.isna(df.iat[i, 1])
-                and pd.isna(df.iat[i, 2])
-                and i > start_data_var
-            ):
-                repeating_bricks_var = df.iat[i, 0]
-
-            if df.iat[i, 0] == "grand total. ":
-                # print('hi')
+        # ---- 1. header row dhoondein jahan col 0 == "ITEM" ho ----
+        header_row_idx = None
+        for i in range(len(df)):
+            if str(df.iat[i, 0]).strip().upper() == "ITEM":
+                header_row_idx = i
                 break
-        # print(result)
-        for i in range(0, len(result)):
-            # for x in range(0,len(result[i])):
-            if (
-                result[i][0].strip() == "jetepar 10cc inj"
-                or result[i][0].strip() == "jetepar 10cc"
-            ):
-                result[i][0] = "008999"
-            if result[i][0].strip() == "jetepar 2cc inj":
-                result[i][0] = "004348"
-            if result[i][0] == "jetepar syp":
-                result[i][0] = "002188"
-            if result[i][0] == "jetepar cap":
-                result[i][0] = "002392"
 
-            if result[i][1] == "kandiaro":
-                result[i][1] = "KANDIARO"
-            if result[i][1] == "n.feroz":
-                result[i][1] = "NAUSHAHRO FEROZ"
-            if result[i][1] == "phull":
-                result[i][1] = "PHULL"
-            if result[i][1] == "T.SHAH":
-                result[i][1] = "T SHAH"
-            if result[i][1] == "B.CITY":
-                result[i][1] = "BHIRIA CITY"
-            if result[i][1] == "B.ROAD":
-                result[i][1] = "BHIRIA ROAD"
-            if result[i][1] == "P.CHANG":
-                result[i][1] = "PACCA CHANG"
-            if result[i][1] == "AKRI":
-                result[i][1] = "AKRI"
-            if result[i][1] == "KARONDI":
-                result[i][1] = "KARONDI"
-            if result[i][1] == "moro ":
-                result[i][1] = "MORO"
-            if result[i][1] == "D.PUR":
-                result[i][1] = "DAULAT PUR"
-            if result[i][1] == "NAWABSHAH":
-                result[i][1] = "NAWABSHAH NWS"
-            # print(result[i][2],result[i][3])
-        # print(result)
-        for r in range(0, len(result)):
+        if header_row_idx is None:
+            print("DEBUG: 'ITEM' header row nahi mila")
+            # return []
+
+        header_row = df.iloc[header_row_idx]
+
+        # ---- 2. "TTL QTY" column dhoondein ----
+        ttl_qty_col = None
+        for c in range(2, len(header_row)):
+            if str(header_row[c]).strip().upper() == "TTL QTY":
+                ttl_qty_col = c
+                break
+        if ttl_qty_col is None:
+            ttl_qty_col = len(header_row) - 2
+
+        brick_cols = list(range(2, ttl_qty_col))
+
+        # ---- 3. bricks list banayein aur normalize karein ----
+        bricks = [str(header_row[c]).strip().upper() for c in brick_cols]
+        for b in range(0, len(bricks)):
+            if bricks[b] == "KANDIARO":
+                bricks[b] = "KANDIARO"
+            if bricks[b] == "N.FEROZ":
+                bricks[b] = "NAUSHAHRO FEROZ"
+            if bricks[b] == "PHULL":
+                bricks[b] = "PHULL"
+            if bricks[b] == "T.SHAH":
+                bricks[b] = "T SHAH"
+            if bricks[b] == "B.CITY":
+                bricks[b] = "BHIRIA CITY"
+            if bricks[b] == "B.ROAD":
+                bricks[b] = "BHIRIA ROAD"
+            if bricks[b] == "P.CHANG":
+                bricks[b] = "PACCA CHANG"
+            if bricks[b] == "AKRI":
+                bricks[b] = "AKRI"
+            if bricks[b] == "KARONDI":
+                bricks[b] = "KARONDI"
+            if bricks[b] == "MORO":
+                bricks[b] = "MORO"
+            if bricks[b] == "D.PUR":
+                bricks[b] = "DAULAT PUR"
+            if bricks[b] == "NAWABSHAH":
+                bricks[b] = "NAWABSHAH NWS"
+            if bricks[b] == "THARUSHAH":
+                bricks[b] = "THARU SHAH"
+
+        # print("DEBUG: bricks =", bricks)
+
+        # ---- 4. products + sales nikalein ----
+        for i in range(header_row_idx + 1, len(df)):
+            raw_name = str(df.iat[i, 0]).strip()
+
+            if raw_name.upper().startswith("G TTL"):
+                break
+
+            if "(TP:" not in raw_name.upper():
+                continue
+
+            product_name = raw_name.split("(TP:")[0].strip()
+            products.append(product_name)
+
+            row_sales = []
+            for col in brick_cols:
+                val = df.iat[i, col]
+                if pd.isna(val):
+                    row_sales.append("0")
+                else:
+                    row_sales.append(str(val))
+            sales.append(row_sales)
+
+        # print("DEBUG: products =", products)
+        # print("DEBUG: sales =", sales)
+
+        # ---- 5. empty ko "0" bana dein (safety) ----
+        for i in sales:
+            for a in range(0, len(i)):
+                if i[a] == "":
+                    i[a] = "0"
+
+        # ---- 6. products x bricks nested loop, zero sale skip ----
+        for p in range(0, len(products)):
+            for b in range(0, len(bricks)):
+                if sales[p][b] == "0":
+                    continue
+                child = []
+                child.append(products[p])
+                child.append(bricks[b])
+                child.append(sales[p][b])
+                result.append(child)
+
+        print(
+            "DEBUG: result BEFORE matching (total rows =",
+            len(result),
+            ") sample:",
+            result[:5],
+        )
+
+        # ---- 7. product name replacement (readable names ke liye) ----
+        for r in result:
+            if r[0] == "JETEPAR 10ML AMP. 5 AMP":
+                r[0] = "Jetepar Injection 10ml"
+            if r[0] == "JETEPAR 2ML AMP. 10 AMP":
+                r[0] = "Jetepar Injection 2ml"
+            if r[0] == "JETEPAR CAP. 10S":
+                r[0] = "Jetepar Capsule"
+            if r[0] == "JETEPAR SYP. 112ML":
+                r[0] = "Jetepar Syrup"
+            if r[0] == "MAIORAD 100MG TAB 30S":
+                r[0] = "Maiorad Tablet"
+            if r[0] == "MAIORAD 3ML AMPS 6S":
+                r[0] = "Maiorad Injection"
+
+            # ---- fuzzy match: pehle exact (100), agar na mile to best available match ----
+            best_ratio = 0
+            best_code = None
             for i in item_list:
-                if result[r][0] == i[0]:
-                    if result[r][2] != "0":
-                        new_result.append(result[r])
-                    # print(r)
-        for r in new_result:
+                final_result = fuzz.token_set_ratio(r[0], i[1])
+                if final_result > best_ratio:
+                    best_ratio = final_result
+                    best_code = i[0]
+            if best_ratio >= 100:
+                r[0] = best_code
+            else:
+                print(
+                    f"DEBUG: NO EXACT MATCH for '{r[0]}' -> best guess was '{best_code}' with ratio {best_ratio}"
+                )
+
+        # print("DEBUG: result AFTER matching sample:", result[:5])
+
+        # ---- 8. item_list se naam/rate insert ----
+        for r in result:
             for i in item_list:
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
-        for r in new_result:
+
+        # print("DEBUG: result AFTER item_list insert sample:", result[:5])
+
+        # ---- 9. tt_list se extra field insert ----
+        for r in result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-        new_result = green_team_bricks(new_result)
-        return new_result
+
+        # print("DEBUG: result FINAL (total rows =", len(result), ") sample:", result[:5])
+
+        # result = green_team_bricks(result)
+        # print("DEBUG: result AFTER green_team_bricks (total rows =", len(result), ")")
+
+        # return result
+        result = green_team_bricks(result)
+        return result
+        # print(result)
 
     else:
         with pdfplumber.open(path) as pdf:
@@ -1632,22 +1687,26 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             bricks[b] = "GHAZIA ABAD"
                         if bricks[b] == "HARPA":
                             bricks[b] = "HARAPPA"
-                            # print(b[l])
-                    # print(bricks)
+
                     for p in range(2, len(data) - 4):
                         products.append(data[p][0])
                         sales.append(data[p][1:-2])
+
                     for i in sales:
                         for a in range(0, len(i)):
                             if i[a] == "":
                                 i[a] = "0"
+
                     for p in range(0, len(products)):
                         for b in range(0, len(bricks)):
+                            if sales[p][b] == "0":
+                                continue
                             child = []
                             child.append(products[p])
                             child.append(bricks[b])
                             child.append(sales[p][b])
                             result.append(child)
+
                     # for jetepar syrup and 2ml inj
                     for r in result:
                         if r[0] == "JETEPAR 2ML INJ 10S":
@@ -1670,16 +1729,18 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             final_result = fuzz.token_set_ratio(r[0], i[1])
                             if final_result >= 100:
                                 r[0] = i[0]
-                                # print(r)
+
                     for r in result:
                         for i in item_list:
                             if r[0] == i[0]:
                                 r.insert(1, i[1])
                                 r.append(i[2])
+
                     for r in result:
                         for t in tt_list:
                             if r[2] == t[0]:
                                 r.insert(4, t[1])
+
                     result = green_team_bricks(result)
                     return result
             elif dist_city == "Sialkot":
@@ -2187,13 +2248,13 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     if "2010305" in bricks[b]:
                         bricks[b] = "ADDA PASRURIAN"
                     if "2010710" in bricks[b]:
-                        bricks[b] = "ADDA PASRURIAN"
+                        bricks[b] = "NOUL MORH / HARRAR"
                     if "4020201" in bricks[b]:
                         bricks[b] = "MAIN BAZAR ZAFARWAL"
                     if "4020206" in bricks[b]:
                         bricks[b] = "THQ ROAD"
                     if "2020404" in bricks[b]:
-                        bricks[b] = "RANGER ROAD"
+                        bricks[b] = "RANGERS ROAD"
 
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
