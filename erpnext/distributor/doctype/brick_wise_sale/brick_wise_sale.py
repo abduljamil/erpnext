@@ -21,7 +21,7 @@ class BrickWiseSale(Document):
 
 
 @frappe.whitelist(allow_guest=True)
-def parse_pdf(pdf_file, parse_check, parent_detail):
+def _parse_pdf(pdf_file, parse_check, parent_detail):
     parent_details = json.loads(parent_detail)
     dist_city = parent_details["city"]
     if not parse_check:
@@ -1885,188 +1885,175 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 return result
             elif dist_city == "Karachi":
                 result = []
-                for x in range(0, len(pdf.pages)):
-                    products = []
-                    bricks = []
-                    sales = []
-                    new_result = []
-                    data = pdf.pages[x].extract_table()
-                    # print(data)
-                    product = data[0][1:]
-                    products.append(product)
-                    # print(products)
-                    for i in range(2, len(data)):  ## for skipping total row
-                        bricks.append(data[i][0])
-                        # print(bricks)
-                        sale = data[i][1:]
-                        sales.append(sale)
-                        # print(sales)
-                    for p in range(0, len(products)):
-                        products[p] = list(
-                            filter(None, products[p])
-                        )  ##remove none value
-                    bricks = list(filter(None, bricks))
-                    for s in range(0, len(sales)):
-                        sales[s] = [
-                            "0" if x == "" else x for x in sales[s]
-                        ]  ## change '' with '0'
+                new_result = []
 
-                    only_sale = [
-                        sales[s]
-                        for s in range(0, len(sales))
-                        if "\n" not in sales[s][0]
-                    ]
-                    ## remove the total of territory wise
-                    for p in products:
-                        for s in range(0, len(only_sale)):
-                            if len(only_sale[s]) - len(p) == 1:
-                                only_sale[s] = only_sale[s][:-1]
-                    for b in range(len(bricks)):
-                        if "AL-ASIF SQUARE" in bricks[b]:
-                            bricks[b] = "AL ASIF SQUARE"
-                        if "AZAM-BASTI,MEHMOODABAD" in bricks[b]:
-                            bricks[b] = "AZAM-BASTI AND MEHMOODABAD"
-                        if "CIVIL HOSPITAL" in bricks[b]:
-                            bricks[b] = "CIVIL HOSPITAL KHI"
-                        if "CLIFTON,DEFENCE" in bricks[b]:
-                            bricks[b] = "CLIFTON AND DEFENCE"
-                        if "FEDERAL. B.AREA" in bricks[b]:
-                            bricks[b] = "FEDERAL B AREA"
-                        if "GULISTAN-E-JAUHAR" in bricks[b]:
-                            bricks[b] = "GULISTAN E JAUHAR"
-                        if "GULSHAN-E-IQBAL" in bricks[b]:
-                            bricks[b] = "GULSHAN E IQBAL KHI"
-                        if "J.P.M.C, CANTT STATION" in bricks[b]:
-                            bricks[b] = "J.P.M.C AND CANTT STATION"
-                        if "KAHTOOR,GADAP." in bricks[b]:
-                            bricks[b] = "KAHTOOR AND GADAP"
-                        if "LANDHI,QUAIDABAD,OLD MUZAFABAD" in bricks[b]:
-                            bricks[b] = "LANDHI AND QUAIDABAD AND OLD MUZAFABAD"
-                        if "LIAQATABAD" in bricks[b]:
-                            bricks[b] = "LIAQUATABAD"
-                        if "LYARI,CHAKIWARA" in bricks[b]:
-                            bricks[b] = "LYARI AND CHAKIWARA"
-                        if "P.I.B,NEW TOWN" in bricks[b]:
-                            bricks[b] = "PIR ILAHI BUKSH AND NEW TOWN"
-                        if "RANCHORE LINE, USMANABAD" in bricks[b]:
-                            bricks[b] = "RANCHORE LANE AND USMANABAD"
-                        if "SADDAR" in bricks[b]:
-                            bricks[b] = "SADDAR KHI"
-                        if "SHAH FAISAL COLONY" in bricks[b]:
-                            bricks[b] = "SHAH FAISAL COLONY KHI"
-                        if "SOILDER BAZAR,GARDEN WEST" in bricks[b]:
-                            bricks[b] = "SOILDER BAZAR AND GARDEN WEST"
-                        if "TOWER,BURNS ROAD" in bricks[b]:
-                            bricks[b] = "TOWER AND BURNS ROAD"
-                        if "WINDER,UTHAL,BELA,COASTLY BELT." in bricks[b]:
-                            bricks[b] = "WINDER AND UTHAL AND BELA AND COASTLY BELT"
-                        if "ANKELASRIA HOSPITAL" in bricks[b]:
-                            bricks[b] = "ANKLESARIA HOSPITAL"
-                    # print(products)
+                # (PDF mein jo naam/hissa ho, Territory Tree ka naam) - pehla match jeetega
+                KHI_BRICKS = [
+                    ("AL-ASIF SQUARE", "AL ASIF SQUARE"),
+                    ("AZAM-BASTI,MEHMOODABAD", "AZAM-BASTI AND MEHMOODABAD"),
+                    ("CIVIL HOSPITAL", "CIVIL HOSPITAL KHI"),
+                    ("CLIFTON,DEFENCE", "CLIFTON AND DEFENCE"),
+                    ("FEDERAL. B.AREA", "FEDERAL B AREA"),
+                    ("GULISTAN-E-JAUHAR", "GULISTAN E JAUHAR"),
+                    ("GULSHAN-E-IQBAL", "GULSHAN E IQBAL KHI"),
+                    ("J.P.M.C, CANTT STATION", "J.P.M.C AND CANTT STATION"),
+                    ("KAHTOOR,GADAP.", "KAHTOOR AND GADAP"),
+                    (
+                        "LANDHI,QUAIDABAD,OLD MUZAFABAD",
+                        "LANDHI AND QUAIDABAD AND OLD MUZAFABAD",
+                    ),
+                    ("LIAQATABAD", "LIAQUATABAD"),
+                    ("LYARI,CHAKIWARA", "LYARI AND CHAKIWARA"),
+                    ("P.I.B,NEW TOWN", "PIR ILAHI BUKSH AND NEW TOWN"),
+                    ("RANCHORE LINE, USMANABAD", "RANCHORE LANE AND USMANABAD"),
+                    ("SADDAR", "SADDAR KHI"),
+                    ("SHAH FAISAL COLONY", "SHAH FAISAL COLONY KHI"),
+                    ("SOILDER BAZAR,GARDEN WEST", "SOILDER BAZAR AND GARDEN WEST"),
+                    ("TOWER,BURNS ROAD", "TOWER AND BURNS ROAD"),
+                    (
+                        "WINDER,UTHAL,BELA,COASTLY BELT.",
+                        "WINDER AND UTHAL AND BELA AND COASTLY BELT",
+                    ),
+                    ("ANKELASRIA HOSPITAL", "ANKLESARIA HOSPITAL"),
+                ]
 
-                    for b in range(len(products[0])):
-                        if "CNORN-FRT-I" in products[0][b]:
-                            products[0][b] = "005425"
-                        if "DPROGSIC-P" in products[0][b]:
-                            products[0][b] = "081838"
-                        if "EBAST 10MG-" in products[0][b]:
-                            products[0][b] = "023906"
-                        if "HISFIX180MG" in products[0][b]:
-                            products[0][b] = "031038"
-                        if "HISFX-180MG" in products[0][b]:
-                            products[0][b] = "031038"
-                        if "HISTFX-120M" in products[0][b]:
-                            products[0][b] = "031037"
-                        if "GISRIP 2MG T" in products[0][b]:
-                            products[0][b] = "035295"
-                        if "ISRP-1MG T" in products[0][b]:
-                            products[0][b] = "035294"
-                        if "JETEPAR CAP" in products[0][b]:
-                            products[0][b] = "002392"
-                        if "JETEPAR SYR" in products[0][b]:
-                            products[0][b] = "002188"
-                        if "JTPAR-INJC- 2" in products[0][b]:
-                            products[0][b] = "004348"
-                        if "JTPR 10ML" in products[0][b]:
-                            products[0][b] = "008999"
-                        if "MAIORAD IN" in products[0][b]:
-                            products[0][b] = "009072"
-                        if "MAIORAD-IN" in products[0][b]:
-                            products[0][b] = "009072"
+                def khi_brick(cell):
+                    b = re.sub(r"\s+", " ", str(cell)).strip()
+                    for key, name in KHI_BRICKS:
+                        if key in b:
+                            return name
+                    return b
 
-                        if "MALTM  PLS" in products[0][b]:
-                            products[0][b] = "071560"
-                        if "DMAORAD-TAB" in products[0][b]:
-                            products[0][b] = "012961"
-                        if "METRONI 200" in products[0][b]:
-                            products[0][b] = "008909"
-                        if "MINGIR-10MG" in products[0][b]:
-                            products[0][b] = "038427"
-                        if "MNGAR TAB-" in products[0][b]:
-                            products[0][b] = "038426"
+                def khi_code(header, pack):
+                    """Header PDF ke hisaab se kat jata hai / kabhi kabhi padosi harf chipak jata hai
+                    (e.g. 'AJETEPAR .10 M'), is liye naam + pack ke keywords se pehchante hain."""
+                    h = re.sub(r"[^A-Z0-9]", "", str(header).upper())
+                    pk = re.sub(r"[^A-Z0-9]", "", str(pack).upper())
+                    if not h:
+                        return None
+                    if re.search(r"CYNRIN|CNORN|CYANORIN", h):
+                        return "005425"
+                    if re.search(r"DPROG|PROGS", h):
+                        return "081838"
+                    if "EBAST" in h:
+                        return "023906"
+                    if re.search(r"HIS\w*?180", h):
+                        return "031038"
+                    if re.search(r"HIS\w*?120", h):
+                        return "031037"
+                    if re.search(r"ISR\w*?1MG", h):
+                        return "035294"
+                    if re.search(r"ISR\w*?2MG", h):
+                        return "035295"
+                    if re.search(r"JETEPAR|JTPAR|JTPR", h):
+                        if "CAP" in h:
+                            return "002392"
+                        if "SYR" in h or "SYP" in h or pk.startswith("112ML"):
+                            return "002188"
+                        if pk.startswith("2ML") or (
+                            "INJ" in h and "2" in h and "10" not in h
+                        ):
+                            return "004348"
+                        if "10" in h or pk.startswith("10ML"):
+                            return "008999"
+                    if re.search(r"MAI?ORAD", h):
+                        if "TAB" in h:
+                            return "012961"
+                        return "009072"
+                    if re.search(r"MALTM|MALTEM", h):
+                        return "071560"
+                    if re.search(r"METRON|MTRN", h):
+                        return "008909" if "200" in h else "081274"
+                    if re.search(r"MINGIR|MINGAIR|MNGAR|MNGIR", h):
+                        return "038427" if "10" in h else "038426"
+                    if re.search(r"^[A-Z0-9]?(MOX|MXL)", h):
+                        if not re.search(r"\d", h):
+                            return "006782"  # MOXILIUM-D (drops)
+                        if "125" in h:
+                            return "006783"
+                        if "500" in h:
+                            return "008908"
+                        if "250" in h:
+                            return "012649" if "ML" in pk else "006784"
+                    if "OBEX" in h:
+                        return "032259"
+                    if re.search(r"PCLC|PCLAC", h):
+                        return "019133"
+                    if "PROB" in h:
+                        return "016654"
+                    if re.search(r"SAVEL|SAVLOX|SAVELOX", h):
+                        return "029328" if "500" in h else "032255"
+                    if re.search(r"SPRCEF|SUPRCEF|SUPARCF|SUPRACEF", h):
+                        if "DS" in h:
+                            return "028727"
+                        if "SUS" in h:
+                            return "024819"
+                        return "024820"
+                    if re.search(r"SUPRLOX|SUPRALOX", h):
+                        return "028728"
+                    if "TRAM" in h:
+                        if "SIC" in h or "INJ" in h:
+                            return "026920"
+                        return "029327" if "5" in h else "026920"
+                    if "VIGROL" in h:
+                        return "007018"
+                    if re.search(r"VIKNN|VIKON", h):
+                        return "006406"
+                    if re.match(r"^(AVOR|AVR)", h):
+                        return "006584" if "1MG" in h else "007853"
+                    return None
 
-                        if "MOXILIUM-D" in products[0][b]:
-                            products[0][b] = "006782"
-                        if "RMOXILM-125M" in products[0][b]:
-                            products[0][b] = "006783"
-                        if "MOXLIM 500-" in products[0][b]:
-                            products[0][b] = "008908"
-                        if "MOXLIM-500" in products[0][b]:
-                            products[0][b] = "008908"
-                        if "MOXLUM-250" in products[0][b]:
-                            products[0][b] = "006784"
-                        if "MTRNIDAZ T" in products[0][b]:
-                            products[0][b] = "081274"
-                        if "BMXLM- 250MG" in products[0][b]:
-                            products[0][b] = "006784"
-                        if "OBEXL-20MG" in products[0][b]:
-                            products[0][b] = "032259"
-                        if "PC-LC-SYRUP" in products[0][b]:
-                            products[0][b] = "019133"
-                        if "PROBTOR 20M" in products[0][b]:
-                            products[0][b] = "016654"
-                        if "PROBTOR-20M" in products[0][b]:
-                            products[0][b] = "016654"
-                        if "SAVELX 250M" in products[0][b]:
-                            products[0][b] = "032255"
-                        if "SAVLOX-500" in products[0][b]:
-                            products[0][b] = "029328"
-                        if "SPRCEF-DS SY" in products[0][b]:
-                            products[0][b] = "028727"
-                        if "SPRCEF-DS-SY" in products[0][b]:
-                            products[0][b] = "028727"
-                        if "SUPARCF-SUS" in products[0][b]:
-                            products[0][b] = "024819"
-                        if "SUPRCEF 400" in products[0][b]:
-                            products[0][b] = "024820"
-                        if "SUPRLOX SYR" in products[0][b]:
-                            products[0][b] = "028728"
-                        if "TRAMAGES 5" in products[0][b]:
-                            products[0][b] = "029327"
-                        if "0TRAMAGSIC" in products[0][b]:
-                            products[0][b] = "026920"
-                        if "VIGROL FORT" in products[0][b]:
-                            products[0][b] = "007018"
-                        if "VIKNN-FORT" in products[0][b]:
-                            products[0][b] = "006406"
-                    # print(products)
-                    for b in range(0, len(bricks)):
-                        for s in range(0, len(only_sale[b])):
-                            child = []
-                            child.append(products[0][s])
-                            child.append(bricks[b])
-                            # print(bricks[b])
-                            child.append(only_sale[b][s])
-                            result.append(child)
-                for r in range(
-                    len(result)
-                ):  # this script add the two sales in each box(e.g 5+6)
-                    if "+" in result[r][2]:
-                        temp_sale = result[r][2]
-                        temp_sale = temp_sale.split("+")
-                        temp_sale = int(temp_sale[0]) + int(temp_sale[1])
-                        temp_sale = str(temp_sale)
-                        result[r][2] = temp_sale
+                def khi_qty(cell):
+                    """'10+2' -> 12 (sale + bonus), '-2' -> -2, '' -> 0"""
+                    s = str(cell or "").replace(",", "")
+                    nums = re.findall(r"[+-]?\d+(?:\.\d+)?", s)
+                    if not nums:
+                        return "0"
+                    tot = sum(float(n) for n in nums)
+                    return str(int(tot)) if tot == int(tot) else str(tot)
+
+                for pg in pdf.pages:
+                    for data in pg.extract_tables():
+                        if not data or len(data[0]) < 3:
+                            continue
+                        header = data[0]
+                        if sum(1 for c in header[1:] if c and str(c).strip()) < 2:
+                            continue
+                        # pack row ("A R E A", 10X10'S ...) optional
+                        start = 1
+                        pack = [""] * len(header)
+                        if (
+                            len(data) > 1
+                            and re.sub(r"[^A-Z]", "", str(data[1][0] or "").upper())
+                            == "AREA"
+                        ):
+                            pack = [c or "" for c in data[1]]
+                            start = 2
+
+                        # product columns: sirf jinka header hai (Amount / total column ka header None hota hai)
+                        cols = []
+                        for ci in range(1, len(header)):
+                            if header[ci] and str(header[ci]).strip():
+                                code = khi_code(
+                                    header[ci], pack[ci] if ci < len(pack) else ""
+                                )
+                                if code is None:
+                                    print(
+                                        f"[Karachi] product header not recognised, skipped: {str(header[ci])!r} / {pack[ci] if ci < len(pack) else ''!r}"
+                                    )
+                                cols.append((ci, code))
+
+                        for row in data[start:]:
+                            if not row or not row[0] or not str(row[0]).strip():
+                                continue  # total row (pehla cell khali)
+                            brick = khi_brick(row[0])
+                            for ci, code in cols:
+                                if code is None or ci >= len(row):
+                                    continue
+                                q = khi_qty(row[ci])
+                                if q != "0":
+                                    result.append([code, brick, q])
+
                 for r in range(0, len(result)):
                     for i in item_list:
                         if result[r][0] == i[0]:
@@ -2077,13 +2064,11 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-                            # print(r)
 
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                            # print(r)
                 new_result = green_team_bricks(new_result)
                 return new_result
             elif dist_city == "Sahiwal":
@@ -2997,7 +2982,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
 
                 new_result = green_team_bricks(new_result)
                 return new_result
-            elif dist_city == "Mandi Bahauddin":
+            elif dist_city == "MBD":
                 result = []
                 new_result = []
                 products = []
@@ -3314,18 +3299,27 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks = []
                 sales = []
 
-                # This report always prints 15 numeric columns before the
-                # trailing "Value" total: the 7 real products below, plus 8
-                # columns that are always blank/zero on this report (no
-                # header text of their own, so there's no way to know what
-                # product they'd represent -- they're simply ignored).
-                NUM_VALUE_COLS = 15
+                # PDF ka structure (rendered page se verify kiya hua):
+                #   line     : <brick name> <N value columns> <Value total>
+                #   agli line: chhota "area code" (jaise 118) -- yeh product column NAHI hai
+                # N (value columns ki tadaad) pehle 15 hoti thi, lekin ab file se khud
+                # nikaali jati hai taake alag-alag files (purani/nayi) mein blank columns
+                # kam ya ziada hon to bhi kaam kare.
+                DEFAULT_NUM_VALUE_COLS = 15
 
+                def _to_int(s):
+                    # "1,234" jaisi values ke liye bhi safe
+                    return int(str(s).replace(",", ""))
+
+                def _is_num(tok):
+                    return re.fullmatch(r"-?[\d,]+", tok) is not None
+
+                # ---- Pass 1: har page ka data range dhoondein ----
+                pages_data = []
                 for page in pdf.pages:
-                    text = page.extract_text()
+                    text = page.extract_text() or ""
                     lines = text.split("\n")
 
-                    # ---- header aur footer ke darmiyan asal data ka range dhoondein ----
                     start_idx = None
                     end_idx = len(lines)
                     for i, line in enumerate(lines):
@@ -3340,7 +3334,32 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
 
                     if start_idx is None:
                         continue
+                    pages_data.append((lines, start_idx, end_idx))
 
+                # ---- value columns ki tadaad (N) file se nikalein ----
+                # Har data line ke end mein numbers ka silsila hota hai:
+                # N values + 1 total. Zyada-tar lines ka common count hi N hai
+                # (jin bricks ke naam ke aakhir mein number ho, jaise "ADA 79",
+                # unka count 1 zyada aayega -- mode us ko ignore kar deta hai).
+                run_counts = {}
+                for lines, s, e in pages_data:
+                    for ln in lines[s:e]:
+                        toks = ln.split()
+                        run = 0
+                        for tok in reversed(toks):
+                            if _is_num(tok):
+                                run += 1
+                            else:
+                                break
+                        if run >= 8 and run < len(toks):  # 7 products + total, aur naam
+                            run_counts[run - 1] = run_counts.get(run - 1, 0) + 1
+                if run_counts:
+                    NUM_VALUE_COLS = max(run_counts, key=run_counts.get)
+                else:
+                    NUM_VALUE_COLS = DEFAULT_NUM_VALUE_COLS
+
+                # ---- Pass 2: bricks aur unki values parse karein ----
+                for lines, start_idx, end_idx in pages_data:
                     i = start_idx
                     while i < end_idx:
                         line = lines[i].strip()
@@ -3349,23 +3368,18 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             continue
 
                         tokens = line.split()
-                        # need: name (>=1 token) + 15 values + 1 total = 17+ tokens
+                        # need: name (>=1 token) + N values + 1 total
                         if len(tokens) < NUM_VALUE_COLS + 2:
                             continue  # not a brick data line
+                        if not _is_num(tokens[-1]):
+                            continue  # total nahi hai => data line nahi
 
-                        # Split from the END, not from the front: some brick
-                        # names end in a number of their own (e.g. "ADA 79",
-                        # "SATINA 2"), which breaks a "find the first
-                        # number" approach -- it would mistake that number
-                        # for the start of the values and shift everything
-                        # over by one column. The value/total column count
-                        # is always the same 16 tokens (15 values + 1
-                        # total), so counting back from the end is reliable
-                        # regardless of how many words are in the name.
+                        # Split from the END, not from the front: some brick names end
+                        # in a number of their own (e.g. "ADA 79", "SATINA 2").
                         name = " ".join(tokens[: -(NUM_VALUE_COLS + 1)])
                         values = tokens[-(NUM_VALUE_COLS + 1) : -1]
 
-                        # ---- agli line ek chhota "area code" column hai (product value NAHI hai) ----
+                        # ---- agli line ek chhota "area code" hai (product value NAHI) ----
                         if i < end_idx and re.fullmatch(r"-?\d+", lines[i].strip()):
                             i += 1
 
@@ -3422,6 +3436,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 # col4 = JETEPARSYP(NEW)     -> 002188
                 # col5 = JETEPARSYP(NEW1)    -> 002188 (same product as col4, summed)
                 # col6 = JETEPARSYP(OLD)     -> 002188 (same product as col4, summed)
+                # col7+ = header-less columns, hamesha ignore.
                 # NOTE: "(NEW)"/"(OLD)"/"(NEW1)" are treated as the same
                 # underlying product (different batch/packaging). If they
                 # should be tracked as separate line items instead, give
@@ -3431,24 +3446,29 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     if len(vals) < 7:
                         continue
 
-                    jetepar_10ml = int(vals[0]) + int(vals[1])
-                    jetepar_2ml = int(vals[2])
-                    jetepar_cap = int(vals[3])
-                    jetepar_syrup = int(vals[4]) + int(vals[5]) + int(vals[6])
-
-                    row_map = [
-                        ("008999", jetepar_10ml),
-                        ("004348", jetepar_2ml),
-                        ("002392", jetepar_cap),
-                        ("002188", jetepar_syrup),
+                    # Har product ke liye: positive sales ka total ek row, aur negative
+                    # (return) ka total alag row. Pehle dono net ho jate the
+                    # (jaise BHAI WALA syrup: 5 aur -1 => 4); ab 5 aur -1 alag rows
+                    # banengi.
+                    product_cols = [
+                        ("008999", [0, 1]),
+                        ("004348", [2]),
+                        ("002392", [3]),
+                        ("002188", [4, 5, 6]),
                     ]
 
-                    for code, val in row_map:
-                        child = []
-                        child.append(code)
-                        child.append(bricks[b])
-                        child.append(str(val))
-                        result.append(child)
+                    for code, idxs in product_cols:
+                        nums = [_to_int(vals[k]) for k in idxs]
+                        positive = sum(n for n in nums if n > 0)
+                        negative = sum(n for n in nums if n < 0)
+                        for val in (positive, negative):
+                            if val == 0:
+                                continue
+                            child = []
+                            child.append(code)
+                            child.append(bricks[b])
+                            child.append(str(val))
+                            result.append(child)
 
                 for r in range(0, len(result)):
                     for i in item_list:
@@ -3492,7 +3512,6 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
 
                 new_result = green_team_bricks(new_result)
                 return new_result
-                # print(f"Faisalabad result: {new_result}")
 
             elif dist_city == "Timergara":
                 result = []
@@ -4082,222 +4101,186 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 return result
 
             elif dist_city == "Rawalpindi":
-                products = []
-                sales = []
-                bricks = []
                 result = []
                 new_result = []
-                for x in range(0, len(pdf.pages)):
-                    data = pdf.pages[x].extract_table()
-                    products.append(data[0][1:-1])
-                    if x == len(pdf.pages) - 1:
-                        for i in range(1, len(data) - 1):
-                            sales.append(data[i][1:-1])
-                            bricks.append(data[i][0])
-                    else:
-                        for i in range(1, len(data)):
-                            sales.append(data[i][1:-1])
-                            bricks.append(data[i][0])
-                    if x == 1:
-                        for k in range(0, len(bricks)):
-                            # bricks[k] = bricks[k][10:]
-                            # if bricks[k] == 'MALL ROAD':
-                            # 	bricks[k] = 'MALL ROAD RWL'
-                            # if bricks[k] == 'CHAKWAL':
-                            # 	bricks[k] = 'CHAKWAL RWL'
-                            # if bricks[k] == 'ALI PURE FARASH':
-                            # 	bricks[k] = 'ALI PUR FARASH'
-                            # if bricks[k] == 'BUNNI CHOWK':
-                            # 	bricks[k] = 'BANNI CHOWK'
-                            # if bricks[k] == 'JAMIA MASJID ROAD':
-                            # 	bricks[k] = 'JAMIA MASJID ROAD'
-                            # if bricks[k] == 'KHAYABAN-E-SIR \nSYED':
-                            # 	bricks[k] = 'KHAYABAN E SIR SYED'
-                            # if bricks[k] == 'CHAKLALA SCHEME \nIII':
-                            # 	bricks[k] = 'CHAKLALA SCHEME III'
-                            # if bricks[k] == 'JAMIA MASJID \nROAD':
-                            # 	bricks[k] = 'JAMIA MASJID ROAD'
 
-                            if "1010104" in bricks[k]:
-                                bricks[k] = "G-10"
-                            if "1010105" in bricks[k]:
-                                bricks[k] = "G-11"
-                            if "1010112" in bricks[k]:
-                                bricks[k] = "I-8"
-                            if "1010206" in bricks[k]:
-                                bricks[k] = "BARA KAHU"
-                            if "1010209" in bricks[k]:
-                                bricks[k] = "ALI PUR FARASH"
-                            if "1020101" in bricks[k]:
-                                bricks[k] = "CHANDNI CHOWK"
-                            if "1020102" in bricks[k]:
-                                bricks[k] = "SAID PURE ROAD"
-                            if "1020103" in bricks[k]:
-                                bricks[k] = "BOHAR BAZAR"
-                            if "1020111" in bricks[k]:
-                                bricks[k] = "SADIQABAD"
-                            if "1020201" in bricks[k]:
-                                bricks[k] = "SADDAR"
-                            if "1020206" in bricks[k]:
-                                bricks[k] = "KAMALABAD"
-                            if "1020211" in bricks[k]:
-                                bricks[k] = "CHAKLALA SCHEME III"
-                            if "1020212" in bricks[k]:
-                                bricks[k] = "BAHRIA"
-                            if "1020216" in bricks[k]:
-                                bricks[k] = "MALL ROAD RWL"
-                            if "1030201" in bricks[k]:
-                                bricks[k] = "WAH CANTT"
-                            if "1040101" in bricks[k]:
-                                bricks[k] = "ATTOCK"
-                            if "1040501" in bricks[k]:
-                                bricks[k] = "KAMRA"
-                            if "1050101" in bricks[k]:
-                                bricks[k] = "GUJAR KHAN"
-                            if "1050301" in bricks[k]:
-                                bricks[k] = "KAHUTA"
-                            if "1010101" in bricks[k]:
-                                bricks[k] = "G-8 MARKAZ"
-                            if "1010102" in bricks[k]:
-                                bricks[k] = "G-9 MARKAZ"
-                            if "1010103" in bricks[k]:
-                                bricks[k] = "PESHAWAR MORE"
-                            if "1010106" in bricks[k]:
-                                bricks[k] = "F-10"
-                            if "1010107" in bricks[k]:
-                                bricks[k] = "F-11"
-                            if "1010110" in bricks[k]:
-                                bricks[k] = "F-8"
-                            if "1010111" in bricks[k]:
-                                bricks[k] = "E SECTORS"
-                            if "1010113" in bricks[k]:
-                                bricks[k] = "I-9"
-                            if "1010114" in bricks[k]:
-                                bricks[k] = "I-10"
-                            if "1010115" in bricks[k]:
-                                bricks[k] = "PWD"
-                            if "1010116" in bricks[k]:
-                                bricks[k] = "HUMMAK"
-                            if "1010117" in bricks[k]:
-                                bricks[k] = "MANDRA"
-                            if "1010118" in bricks[k]:
-                                bricks[k] = "B-17"
-                            if "1010119" in bricks[k]:
-                                bricks[k] = "D-17"
-                            if "1010122" in bricks[k]:
-                                bricks[k] = "D-12 MARKAZ"
-                            if "1010201" in bricks[k]:
-                                bricks[k] = "F-6 SUPER MARKET"
-                            if "1010202" in bricks[k]:
-                                bricks[k] = "F-7 JINNAH SUPER"
-                            if "1010203" in bricks[k]:
-                                bricks[k] = "MELODY MARKET"
-                            if "1010204" in bricks[k]:
-                                bricks[k] = "ABPARA MARKET"
-                            if "1010207" in bricks[k]:
-                                bricks[k] = "BLUE AREA"
-                            if "1010301" in bricks[k]:
-                                bricks[k] = "CHAK SHAHZAD"
-                            if "1020107" in bricks[k]:
-                                bricks[k] = "KHAYABAN E SIR SYED"
-                            if "1020108" in bricks[k]:
-                                bricks[k] = "PIRWADHAI"
-                            if "1020109" in bricks[k]:
-                                bricks[k] = "DHOKE HASSOO"
-                            if "1020110" in bricks[k]:
-                                bricks[k] = "DHQ MOHAN PURA"
-                            if "1020114" in bricks[k]:
-                                bricks[k] = "MURREE ROAD"
-                            if "1020116" in bricks[k]:
-                                bricks[k] = "SATELLITE TOWN RWL"
-                            if "1020203" in bricks[k]:
-                                bricks[k] = "PESHAWAR ROAD"
-                            if "1020204" in bricks[k]:
-                                bricks[k] = "TENCH BHATA"
-                            if "1020205" in bricks[k]:
-                                bricks[k] = "DHERI"
-                            if "1020209" in bricks[k]:
-                                bricks[k] = "MORGAH"
-                            if "1020213" in bricks[k]:
-                                bricks[k] = "NASEERABAD"
-                            if "1020214" in bricks[k]:
-                                bricks[k] = "MISRIAL ROAD"
-                            if "1020215" in bricks[k]:
-                                bricks[k] = "LALKURTI"
-                            if "1020401" in bricks[k]:
-                                bricks[k] = "GULBERG GREEN"
-                            if "1030101" in bricks[k]:
-                                bricks[k] = "TAXILLA"
-                            if "1030301" in bricks[k]:
-                                bricks[k] = "HASSAN ABDAL"
-                            if "1030401" in bricks[k]:
-                                bricks[k] = "TARNOL"
-                            if "1040201" in bricks[k]:
-                                bricks[k] = "HAZRO"
-                            if "1050201" in bricks[k]:
-                                bricks[k] = "KALLAR SAYYADAN"
-                            if "1050401" in bricks[k]:
-                                bricks[k] = "MANDRA"
-                            if "1050402" in bricks[k]:
-                                bricks[k] = "RAWAT"
-                            if "1050403" in bricks[k]:
-                                bricks[k] = "DHA"
-                            if "1060101" in bricks[k]:
-                                bricks[k] = "FATEH JANG"
-                            if "1080301" in bricks[k]:
-                                bricks[k] = "KOTLI"
-                            if "1010401" in bricks[k]:
-                                bricks[k] = "GHOURI TOWN"
-                            if "1030402" in bricks[k]:
-                                bricks[k] = "G-15"
-                            if "1010120" in bricks[k]:
-                                bricks[k] = "F-17"
-                            if "1010121" in bricks[k]:
-                                bricks[k] = "F-18"
-                            if "1020105" in bricks[k]:
-                                bricks[k] = "JAMIA MASJID ROAD"
-                            if "1020106" in bricks[k]:
-                                bricks[k] = "OPP HFH"
-                            if "1020210" in bricks[k]:
-                                bricks[k] = "ADYALA ROAD"
-                            if "1060301" in bricks[k]:
-                                bricks[k] = "PINDI GHEB"
-                            if "1020208" in bricks[k]:
-                                bricks[k] = "DHAMIAL CHAKRI"
-                            if "1020113" in bricks[k]:
-                                bricks[k] = "DHOKE KALA KHAN"
-                            if "1020119" in bricks[k]:
-                                bricks[k] = "MARIR HASSAN"
+                # Brick code -> Territory Tree name
+                RWP_BRICK_CODES = {
+                    "1010101": "G-8 MARKAZ",
+                    "1010102": "G-9 MARKAZ",
+                    "1010103": "PESHAWAR MORE",
+                    "1010104": "G-10",
+                    "1010105": "G-11",
+                    "1010106": "F-10",
+                    "1010107": "F-11",
+                    "1010110": "F-8",
+                    "1010111": "E SECTORS",
+                    "1010112": "I-8",
+                    "1010113": "I-9",
+                    "1010114": "I-10",
+                    "1010115": "PWD",
+                    "1010116": "HUMMAK",
+                    "1010117": "MANDRA",
+                    "1010118": "B-17",
+                    "1010119": "D-17",
+                    "1010120": "F-17",
+                    "1010121": "F-18",
+                    "1010122": "D-12 MARKAZ",
+                    "1010201": "F-6 SUPER MARKET",
+                    "1010202": "F-7 JINNAH SUPER",
+                    "1010203": "MELODY MARKET",
+                    "1010204": "ABPARA MARKET",
+                    "1010206": "BARA KAHU",
+                    "1010207": "BLUE AREA",
+                    "1010209": "ALI PUR FARASH",
+                    "1010301": "CHAK SHAHZAD",
+                    "1010401": "GHOURI TOWN",
+                    "1020101": "CHANDNI CHOWK",
+                    "1020102": "SAID PURE ROAD",
+                    "1020103": "BOHAR BAZAR",
+                    "1020105": "JAMIA MASJID ROAD",
+                    "1020106": "OPP HFH",
+                    "1020107": "KHAYABAN E SIR SYED",
+                    "1020108": "PIRWADHAI",
+                    "1020109": "DHOKE HASSOO",
+                    "1020110": "DHQ MOHAN PURA",
+                    "1020111": "SADIQABAD",
+                    "1020113": "DHOKE KALA KHAN",
+                    "1020114": "MURREE ROAD",
+                    "1020116": "SATELLITE TOWN RWL",
+                    "1020119": "MARIR HASSAN",
+                    "1020201": "SADDAR",
+                    "1020203": "PESHAWAR ROAD",
+                    "1020204": "TENCH BHATA",
+                    "1020205": "DHERI",
+                    "1020206": "KAMALABAD",
+                    "1020208": "DHAMIAL CHAKRI",
+                    "1020209": "MORGAH",
+                    "1020210": "ADYALA ROAD",
+                    "1020211": "CHAKLALA SCHEME III",
+                    "1020212": "BAHRIA",
+                    "1020213": "NASEERABAD",
+                    "1020214": "MISRIAL ROAD",
+                    "1020215": "LALKURTI",
+                    "1020216": "MALL ROAD RWL",
+                    "1020401": "GULBERG GREEN",
+                    "1030101": "TAXILLA",
+                    "1030201": "WAH CANTT",
+                    "1030301": "HASSAN ABDAL",
+                    "1030401": "TARNOL",
+                    "1030402": "G-15",
+                    "1040101": "ATTOCK",
+                    "1040201": "HAZRO",
+                    "1040501": "KAMRA",
+                    "1050101": "GUJAR KHAN",
+                    "1050201": "KALLAR SAYYADAN",
+                    "1050301": "KAHUTA",
+                    "1050401": "MANDRA",
+                    "1050402": "RAWAT",
+                    "1050403": "DHA",
+                    "1060101": "FATEH JANG",
+                    "1060301": "PINDI GHEB",
+                    "1080301": "KOTLI",
+                }
+                # Purane (bina code wale) reports ke naam
+                RWP_BRICK_NAMES = {
+                    "MALL ROAD": "MALL ROAD RWL",
+                    "CHAKWAL": "CHAKWAL RWL",
+                    "ALI PURE FARASH": "ALI PUR FARASH",
+                    "BUNNI CHOWK": "BANNI CHOWK",
+                    "KHAYABAN-E-SIR SYED": "KHAYABAN E SIR SYED",
+                    "CHAKLALA SCHEME III": "CHAKLALA SCHEME III",
+                    "JAMIA MASJID ROAD": "JAMIA MASJID ROAD",
+                }
 
-                for p in range(0, len(products)):
-                    for i in range(0, len(products[p])):
-                        if "009001" in products[p][i]:
-                            products[p][i] = "002188"
-                        if "009002" in products[p][i]:
-                            products[p][i] = "002392"
-                        if "009003" in products[p][i]:
-                            products[p][i] = "004348"
-                        if "009004" in products[p][i]:
-                            products[p][i] = "008999"
-                        if "009008" in products[p][i]:
-                            products[p][i] = "009072"
-                        if "009005" in products[p][i]:
-                            products[p][i] = "008376"
-                        if "AFLOXAN TAB" in products[p][i]:
-                            products[p][i] = "017230"
-                        if "MAIORAD TAB" in products[p][i]:
-                            products[p][i] = "012961"
-                    for s in range(0, len(sales)):
-                        for i in range(0, len(sales[s])):
-                            if sales[s][i] == "-":
-                                sales[s][i] = "0"
-                for s in range(0, len(sales)):
-                    for i in range(0, len(sales[s])):
-                        child = []
-                        child.append(products[p][i])
-                        child.append(bricks[s])
-                        child.append(sales[s][i])
-                        result.append(child)
+                def rwp_brick(cell):
+                    raw = re.sub(r"\s+", " ", str(cell or "")).strip()
+                    m = re.match(r"^(\d{7})\b\s*-?\s*(.*)$", raw)
+                    if m:
+                        code, name = m.group(1), m.group(2).strip()
+                        if code in RWP_BRICK_CODES:
+                            return RWP_BRICK_CODES[code]
+                        raw = name  # code map mein nahi -> code hata kar naam
+                    return RWP_BRICK_NAMES.get(raw.upper(), raw)
+
+                # Product column: pehle NAAM se, phir CODE se (newline/space ignore)
+                RWP_PRODUCT_CODES = {
+                    "009001": "002188",
+                    "009002": "002392",
+                    "009003": "004348",
+                    "009004": "008999",
+                    "009005": "008376",
+                    "009007": "012961",
+                    "009008": "009072",
+                }
+
+                def rwp_product(header):
+                    h = re.sub(r"\s+", "", str(header or "")).upper()
+                    if not h:
+                        return None
+                    if "JETEPAR" in h:
+                        if "SYP" in h or "SYRUP" in h:
+                            return "002188"
+                        if "CAP" in h:
+                            return "002392"
+                        if "2ML" in h or "2CC" in h:
+                            return "004348"
+                        if "10ML" in h or "10CC" in h:
+                            return "008999"
+                    if "MAIORAD" in h:
+                        if "TAB" in h:
+                            return "012961"
+                        if "INJ" in h or "AMP" in h or "3ML" in h:
+                            return "009072"
+                    if "AFLOXAN" in h or "AFLOXON" in h:
+                        if "TAB" in h:
+                            return "017230"
+                        if "CAP" in h:
+                            return "008376"
+                    m = re.match(r"^(\d{6})", h)
+                    if m and m.group(1) in RWP_PRODUCT_CODES:
+                        return RWP_PRODUCT_CODES[m.group(1)]
+                    return None
+
+                def rwp_clean_sale(v):
+                    if v is None:
+                        return "0"
+                    s = str(v).split("\n")[0].strip().replace(",", "")
+                    return "0" if s in ("", "-") else s
+
+                col_map = None  # {column index: item code}; agle page pe header na ho to purana use hota hai
+                for pg in pdf.pages:
+                    for table in pg.extract_tables():
+                        for row in table:
+                            if not row:
+                                continue
+                            first = re.sub(r"\s+", " ", str(row[0] or "")).strip()
+
+                            # header row: pehla cell khali/text aur kam az kam 1 product pehchana jaye
+                            if not re.match(r"^\d{7}\b", first):
+                                found = {
+                                    ci: rwp_product(c)
+                                    for ci, c in enumerate(row)
+                                    if ci > 0 and rwp_product(c)
+                                }
+                                if found:
+                                    col_map = found
+                                    continue
+                            # Total / khali row skip
+                            if not first or first.upper().startswith(
+                                ("TOTAL", "GRAND")
+                            ):
+                                continue
+                            if not col_map:
+                                continue
+
+                            brick = rwp_brick(first)
+                            for ci, code in col_map.items():
+                                if ci < len(row):
+                                    result.append(
+                                        [code, brick, rwp_clean_sale(row[ci])]
+                                    )
+
                 for r in range(0, len(result)):
                     for i in item_list:
                         if result[r][0] == i[0]:
@@ -4314,7 +4297,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[2] == t[0]:
                             r.insert(4, t[1])
                 new_result = green_team_bricks(new_result)
-                # return new_result
+                return new_result
 
             elif dist_city == "Vehari":
                 result = []
@@ -4847,93 +4830,207 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
             elif dist_city == "Quetta":
                 result = []
                 new_result = []
-                products = []
 
-                bricks = [
-                    "ALAM KHAN CHOWK",
-                    "ALAMDAR ROAD",
-                    "BARORI",
-                    "QUETTA CANTONMENT",
-                    "INSTITUTION",
-                    "JINNAH ROAD KANDHARI BAZAR",
-                    "HUDA SPINI ROAD",
-                    "SABZAL ROAD",
-                    "SIRKI ROAD GAWALMANDI CHOWK",
-                    "LIAQAT BAZAR ARCHAR_FJ ROAD",
-                    "MEKANGI ROAD",
-                    "MISSION ROAD",
-                    "OFF JINNAH ROAD",
-                    "PASHTUN ABAD",
-                    "PRINCE ROAD",
-                    "SARIAB ROAD",
-                    "SATELLITE TOWN QTA",
-                    "ZARGON ROAD",
-                    "WHOLESALE QTA",
-                    "CHAMAN",
-                    "DALBANDIN",
-                    "DUKKI",
-                    "QILLA SIAFULLAH",
-                    "KALAT",
-                    "KHANOZAI",
-                    "KHARAN",
-                    "KHUZDAR",
-                    "KUCHLACK",
-                    "LORALAI",
-                    "M_BAG",
-                    "MASTUNG",
-                    "MACHH",
-                    "NOSHKI",
-                    "PISHIN",
-                    "SANJAWI",
-                    "SARANAN",
-                    "SIBI",
-                    "ZHOB",
-                    "ZIARAT",
+                # Header text (letters sorted, so wrapping/order does not matter) -> Territory name
+                QTA_HEADERS = {
+                    "Alam Khan Chock": "ALAM KHAN CHOWK",
+                    "Alamdar Road": "ALAMDAR ROAD",
+                    "Barori": "BARORI",
+                    "Cant": "QUETTA CANTONMENT",
+                    "Institution": "INSTITUTION",
+                    "Kandhari Bazar Jinnah Road": "JINNAH ROAD KANDHARI BAZAR",
+                    "Huda Spini Road": "HUDA SPINI ROAD",
+                    "Sabzal Road": "SABZAL ROAD",
+                    "Sirki Road Gawalmandi Chock": "SIRKI ROAD GAWALMANDI CHOWK",
+                    "Liaqat Bazar Archar FJ Road": "LIAQAT BAZAR ARCHAR_FJ ROAD",
+                    "Macangi Raod": "MEKANGI ROAD",
+                    "Mission Road": "MISSION ROAD",
+                    "Off Jinnah Road": "OFF JINNAH ROAD",
+                    "Pashtonabad": "PASHTUN ABAD",
+                    "Prince Road": "PRINCE ROAD",
+                    "Saryab Road": "SARIAB ROAD",
+                    "Satelite Town": "SATELLITE TOWN QTA",
+                    "Zargon Road": "ZARGON ROAD",
+                    "Wholesale": "WHOLESALE QTA",
+                    "Chaman": "CHAMAN",
+                    "Dalbandin": "DALBANDIN",
+                    "Dukki": "DUKKI",
+                    "K_Siafullah": "QILLA SIAFULLAH",
+                    "Kallat": "KALAT",
+                    "Khanozai": "KHANOZAI",
+                    "Kharan": "KHARAN",
+                    "Khuzdar": "KHUZDAR",
+                    "Kuchlack": "KUCHLACK",
+                    "Loralai": "LORALAI",
+                    "M_Bag": "M_BAG",
+                    "Mastung": "MASTUNG",
+                    "Much": "MACHH",
+                    "Noshki": "NOSHKI",
+                    "Pishin": "PISHIN",
+                    "Sanjavi": "SANJAWI",
+                    "Saranan": "SARANAN",
+                    "Sibbi": "SIBI",
+                    "Zhob": "ZHOB",
+                    "ZIARAT": "ZIARAT",
+                }
+
+                def qta_fp(s):
+                    return "".join(sorted(re.sub(r"[^A-Z0-9]", "", str(s).upper())))
+
+                QTA_HEADER_FP = {qta_fp(k): v for k, v in QTA_HEADERS.items()}
+
+                def qta_subset(have, key):
+                    need = Counter(key)
+                    return all(have[ch] >= n for ch, n in need.items())
+
+                def qta_classify(txt):
+                    """returns ('brick', name) / ('skip', None).
+                    Total columns ka text kabhi kabhi scrambled aata hai
+                    (e.g. 'Q / UT / AO / A / NTITYTAL / M'), is liye sirf
+                    lafz nahi, letters ke pattern se bhi pehchante hain."""
+                    fp = qta_fp(txt)
+                    if fp in QTA_HEADER_FP:  # exact brick header
+                        return "brick", QTA_HEADER_FP[fp]
+                    up = str(txt).upper()
+                    if any(k in up for k in ("TOTAL", "QUANTITY", "AMOUNT")):
+                        return "skip", None
+                    have = Counter(fp)
+                    # scrambled "Quantity Total" / "Amount" / "TOTAL AREA" cells
+                    if (
+                        qta_subset(have, "QUANTITY")
+                        or qta_subset(have, "AMOUNT")
+                        or qta_subset(have, "TOTALAREA")
+                    ):
+                        return "skip", None
+                    # padosi cell ka extra lafz aa jaye to sab se lamba alias
+                    best, best_len = None, 0
+                    for k, v in QTA_HEADER_FP.items():
+                        if len(k) > best_len and qta_subset(have, k):
+                            best, best_len = v, len(k)
+                    if best:
+                        return "brick", best
+                    # naya/unknown brick: sirf tab lein jab text saaf ho (har line 3+ letters)
+                    lines = [l.strip() for l in str(txt).split("\n") if l.strip()]
+                    if lines and all(len(l) >= 3 for l in lines):
+                        return "brick", " ".join(lines).upper()
+                    return "skip", None
+
+                # (required keywords, item code) - pehla match jeetega
+                QTA_PRODUCTS = [
+                    (("JETEPAR", "SYP"), "002188"),
+                    (("JETEPAR", "SYRUP"), "002188"),
+                    (("JETEPAR", "CAP"), "002392"),
+                    (("JETEPAR", "2CC"), "004348"),
+                    (("JETEPAR", "2ML"), "004348"),
+                    (("JETEPAR", "10CC"), "008999"),
+                    (("JETEPAR", "10ML"), "008999"),
+                    (("MAIORAD", "INJ"), "009072"),
+                    (("MAIORAD", "TAB"), "012961"),
+                    (("AFLOXAN", "CAP"), "008376"),
+                    (("AFLOXAN", "TAB"), "017230"),
+                    (("DEPROGESIC", "P"), "081838"),
+                    (("METRONIDAZOLE", "400"), "081274"),
+                    (("METRONIDAZOLE", "200"), "008909"),
+                    (("MOXILIUM", "125"), "006783"),
+                    (("MOXILIUM", "250", "SYP"), "012649"),
+                    (("MOXILIUM", "250", "CAP"), "006784"),
+                    (("MOXILIUM", "500"), "008908"),
+                    (("MOXILIUM", "DROP"), "006782"),
+                    (("AVOR", "2MG"), "007853"),
+                    (("AVOR", "1MG"), "006584"),
+                    (("CYANORIN",), "005425"),
+                    (("PC-LAC",), "019133"),
+                    (("VIKONON",), "006406"),
+                    (("VIGROL",), "007018"),
+                    (("EBAST",), "023906"),
+                    (("HISTAFEX", "120"), "031037"),
+                    (("HISTAFEX", "180"), "031038"),
+                    (("ISRIP", "1MG"), "035294"),
+                    (("ISRIP", "2MG"), "035295"),
+                    (("MINGAIR", "10"), "038427"),
+                    (("MINGAIR", "5"), "038426"),
+                    (("OBEXIL",), "032259"),
+                    (("PROBITOR",), "016654"),
+                    (("SAVELOX", "250"), "032255"),
+                    (("SAVELOX", "500"), "029328"),
+                    (("SUPRACEF", "CAP"), "024820"),
+                    (("SUPRACEF", "DS"), "028727"),
+                    (("SUPRACEF", "SUS"), "024819"),
+                    (("SUPRACEF", "SYP"), "024819"),
+                    (("SUPRALOX",), "028728"),
+                    (("TRAMAGESIC", "INJ"), "026920"),
+                    (("TRAMAGESIC", "CAP"), "029327"),
+                    (("CODAMIN",), "028729"),
+                    (("MALTEM", "PLUS"), "071560"),
                 ]
-                sales = []
-                sales1 = []
-                sales2 = []
-                sales3 = []
-                for x in range(0, len(pdf.pages)):
-                    data = pdf.pages[x].extract_table()
-                    sales = data[2:-1]
-                    for i in range(0, len(sales)):
-                        products.append(sales[i][0])
-                        sales1.append(sales[i][2:-2])
-                        if products[i] == "JETEPAR  SYP":
-                            products[i] = "002188"
-                        if products[i] == "JETEPAR INJ. 2CC":
-                            products[i] = "004348"
-                        if products[i] == "JETEPAR INJ. 10CC":
-                            products[i] = "008999"
-                        if products[i] == "MAIORAD INJ":
-                            products[i] = "009072"
-                        if products[i] == "JETEPAR CAPS":
-                            products[i] = "002392"
-                        if products[i] == "MAIORAD TAB":
-                            products[i] = "012961"
-                        if products[i] == "AFLOXAN CAPS":
-                            products[i] = "008376"
-                        if products[i] == "AFLOXAN TAB":
-                            products[i] = "017230"
-                for i in range(0, len(sales1)):
-                    sales2 = []
-                    for k in range(0, len(sales1[i])):
-                        if sales1[i][k] != None:
-                            sales2.append(sales1[i][k])
-                    sales3.append(sales2)
-                    sales3[i].pop(19)
-                for s in range(0, len(sales3)):
-                    for i in range(0, len(sales3[s])):
-                        if sales3[s][i] == "":
-                            sales3[s][i] = "0"
-                for p in range(0, len(products)):
-                    for s in range(0, len(sales3[p])):
-                        child = []
-                        child.append(products[p])
-                        child.append(bricks[s])
-                        child.append(sales3[p][s])
-                        result.append(child)
+
+                def qta_product(name):
+                    n = re.sub(r"\s+", " ", str(name)).strip().upper()
+                    if re.match(r"^(\d\s*-|GRAND|TOTAL|PRODUCTS|AREA)", n):
+                        return None  # group / total / heading rows
+                    for kws, code in QTA_PRODUCTS:
+                        if all(k in n for k in kws):
+                            return code
+                    print(f"[Quetta] product not recognised, skipped: '{n}'")
+                    return None
+
+                for pg in pdf.pages:
+                    tables = pg.find_tables()
+                    if not tables:
+                        continue
+                    # header row = pehli table ki pehli row
+                    hdr_cells = sorted(
+                        [c for c in tables[0].rows[0].cells if c], key=lambda c: c[0]
+                    )
+                    if len(hdr_cells) < 3:
+                        continue
+                    name_edge = hdr_cells[0][2]  # product-name column ka right edge
+
+                    cols = []  # (x0, x1, brick_name)
+                    for c in hdr_cells[1:]:
+                        txt = pg.crop(c).extract_text() or ""
+                        kind, name = qta_classify(txt)
+                        if kind == "skip":
+                            if txt.strip():
+                                print(
+                                    f"[Quetta] header column skipped: {txt.strip()!r}"
+                                )
+                            continue
+                        cols.append((c[0], c[2], name))
+
+                    # words ko lines mein group karein (tolerance 3pt)
+                    words = sorted(
+                        pg.extract_words(x_tolerance=1.5), key=lambda w: w["top"]
+                    )
+                    lines, cur, cur_top = [], [], None
+                    for w in words:
+                        if cur_top is None or abs(w["top"] - cur_top) <= 3:
+                            cur.append(w)
+                            cur_top = w["top"] if cur_top is None else cur_top
+                        else:
+                            lines.append(cur)
+                            cur, cur_top = [w], w["top"]
+                    if cur:
+                        lines.append(cur)
+
+                    for ln in lines:
+                        ln.sort(key=lambda w: w["x0"])
+                        name_words = [w["text"] for w in ln if w["x1"] <= name_edge + 1]
+                        val_words = [w for w in ln if w["x0"] > name_edge - 1]
+                        if not name_words or not val_words:
+                            continue
+                        code = qta_product(" ".join(name_words))
+                        if code is None:
+                            continue
+                        for w in val_words:
+                            cx = (w["x0"] + w["x1"]) / 2
+                            for x0, x1, bname in cols:
+                                if x0 <= cx < x1:
+                                    v = w["text"].replace(",", "").strip()
+                                    if v not in ("", "-", "0", "0.0"):
+                                        result.append([code, bname, v])
+                                    break
+
                 for r in range(0, len(result)):
                     for i in item_list:
                         if result[r][0] == i[0]:
@@ -4955,7 +5052,6 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 result = []
                 products = []
                 sales = []
-
                 page = pdf.pages[0]
                 table = page.extract_table()
 
@@ -5441,103 +5537,203 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
             elif dist_city == "Jhang":
                 result = []
                 new_result = []
-                products = []
-                bricks = []
-                sale_quantity = []
-                sales_price = []
-                sales = []
-                # bricks = ['ATHARA HAZARI', 'AHMADPUR SIAL', 'BHOWA', 'GOJRA JNG', 'JHANG 1', 'JHANG 2', 'KOT SHAKIR JNG', 'SHAH JEEWNA', 'SHORKOT CANTT', 'SHORKOT JNG']
-                product = []
-                flag_1 = False
-                for x in range(0, len(pdf.pages)):
-                    data = pdf.pages[x].extract_text()
-                    data = re.sub("\n", "$", data)
-                    data = data.split("$")
-                    brick = re.sub(r"\s+", "#", data[4])
-                    brick = brick.split("#")
-                    brick = brick[3:-2]
-                    for i in range(0, len(data)):
-                        find_Blue = re.search(r"BLUE", data[i - 1])
-                        if find_Blue != None:
-                            flag_1 = True
-                        find_Green = re.search(r"GREEN", data[i - 1])
-                        if find_Green != None:
-                            flag_1 = True
-                        find_group = re.search(r"Group Total", data[i])
-                        if find_group != None:
-                            flag_1 = False
-                        if flag_1 == True:
-                            sales.append(data[i])
-                    for i in range(0, len(sales)):
-                        sales[i] = re.sub("'S", "$", sales[i])
-                        sales[i] = re.sub("ML", "$", sales[i])
-                        sales[i] = sales[i].split("$")
-                        products.append(sales[i][0])
 
-                    var_for_jhang_brick = True
-                    for i in range(0, len(brick)):
-                        if brick[i] == "18":
-                            bricks.append("ATHARA HAZARI")
-                        if brick[i] == "AHMAD":
-                            bricks.append("AHMADPUR SIAL")
-                        if brick[i] == "BHOW":
-                            bricks.append("BHOWA")
-                        if brick[i] == "GOJRA":
-                            bricks.append("GOJRA JNG")
-                        if brick[i] == "JHANG" and var_for_jhang_brick == True:
-                            bricks.append("JHANG 1")
-                            var_for_jhang_brick = False
-                        if brick[i] == "JHANG" and var_for_jhang_brick == False:
-                            bricks.append("JHANG 2")
-                            var_for_jhang_brick = (
-                                "Please do not change or remove this statement it works"
+                # header ka pehla lafz -> Territory name (column ke header tokens x-position se jorre jate hain)
+                JHG_BRICKS = [
+                    ("18", "ATHARA HAZARI"),
+                    ("AHMAD", "AHMADPUR SIAL"),
+                    ("BHOW", "BHOWA"),
+                    ("GOJRA", "GOJRA JNG"),
+                    (
+                        "JHANG",
+                        "JHANG",
+                    ),  # pehla JHANG -> JHANG 1, doosra -> JHANG 2 (neeche)
+                    ("KOT", "KOT SHAKIR JNG"),
+                    ("SHAH", "SHAH JEEWNA"),
+                    ("SHK.C", "SHORKOT CANTT"),
+                    ("SHORK", "SHORKOT JNG"),
+                ]
+
+                # (required keywords, item code) - pehla match jeetega (SYP pehle taake "112ML" 2ML se na takraye)
+                JHG_PRODUCTS = [
+                    (("JETEPAR", "SYP"), "002188"),
+                    (("JETEPAR", "SYRUP"), "002188"),
+                    (("JETEPAR", "CAP"), "002392"),
+                    (("JETEPAR", "10ML"), "008999"),
+                    (("JETEPAR", "10CC"), "008999"),
+                    (("JETEPAR", "2ML"), "004348"),
+                    (("JETEPAR", "2CC"), "004348"),
+                    (("MAIORAD", "TAB"), "012961"),
+                    (("MAIORAD", "3ML"), "009072"),
+                    (("MAIORAD", "INJ"), "009072"),
+                    (("MAIORAD", "AMP"), "009072"),
+                    (("AFLOXAN", "CAP"), "008376"),
+                    (("AFLOXAN", "TAB"), "017230"),
+                    (("AFLOXON", "CAP"), "008376"),
+                    (("AFLOXON", "TAB"), "017230"),
+                    (("METRONIDAZOLE", "400"), "081274"),
+                    (("METRONIDAZOLE", "200"), "008909"),
+                    (("MOXILIUM", "DROP"), "006782"),
+                    (("MOXILIUM", "125"), "006783"),
+                    (("MOXILIUM", "250", "SYP"), "012649"),
+                    (("MOXILIUM", "250", "CAP"), "006784"),
+                    (("MOXILIUM", "500"), "008908"),
+                    (("P.C.LAC",), "019133"),
+                    (("PC-LAC",), "019133"),
+                    (("VIKNON",), "006406"),
+                    (("VIKONON",), "006406"),
+                    (("VIGROL",), "007018"),
+                    (("CYANORIN",), "005425"),
+                    (("EBAST",), "023906"),
+                    (("HISTAFEX", "120"), "031037"),
+                    (("HISTAFEX", "180"), "031038"),
+                    (("AVOR", "2MG"), "007853"),
+                    (("DEPROGESIC", "P"), "081838"),
+                    (("OBEXIL",), "032259"),
+                    (("PROBITOR",), "016654"),
+                    (("SAVELOX", "250"), "032255"),
+                    (("SAVELOX", "500"), "029328"),
+                    (("SUPRACEF", "CAP"), "024820"),
+                    (("SUPRACEF", "DS"), "028727"),
+                    (("SUPRACEF", "SUS"), "024819"),
+                    (("SUPRALOX",), "028728"),
+                    (("TRAMAGESIC", "INJ"), "026920"),
+                    (("TRAMAGESIC", "CAP"), "029327"),
+                    (("MINGAIR", "10"), "038427"),
+                    (("MINGAIR", "5"), "038426"),
+                ]
+                JHG_SKIP = (
+                    "GROUP",
+                    "COMPANY",
+                    "GRAND",
+                    "BLUE",
+                    "GREEN",
+                    "PRODUCT",
+                    "TOTAL",
+                    "PAGE",
+                )
+
+                def jhg_product(name):
+                    n = re.sub(r"\s+", " ", str(name)).strip().upper()
+                    if not n or n.startswith(JHG_SKIP):
+                        return None
+                    for kws, code in JHG_PRODUCTS:
+                        if all(k in n for k in kws):
+                            return code
+                    print(f"[Jhang] product not recognised, skipped: '{n}'")
+                    return None
+
+                def jhg_lines(words, tol=3):
+                    words = sorted(words, key=lambda w: w["top"])
+                    lines, cur, cur_top = [], [], None
+                    for w in words:
+                        if cur_top is None or abs(w["top"] - cur_top) <= tol:
+                            cur.append(w)
+                            cur_top = w["top"] if cur_top is None else cur_top
+                        else:
+                            lines.append(cur)
+                            cur, cur_top = [w], w["top"]
+                    if cur:
+                        lines.append(cur)
+                    for ln in lines:
+                        ln.sort(key=lambda w: w["x0"])
+                    return lines
+
+                num_re = re.compile(r"^-?[\d,]+(\.\d+)?$")
+
+                for pg in pdf.pages:
+                    words = pg.extract_words(x_tolerance=1.5)
+                    hdr_prod = next((w for w in words if w["text"] == "Product"), None)
+                    hdr_pack = next((w for w in words if w["text"] == "Packing"), None)
+                    hdr_tqty = next(
+                        (w for w in words if w["text"].upper().startswith("T.QTY")),
+                        None,
+                    )
+                    if not (hdr_prod and hdr_pack and hdr_tqty):
+                        continue
+
+                    name_edge = hdr_pack["x0"] - 5  # product name is se pehle khatam
+                    val_start = hdr_pack["x1"] + 1  # brick columns packing ke baad
+                    cutoff = hdr_tqty["x0"] - 5  # is se aage T.Qty / Value columns
+
+                    lines = jhg_lines(words)
+
+                    # ---- product rows dhoondein (naam + packing + values) ----
+                    prod_rows = []
+                    for ln in lines:
+                        nm = " ".join(w["text"] for w in ln if w["x1"] <= name_edge)
+                        code = jhg_product(nm) if nm else None
+                        if code is None:
+                            continue
+                        vals = [
+                            w
+                            for w in ln
+                            if w["x0"] >= val_start
+                            and num_re.match(w["text"])
+                            and (w["x0"] + w["x1"]) / 2 < cutoff
+                        ]
+                        if vals:
+                            prod_rows.append((code, vals))
+
+                    # ---- value columns (right-edge clusters) ----
+                    edges = sorted(w["x1"] for _, vals in prod_rows for w in vals)
+                    slots = []
+                    for e in edges:
+                        if slots and e - slots[-1][-1] <= 4:
+                            slots[-1].append(e)
+                        else:
+                            slots.append([e])
+                    slot_x1 = [sum(s) / len(s) for s in slots]
+
+                    # ---- header tokens ko x-position se column se jorna ----
+                    hdr_top = hdr_prod["top"]
+                    first_line_top = min(
+                        (w["top"] for w in words if w["top"] > hdr_top + 20),
+                        default=hdr_top + 40,
+                    )
+                    slot_tokens = [[] for _ in slot_x1]
+                    for w in words:
+                        if not (hdr_top - 3 <= w["top"] < first_line_top - 3):
+                            continue
+                        cx = (w["x0"] + w["x1"]) / 2
+                        if w["x0"] < val_start or cx >= cutoff:
+                            continue
+                        for si, sx in enumerate(slot_x1):
+                            if sx + 4 >= cx:
+                                slot_tokens[si].append(w)
+                                break
+
+                    jhang_count = 0
+                    slot_names = []
+                    for toks in slot_tokens:
+                        toks.sort(key=lambda w: (round(w["top"]), w["x0"]))
+                        first = toks[0]["text"].upper() if toks else ""
+                        name = None
+                        for key, brick in JHG_BRICKS:
+                            if first == key or (key != "18" and first.startswith(key)):
+                                name = brick
+                                break
+                        if name == "JHANG":
+                            jhang_count += 1
+                            name = "JHANG %d" % jhang_count
+                        if name is None and toks:
+                            name = " ".join(t["text"] for t in toks).upper()
+                            print(
+                                f"[Jhang] brick header not recognised, using raw: '{name}'"
                             )
-                        if brick[i] == "KOT":
-                            bricks.append("KOT SHAKIR JNG")
-                        if brick[i] == "SHAH":
-                            bricks.append("SHAH JEEWNA")
-                        if brick[i] == "SHK.C":
-                            bricks.append("SHORKOT CANTT")
-                        if brick[i] == "SHORK":
-                            bricks.append("SHORKOT JNG")
+                        slot_names.append(name)
 
-                    for i in range(0, len(sales)):
-                        if products[i] == "JETEPAR  2":
-                            products[i] = "004348"
-                        if products[i] == "JETEPAR 10":
-                            products[i] = "008999"
-                        if products[i] == "JETEPAR CAP 20":
-                            products[i] = "002392"
-                        if products[i] == "JETEPAR SYP 112":
-                            products[i] = "002188"
-                        if products[i] == "MAIORAD  3":
-                            products[i] = "009072"
-                        if products[i] == "METRONIDAZOLE 400 MG 100":
-                            products[i] = "081274"
-                        if products[i] == "METRONIDAZOLE TAB 200 100":
-                            products[i] = "008909"
-                        if products[i] == "MOXILIUM DROP 10% 10":
-                            products[i] = "006782"
-                        if products[i] == "MOXILIUM SYP 125MG 45":
-                            products[i] = "006783"
-                        if products[i] == "MOXILIUM SYP 250MG 60":
-                            products[i] = "012649"
-                        if products[i] == "P.C.LAC SYP 120":
-                            products[i] = "019133"
-                        if products[i] == "VIKNON FORTE 120":
-                            products[i] = "006406"
-                        sales[i] = sales[i][-1]
-                        sales[i] = re.sub("\s+", "$", sales[i])
-                        sales[i] = sales[i].split("$")
-                        sale_quantity.append(sales[i][-3:])
-                        sales[i] = sales[i][1 : len(bricks) + 1]
-                for p in range(0, len(products)):
-                    for s in range(0, len(sales[p])):
-                        child = []
-                        child.append(products[p])
-                        child.append(bricks[s])
-                        child.append(sales[p][s])
-                        result.append(child)
+                    # ---- values ko un ke column mein daalna ----
+                    for code, vals in prod_rows:
+                        for w in vals:
+                            si = min(
+                                range(len(slot_x1)),
+                                key=lambda k: abs(slot_x1[k] - w["x1"]),
+                            )
+                            bname = slot_names[si]
+                            v = w["text"].replace(",", "").strip()
+                            if bname and v not in ("", "-", "0", "0.0"):
+                                result.append([code, bname, v])
 
                 for r in range(0, len(result)):
                     for i in item_list:
@@ -5554,7 +5750,6 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                            # print(r)
 
                 new_result = green_team_bricks(new_result)
                 return new_result
@@ -5562,39 +5757,12 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                 result = []
                 products = []
 
-                KNOWN_BRICKS_TEAM1 = [
-                    "MALAKWAL SGD",
-                    "AKT",
-                    "JAUHARABAD",
-                    "KHUSHAB",
-                    "MITHA LAK",
-                    "NOWSHRA",
-                    "NUR",
-                    "QUAIDABAD",
-                    "CHOWKI BHAGAT",
-                    "BHALWAL",
-                    "BHERA",
-                    "FAROOKA",
-                    "JAVERIA",
-                    "KOT MOMIN",
-                    "MARI LAK",
-                    "PHL",
-                    "SAHIWAL",
-                    "SARGODHA 1",
-                    "SHAHPUR",
-                ]
-                KNOWN_BRICKS_TEAM2 = [
-                    "SILLANWALI",
-                    "ADA46 49TAL",
-                    "SARGODHA 2",
-                    "WHOLESALE SGD",
-                ]
-
-                # Raw decoded header text (top-line+mid-line+bottom-line, no spaces) -> real name.
-                # This is what makes column order/alignment stop mattering: we match by what
-                # the header actually says, not by which position it happens to sit in.
-                # Add a new "RAWTEXT": "Real Name" line here any time a report shows a brick
-                # this doesn't recognise (the warning printed below will show you the raw text).
+                # Raw decoded header text (each column's text read top-to-bottom, no
+                # spaces) -> real brick name. This is what makes column order/alignment
+                # stop mattering: every page's header is decoded fresh and matched by
+                # content, not by position. Add "RAWTEXT": "Real Name" here whenever a
+                # report shows a brick this doesn't recognise yet (the printed warning
+                # will show you the raw text to add).
                 HEADER_ALIASES = {
                     "MLKW": "MALAKWAL SGD",
                     "AKT": "AKT",
@@ -5607,13 +5775,27 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     "CHKI": "CHOWKI BHAGAT",
                     "BHL": "BHALWAL",
                     "BHR": "BHERA",
-                    "FRQ": "FAROOKA",  # "Q" here is a mis-rendered "O" in this font
+                    "FRQ": "FAROOKA",  # font renders "O" as "Q" in this position
                     "KOT": "KOT MOMIN",
                     "MRI": "MARI LAK",
                     "PHL": "PHL",
                     "SAHW": "SAHIWAL",
                     "SRG1": "SARGODHA 1",
-                    # "SHCITY": "",   # <-- unconfirmed, see note above
+                    "SHP": "SHAHPUR",
+                    "SILWI": "SILLANWALI",
+                    "ADA4649TAL": "ADA46 49TAL",
+                    "SAG2": "SARGODHA 2",
+                    "WHOLESALE": "WHOLESALE SGD",
+                    "JHWN": "JAVERIA",
+                    # "SHCITY": "",   # <-- still unconfirmed, see note below
+                }
+                # Header columns that are report totals, not real bricks -- always dropped.
+                NON_BRICK_HEADER_TOKENS = {
+                    "TOTAL",
+                    "TOTALQTY",
+                    "TTLQTY",
+                    "TTLAMT",
+                    "TRADEVALUE",
                 }
 
                 # Rename any FINAL name here so it matches your territory tree exactly.
@@ -5621,6 +5803,11 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     # "OLD NAME": "NEW NAME",
                     "NOWSHRA": "NOWSHERA SGD1",
                     "NUR": "NURPURTHAL",
+                    "SARGODHA 1": "SARGODHA SGD1",
+                    "SAHIWAL": "SAHIWAL SGD",
+                    "PHL": "PHULARWAN",
+                    "KOT MOMIN": "KOTMOMAN",
+                    "JAVERIA": "JHAWERIAN",
                 }
 
                 PRODUCT_PREFIXES = [
@@ -5682,11 +5869,18 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     p.split()[0].upper() for p, _ in PRODUCT_PREFIXES
                 }
 
+                def is_zero(v):
+                    # Handles "0", "0.0", "-0", blank/NaN-ish values.
+                    try:
+                        return float(str(v).replace(",", "")) == 0
+                    except (ValueError, TypeError):
+                        return str(v).strip().upper() in ("", "NAN", "-", "N/A")
+
                 def split_name_and_values(line):
                     tokens = re.sub(r"\s+", " ", line).strip().split(" ")
 
                     def is_number(t):
-                        return re.fullmatch(r"-?\d+", t) is not None
+                        return re.fullmatch(r"-?\d+(\.\d+)?", t) is not None
 
                     boundary = len(tokens)
                     for i in range(len(tokens)):
@@ -5695,22 +5889,16 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             break
                     return " ".join(tokens[:boundary]), tokens[boundary:]
 
-                def is_zero(v):
-                    # Handles "0", "0.0", "-0", blank/NaN-ish values -- anything that
-                    # isn't a genuine nonzero sale gets dropped.
-                    try:
-                        return float(str(v).replace(",", "")) == 0
-                    except (ValueError, TypeError):
-                        return str(v).strip().upper() in ("", "NAN", "-", "N/A")
-
-                def decode_bricks_from_header(page):
+                def decode_header_columns(page, extra_stopwords=()):
                     """
                     Reads the header block above the first product row, groups its words
-                    by x-position (column), and concatenates each column's rows top-to-
-                    bottom to recover the real brick name -- regardless of how many
-                    header lines there are, what order the bricks are in, or how the
-                    columns are spaced on this particular PDF.
+                    by x-position (column), and joins each column's text top-to-bottom
+                    to recover the real brick name -- regardless of column count, order,
+                    or spacing. `extra_stopwords` excludes this page's own metadata text
+                    (company name, "TOWN WISE REPORT", team name, dates) so nothing
+                    needs to be hardcoded even if the team name changes.
                     """
+                    stopwords = {w.upper() for w in extra_stopwords}
                     words = page.extract_words()
                     starts = [
                         w["top"]
@@ -5720,95 +5908,90 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     if not starts:
                         return None
                     cutoff = min(starts) - 1
-                    header_words = [w for w in words if w["top"] < cutoff]
-
+                    header_words = [
+                        w
+                        for w in words
+                        if w["top"] < cutoff
+                        and w["text"].upper() not in stopwords
+                        and "/" not in w["text"]
+                    ]
                     cols = {}
                     for w in header_words:
                         x = round(w["x0"], 1)
                         cols.setdefault(x, []).append((w["top"], w["text"]))
-
-                    decoded = []
+                    col_list = []
                     for x in sorted(cols.keys()):
                         parts = sorted(cols[x], key=lambda tw: tw[0])
-                        decoded.append("".join(t for _, t in parts))
-                    return decoded
+                        col_list.append((x, "".join(t for _, t in parts)))
+                    return col_list
 
-                def resolve_bricks(decoded_header, n_value_cols):
-                    if decoded_header:
-                        resolved = [HEADER_ALIASES.get(tok) for tok in decoded_header]
-                        unknown = [
-                            tok
-                            for tok, name in zip(decoded_header, resolved)
-                            if name is None
-                        ]
-                        if not unknown:
-                            return resolved
+                def resolve_columns(col_list):
+                    """(x0, brick_name) for real bricks only -- TOTAL etc dropped, and
+                    an unrecognised header keeps its raw text (never silently mislabels
+                    a new brick with an old, unrelated name)."""
+                    resolved, unknown = [], []
+                    for x, tok in col_list:
+                        if tok.upper() in NON_BRICK_HEADER_TOKENS:
+                            continue
+                        name = HEADER_ALIASES.get(tok)
+                        if name is None:
+                            name = tok
+                            unknown.append(tok)
+                        resolved.append((x, BRICK_ALIASES.get(name, name)))
+                    if unknown:
                         print(
                             f"[Sargodha] Unrecognised header token(s): {unknown} "
-                            f"-- add them to HEADER_ALIASES. Falling back to positional guess for this page."
+                            f"-- add proper names to HEADER_ALIASES."
                         )
-                    # Fallback: guess by column count, same as before.
-                    if n_value_cols == len(KNOWN_BRICKS_TEAM1):
-                        return KNOWN_BRICKS_TEAM1
-                    if n_value_cols == len(KNOWN_BRICKS_TEAM2):
-                        return KNOWN_BRICKS_TEAM2
-                    print(
-                        f"[Sargodha] WARNING: {n_value_cols} value columns match no known brick list."
-                    )
-                    return [f"UNKNOWN_COL_{i + 1}" for i in range(n_value_cols)]
+                    return resolved
 
-                products, sales, row_bricks = [], [], []
-
-                for x in range(0, len(pdf.pages)):
-                    page = pdf.pages[x]
+                for page in pdf.pages:
                     raw = re.sub("\n", "$", page.extract_text()).split("$")
-
                     try:
                         anchor = next(
                             i for i, l in enumerate(raw) if "TOWN WISE REPORT" in l
                         )
                     except StopIteration:
                         anchor = 3
-                    try:
-                        company_idx = next(
-                            i for i, l in enumerate(raw) if "CUTE" in l.upper()
-                        )
-                        body = raw[company_idx + 1 :]
-                    except StopIteration:
-                        body = raw[6:]
+                    # company name, "TOWN WISE REPORT.." and "..TEAM.." lines
+                    meta_lines = raw[: anchor + 2]
+                    body = raw[anchor + 2 :]
                     body = body[:-2]
 
-                    decoded_header = decode_bricks_from_header(page)
-                    page_bricks = None
+                    meta_stopwords = {
+                        tok
+                        for line in meta_lines
+                        for tok in re.sub(r"[^A-Za-z0-9/&]", " ", line).split()
+                    }
+                    col_list = decode_header_columns(
+                        page, extra_stopwords=meta_stopwords
+                    )
+                    brick_cols = resolve_columns(col_list) if col_list else []
+                    brick_names_in_order = [name for _, name in brick_cols]
 
-                    for i in range(len(body)):
-                        name, values = split_name_and_values(body[i])
+                    for line in body:
+                        name, values = split_name_and_values(line)
+                        first_word = name.split(" ")[0].upper() if name else ""
+                        if first_word not in PRODUCT_START_WORDS:
+                            continue
+
                         matched_code = None
                         for prefix, code in PRODUCT_PREFIXES:
                             if name.startswith(prefix):
                                 matched_code = code
                                 break
-                        if matched_code is None:
+                        if matched_code is None or matched_code == "777777":
                             continue
 
-                        if page_bricks is None:
-                            page_bricks = resolve_bricks(decoded_header, len(values))
-                            page_bricks = [BRICK_ALIASES.get(b, b) for b in page_bricks]
-
-                        products.append(matched_code)
-                        sales.append(values[: len(page_bricks)])
-                        row_bricks.append(page_bricks)
-
-                for p in range(0, len(products)):
-                    if products[p] == "777777":
-                        continue
-                    bricks_here = row_bricks[p]
-                    for s in range(0, len(sales[p])):
-                        if is_zero(sales[p][s]):
-                            continue
-                        if s >= len(bricks_here):
-                            continue
-                        result.append([products[p], bricks_here[s], sales[p][s]])
+                        # Take values left-to-right in the SAME order the header was
+                        # just decoded in -- this is what makes reordering safe, and
+                        # naturally drops any trailing TOTAL/trade-value columns
+                        # (even when they run together with no space, e.g. "2594116859700").
+                        for brick_name, val in zip(brick_names_in_order, values):
+                            if is_zero(val):
+                                continue
+                            products.append(matched_code)
+                            result.append([matched_code, brick_name, val])
 
                 for r in result:
                     for i in item_list:
@@ -7038,7 +7221,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     "KABIRWALA": "KABIR WALA",
                     "BODHLA SANT": "BUDHLA SANT",
                     "MAKH-RASHID": "MAKHDOOM RASHEED",
-                    "MAKH-AALI": "MAKHDOOM RASHEED",
+                    "MAKH-AALI": "MAKHDOOM ALI",
                     "MUZAFFAR GRAH": "MUZAFFAR GARH",
                     "NAWAB PUR ROAD MULTAN": "NAWAB PUR ROAD",
                     "OLD SHUJABAD ROAD, MULTAN.": "OLD SHUJABAD ROAD",
@@ -7047,7 +7230,7 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                     "CHUNGI NO.14 MULTAN": "CHUNGI NO 14",
                     "VEHARI CHOWK MULTAN": "VEHARI CHOWK",
                     "W-WALI": "WASSANDAY WALI",
-                    "SHAHARSULTAN": "WASSANDAY WALI",
+                    "SHAHARSULTAN": "SHAHER SULTAN",
                     "NISHTER-II": "NISHTER 2",
                     "MAKH-PUR": "MAKHDOOM PUR PAHORAN",
                     "PULL - 14": "PULL 14",
@@ -7785,3 +7968,39 @@ def parse_pdf(pdf_file, parse_check, parent_detail):
                             r.insert(4, t[1])
                 new_result = green_team_bricks(new_result)
                 return new_result
+
+
+def _is_zero_sale(val):
+    # sirf asli zero ko True return karega; nan / "" / "-" / None ko nahi
+    if val is None:
+        return False
+    s = str(val).strip().replace(",", "")
+    if s == "" or s.lower() in ("nan", "none", "-"):
+        return False
+    try:
+        return float(s) == 0
+    except ValueError:
+        return False
+
+
+def _remove_zero_sale_rows(rows):
+    if not rows:
+        return rows
+    out = []
+    for r in rows:
+        try:
+            # matched rows: [code, name, brick, sale, parent, price] -> sale index 3
+            # unmatched rows: [code, brick, sale] -> sale index 2
+            idx = 3 if len(r) >= 5 else 2
+            if _is_zero_sale(r[idx]):
+                continue
+        except (IndexError, TypeError):
+            pass
+        out.append(r)
+    return out
+
+
+@frappe.whitelist(allow_guest=True)
+def parse_pdf(pdf_file, parse_check, parent_detail):
+    result = _parse_pdf(pdf_file, parse_check, parent_detail)
+    return _remove_zero_sale_rows(result)
