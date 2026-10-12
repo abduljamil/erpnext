@@ -14,6 +14,7 @@
   "city",
   "file",
   "process_pdf",
+  "calculate",
   "product_price_variance_section",
   "item_code",
   "item_name",
@@ -24,7 +25,8 @@
   "selling_product",
   "grand_total_section",
   "total_value",
-  "column_break_13"
+  "column_break_13",
+  "parsed_bricks"
  ],
  "fields": [
   {
@@ -116,7 +118,6 @@
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Name"
   },
   {
@@ -127,8 +128,7 @@
    "depends_on": "item_code",
    "fetch_from": "item_code.trade_price",
    "fieldname": "item_price",
-   "fieldtype": "Float",
-   "in_list_view": 1,
+   "fieldtype": "Data",
    "label": "Item Price"
   },
   {
@@ -142,11 +142,23 @@
    "fieldtype": "Link",
    "label": "Fiscal Year",
    "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "parsed_bricks",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Parsed Bricks (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calculate",
+   "fieldtype": "Button",
+   "label": "Calculate"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-02-18 12:07:29.900518",
+ "modified": "2026-09-26 09:57:55.352156",
  "modified_by": "Administrator",
  "module": "Distributor",
  "name": "Brick Wise Sale",
