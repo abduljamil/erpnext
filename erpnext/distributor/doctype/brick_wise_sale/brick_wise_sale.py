@@ -20,6 +20,24 @@ class BrickWiseSale(Document):
     pass
 
 
+# brick capture support (added)
+_debug_bricks = []
+
+
+def _capture_bricks_from_locals(local_vars):
+    """Insert `_capture_bricks_from_locals(locals())` right before every
+    `return result` / `return new_result` / `return end_result` line in
+    _parse_pdf. It grabs whichever of these names holds the branch's final
+    brick list, in priority order, without needing to know per-branch
+    which name was used."""
+    global _debug_bricks
+    for key in ("bricks2", "bricks1", "all_bricks", "bricks", "brick", "area_bricks"):
+        val = local_vars.get(key)
+        if val:
+            _debug_bricks = [str(n).strip() for n in val if n and str(n).strip()]
+            return
+
+
 @frappe.whitelist(allow_guest=True)
 def _parse_pdf(pdf_file, parse_check, parent_detail):
     parent_details = json.loads(parent_detail)
@@ -56,172 +74,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 if k[0] == i["name"]:
                     k[2] = k[2] + " " + "GT"
         return result
-
-    # if dist_city == "Gujrat":
-    #     result = []
-    #     doc = fitz.open(path)
-    #     page1 = doc[0]
-    #     page1_text = page1.get_text()
-
-    # if dist_city == "Gujrat" and "PRODUCT NAME" in page1_text:
-    #     import io as _io
-    #     from collections import defaultdict as _defaultdict
-
-    #     with open(path, "rb") as _f:
-    #         _pdf_bytes = _f.read()
-    #     _pdf_bytes = _pdf_bytes.replace(b"/CreatorDate (\r\n", b"/CreatorDate ()\r\n")
-    #     _pdf_bytes = _pdf_bytes.replace(b"/CreatorDate (\n", b"/CreatorDate ()\n")
-
-    #     with pdfplumber.open(_io.BytesIO(_pdf_bytes)) as _pdf:
-    #         _page = _pdf.pages[0]
-    #         _words = _page.extract_words(x_tolerance=1)
-
-    #     _rows_map = _defaultdict(list)
-    #     for _w in _words:
-    #         _rows_map[round(_w["top"], 1)].append(_w)
-    #     _sorted_tops = sorted(_rows_map.keys())
-
-    #     _numeric_re = re.compile(r"^-?\d+(\.\d+)?$")
-
-    #     # ---- 1. header row se bricks (column names) nikaalna, x-position ke sath ----
-    #     header_tokens = None
-    #     header_top = None
-    #     for _top in _sorted_tops:
-    #         _line = sorted(_rows_map[_top], key=lambda w: w["x0"])
-    #         _texts = [w["text"] for w in _line]
-    #         if len(_texts) >= 2 and _texts[0] == "PRODUCT" and _texts[1] == "NAME":
-    #             header_tokens = _line[2:]
-    #             header_top = _top
-    #             break
-
-    #     if header_tokens is None:
-    #         frappe.throw(
-    #             "Gujrat (new format) PDF: header row (PRODUCT NAME ...) not found"
-    #         )
-
-    #     bricks = []
-    #     header_x = []
-    #     for _w in header_tokens:
-    #         # header labels like "(SRGO" / "CPAK)" carry stray brackets - strip them
-    #         bricks.append(_w["text"].strip("()"))
-    #         header_x.append(_w["x0"])
-
-    #     _edges = [(header_x[i] + header_x[i + 1]) / 2 for i in range(len(header_x) - 1)]
-
-    #     def _bin_index(x):
-    #         idx = 0
-    #         for e in _edges:
-    #             if x > e:
-    #                 idx += 1
-    #             else:
-    #                 break
-    #         return idx
-
-    #     # ---- 3. har product row parse karna: naam + values (bin-matched) ----
-    #     products = []
-    #     sales = []
-    #     for _top in _sorted_tops:
-    #         if _top <= header_top:
-    #             continue
-    #         _line = sorted(_rows_map[_top], key=lambda w: w["x0"])
-    #         if not _line:
-    #             continue
-    #         if _line[0]["text"] == "Total":
-    #             # "Total Rs/=" row aur uske baad wali continuation lines
-    #             # sirf grand-totals hain, product-wise sales nahi - stop here.
-    #             break
-    #         _name_parts = []
-    #         _value_words = []
-    #         _started_values = False
-    #         for _w in _line:
-    #             if not _started_values and not _numeric_re.match(_w["text"]):
-    #                 _name_parts.append(_w["text"])
-    #             else:
-    #                 _started_values = True
-    #                 if _numeric_re.match(_w["text"]):
-    #                     _value_words.append(_w)
-    #         if not _name_parts:
-    #             continue
-    #         _product_name = " ".join(_name_parts)
-    #         _row_sales = ["0"] * len(bricks)
-    #         for _w in _value_words:
-    #             idx = _bin_index(_w["x0"])
-    #             if 0 <= idx < len(bricks):
-    #                 _row_sales[idx] = _w["text"]
-    #         products.append(_product_name)
-    #         sales.append(_row_sales)
-
-    #     # ---- 4. product x brick nested loop, zero sale skip ----
-    #     for p in range(0, len(products)):
-    #         for b in range(0, len(bricks)):
-    #             if sales[p][b] == "0":
-    #                 continue
-    #             child = []
-    #             child.append(products[p])
-    #             child.append(bricks[b])
-    #             child.append(sales[p][b])
-    #             result.append(child)
-
-    #     # ---- 5. product name -> item code ----
-    #     # A direct name->code lookup is tried FIRST. The fuzzy match below
-    #     # (requiring a perfect ratio==100) almost never actually matches
-    #     # this report's product names against item_list's names, because
-    #     # the wording is quite different (e.g. this report prints "Jetepar
-    #     # 10ml Amps 5's" while item_list has "Jetepar Injection 10ml") --
-    #     # so EVERY row was falling through unresolved, leaving the raw
-    #     # product-name text in place of an item code. Downstream, that
-    #     # unresolved value never matches item_list either, so the row never
-    #     # gets its name/price inserted and ends up one element short,
-    #     # which is what was shifting Brick into the Product Name column,
-    #     # Sale Qty into the Brick column, etc.
-    #     NAME_TO_CODE = {
-    #         "Cyanorin Fort Amp": "005425",  # Cyanorin Forte Injection
-    #         "Jetepar 10ml Amps 5's": "008999",  # Jetepar Injection 10ml
-    #         "Jetepar 2ml Amps 10's": "004348",  # Jetepar Injection 2ml
-    #         "Jetepar Cap 20's": "002392",  # Jetepar Capsule
-    #         "Jetepar Syrup 112ml": "002188",  # Jetepar Syrup
-    #         "Maiorad 3ml Amps 6's": "009072",  # Maiorad Injection
-    #         "Maiorad Tab 3*10's": "012961",  # Mairoad Tablet
-    #         "Metronidazole Tab": "081274",  # Metronidazole Tablet 400mg (confirmed)
-    #         "Moxilium Syrup 125mg": "006783",  # Moxilium Suspension 125mg
-    #         "Supracef Cap 5's": "024820",  # Supracef Capsule 400mg
-    #         "Supracef Susp 30ml": "024819",  # Supracef Suspension 100mg (confirmed)
-    #     }
-
-    #     for r in result:
-    #         if r[0] in NAME_TO_CODE:
-    #             r[0] = NAME_TO_CODE[r[0]]
-    #             continue
-    #         # fallback for any product not yet in the dict above (e.g. a
-    #         # future new item on the report) -- keeps working instead of
-    #         # silently breaking, and prints a debug line so a new
-    #         # NAME_TO_CODE entry can be added for it
-    #         best_ratio = 0
-    #         best_code = None
-    #         for i in item_list:
-    #             final_result = fuzz.token_set_ratio(r[0], i[1])
-    #             if final_result > best_ratio:
-    #                 best_ratio = final_result
-    #                 best_code = i[0]
-    #         if best_ratio >= 100:
-    #             r[0] = best_code
-    #         else:
-    #             print(
-    #                 f"DEBUG: NO EXACT MATCH for '{r[0]}' -> best guess was '{best_code}' with ratio {best_ratio}"
-    #             )
-
-    #     for r in result:
-    #         for i in item_list:
-    #             if r[0] == i[0]:
-    #                 r.insert(1, i[1])
-    #                 r.append(i[2])
-    #     for r in result:
-    #         for t in tt_list:
-    #             if r[2] == t[0]:
-    #                 r.insert(4, t[1])
-
-    #     result = green_team_bricks(result)
-    #     return result
 
     if dist_city == "Gujrat":
         result = []
@@ -278,8 +130,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
         # Example: "ShaD": "SHAHDARA GUJRAT",
         BRICK_RENAME = {
             # "PDF NAME": "TERRITORY TREE NAME",
-            "KHIR GT": "KHARRIAN GT",
-            "PHAR GT": "PAHRIANWALI GT",
+            "KHIR": "KHARRIAN",
+            "PHAR": "PAHRIANWALI",
             "LALA": "LALAMUSA",
             "KOTL": "KOTLA",
             "DNGA": "DINGA GUJRAT",
@@ -298,11 +150,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             "CIRC": "CIRCU",
             "RAMT": "RAMTA",
             "KHIR": "KHARIAN",
-            "LALA GT": "LALAMUSA GUJRAT GT",
-            "JPJ GT": "JALAL PUR JATTAN ROAD GT",
-            "DNGA GT": "DINGA GUJRAT GT",
-            "ShaF GT": "SHAHF GT",
+            "LALA": "LALAMUSA GUJRAT",
+            "JPJ": "JALAL PUR JATTAN ROAD",
+            "DNGA": "DINGA GUJRAT",
+            "ShaF": "SHAHF",
             "ShaD": "SHAHD",
+            "PHAL": "PHALIA",
         }
         bricks = [BRICK_RENAME.get(b, b) for b in bricks]
 
@@ -362,40 +215,27 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 child.append(sales[p][b])
                 result.append(child)
 
-        # ---- 5. product name -> item code ----
-        # A direct name->code lookup is tried FIRST. The fuzzy match below
-        # (requiring a perfect ratio==100) almost never actually matches
-        # this report's product names against item_list's names, because
-        # the wording is quite different (e.g. this report prints "Jetepar
-        # 10ml Amps 5's" while item_list has "Jetepar Injection 10ml") --
-        # so EVERY row was falling through unresolved, leaving the raw
-        # product-name text in place of an item code. Downstream, that
-        # unresolved value never matches item_list either, so the row never
-        # gets its name/price inserted and ends up one element short,
-        # which is what was shifting Brick into the Product Name column,
-        # Sale Qty into the Brick column, etc.
         NAME_TO_CODE = {
-            "Cyanorin Fort Amp": "005425",  # Cyanorin Forte Injection
-            "Jetepar 10ml Amps 5's": "008999",  # Jetepar Injection 10ml
-            "Jetepar 2ml Amps 10's": "004348",  # Jetepar Injection 2ml
-            "Jetepar Cap 20's": "002392",  # Jetepar Capsule
-            "Jetepar Syrup 112ml": "002188",  # Jetepar Syrup
-            "Maiorad 3ml Amps 6's": "009072",  # Maiorad Injection
-            "Maiorad Tab 3*10's": "012961",  # Mairoad Tablet
-            "Metronidazole Tab": "081274",  # Metronidazole Tablet 400mg (confirmed)
-            "Moxilium Syrup 125mg": "006783",  # Moxilium Suspension 125mg
-            "Supracef Cap 5's": "024820",  # Supracef Capsule 400mg
-            "Supracef Susp 30ml": "024819",  # Supracef Suspension 100mg (confirmed)
+            "Cyanorin Fort Amp": "005425",
+            "Jetepar 10ml Amps 5's": "008999",
+            "Jetepar 2ml Amps 10's": "004348",
+            "Jetepar Cap 20's": "002392",
+            "Jetepar Syrup 112ml": "002188",
+            "Maiorad 3ml Amps 6's": "009072",
+            "Maiorad Tab 3*10's": "012961",
+            "Metronidazole Tab": "081274",
+            "Moxilium Syrup 125mg": "006783",
+            "Supracef Cap 5's": "024820",
+            "Supracef Susp 30ml": "024819",
+            "Maiorad Tab 30's": "012961",
+            "Moxilium Syrup 250mg": "012649",
+            "Vikonon Fort Syrup": "006406",
         }
 
         for r in result:
             if r[0] in NAME_TO_CODE:
                 r[0] = NAME_TO_CODE[r[0]]
                 continue
-            # fallback for any product not yet in the dict above (e.g. a
-            # future new item on the report) -- keeps working instead of
-            # silently breaking, and prints a debug line so a new
-            # NAME_TO_CODE entry can be added for it
             best_ratio = 0
             best_code = None
             for i in item_list:
@@ -415,12 +255,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
+        result = green_team_bricks(result)
         for r in result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-
-        result = green_team_bricks(result)
         return result
 
     elif dist_city == "Gujrat":
@@ -505,11 +344,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
+        result = green_team_bricks(result)
         for r in result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-        result = green_team_bricks(result)
         return result
     elif dist_city == "Sukkur":
         bricks = []
@@ -638,7 +477,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             if bricks[i] == "JCD" and Second_sheet_var == False:
                 bricks[i] = "JACOBABAD SUKKUR"
             if bricks[i] == "JHANI" and Second_sheet_var == False:
-                bricks[i] = ""
+                bricks[i] = "JAHANIYA"
             if bricks[i] == "JINAH" and Second_sheet_var == False:
                 bricks[i] = "JINNAH CHOWK"
             if bricks[i] == "K.BNG" and Second_sheet_var == False:
@@ -703,6 +542,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[i] = "SUKKUR BY PASS"
             if bricks[i] == "S.PAT":
                 bricks[i] = "SALEH PAT"
+            # if bricks[i] == "MNRAR":
+            #     bricks[i] = "MINARA ROAD"
         # print(bricks)
         # print(len(bricks))
         for i in range(len(sales)):
@@ -724,17 +565,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
-                    # print(r)
+        result = green_team_bricks(result)
         for r in result:
-            # print(r)
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-                    # print(r)
-        # for r in result:
-        #     if r[4] != 'SKR1':
-        #         print(r[2])
-        result = green_team_bricks(result)
         return result
     elif dist_city == "Hyderabad":
         bricks = []
@@ -761,7 +596,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 data = []
                 for k in range(0, len(products) + 1):
                     data.append(str(df.iat[i, k]))
-                    # print(data)
                 bricks.append(data[0])
                 sales.append(data[1:])
 
@@ -782,6 +616,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 products[i] = "009072"
             if products[i] == "M_TAB":
                 products[i] = "012961"
+
         for i in range(0, len(bricks)):
             if bricks[i] == "CHOTI GHITTI":
                 bricks[i] = "CHOTI GHITI"
@@ -845,8 +680,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[i] = "KADAN"
             if bricks[i] == "LATIFABAD NO 8":
                 bricks[i] = "LATIFABAD 8"
-            if bricks[i] == "LATIFABAD NO 8":
-                bricks[i] = "LATIFABAD 8"
             if bricks[i] == " AUTO BHAN ROAD":
                 bricks[i] = "AUTO BAHN ROAD"
             if bricks[i] == "RUKKAN BURIRA":
@@ -854,10 +687,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             if bricks[i] == "JAMSHORRO":
                 bricks[i] = "JAMSHORO"
 
-        for i in range(len(sales)):
-            for k in range(len(sales[i])):
-                if sales[i][k] == "nan":
-                    sales[i][k] = "0"
         for s in range(0, len(sales)):
             for i in range(0, len(sales[s])):
                 child = []
@@ -865,140 +694,190 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 child.append(bricks[s])
                 child.append(sales[s][i])
                 result.append(child)
+
         for r in range(0, len(result)):
             for i in item_list:
                 if result[r][0] == i[0]:
                     if result[r][2] != "0":
                         new_result.append(result[r])
-                    # print(r)
+
         for r in new_result:
             for i in item_list:
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
-        for r in new_result:
-            for t in tt_list:
-                if r[2] == t[0]:
-                    r.insert(4, t[1])
-                    # print(r)
         new_result = green_team_bricks(new_result)
+        for r in new_result:
+            for t in tt_list:
+                if r[2] == t[0]:
+                    r.insert(4, t[1])
+
         return new_result
+
     elif dist_city == "Thatta":
-        bricks = []
-        data = []
         result = []
-        sales = []
-        products = []
-        start_data_var = 1000
-        df = pd.read_excel(path)
-        for i in range(0, len(df)):
-            if df.iat[i, 0] == "ITEM":
-                start_data_var = i
-                for x in range(1, len(df.columns)):
-                    if df.iat[i, x] == "TTL QTY":
-                        break
-                    bricks.append(df.iat[i, x])
-            if (df.iat[i, 0]).strip() == "TTL QTY PCW TEAM-BLUE":
-                break
+        new_result = []
 
-            if i > start_data_var + 1:
-                data = []
-                for k in range(0, len(bricks) + 1):
-                    data.append(str(df.iat[i, k]))
-                products.append(data[0])
-                sales.append(data[1:])
-        for i in range(0, len(products)):
-            if "AFLOXON 150 CAP 20,S" in products[i]:
-                products[i] = "008376"
-            if "AFLOXON 300MG TAB 30,S" in products[i]:
-                products[i] = "017230"
-            if "JETEPAR 10ML INJ 5,S" in products[i]:
-                products[i] = "008999"
-            if "JETEPAR 2ML AMPULES 10,S" in products[i]:
-                products[i] = "004348"
-            if "JETEPAR CAP" in products[i]:
-                products[i] = "002392"
-            if "JETEPAR SYP" or "JETEPAR SYR" in products[i]:
-                products[i] = "002188"
-            if "MAIORAD INJ 3ML 6,S" in products[i]:
-                products[i] = "009072"
-            if "MAIORAD TAB 30,S" in products[i]:
-                products[i] = "012961"
-            if "JETEPAR SYRUP 112ML (TP: 244.22)" in products[i]:
-                products[i] = "002188"
+        # Excel/PDF header ka naam -> Territory Tree naam (purane short naam aur naye poore naam dono)
+        THT_BRICKS = {
+            "BAGHN": "BAGHAN THT",
+            "BAGHAN": "BAGHAN THT",
+            "BUHUR": "BUHURO",
+            "CHAJN": "CHACH JAHAN",
+            "DABHE": "DHABEEJI",
+            "DABHEEJI": "DHABEEJI",
+            "JHARK": "JHIRK SIDE",
+            "JHARIK SIDE": "JHIRK SIDE",
+            "JHIMP": "JHAMPIR",
+            "JHIMPIR": "JHAMPIR",
+            "SUJAW": "SUJAWAL",
+            "THT": "THATTA THT",
+            "THATTA": "THATTA THT",
+            "C.CND": "CHATO CHAND",
+            "CHOUH": "CHOUHAR JAMALI",
+            "GAGAR": "GHAGHAR",
+            "GHULM": "GHULLAMULLAH",
+            "KHORW": "KHORWA",
+            "NORAD": "NOORIABAD",
+            "S.KRM": "SHAH KARIM",
+            "BATHO": "BATHORO",
+            "GOHRA": "GHORA BARI",
+            "GULMD": "GUL MANDA",
+            "GULMANDA": "GUL MANDA",
+            "J,CHK": "JATI CHOWK",
+            "JUNGS": "JUNGSHAI",
+            "N.B": "NOOHBHATI",
+            "P,T": "PATHAN COLONY",
+            "GARHOO": "GARHO",
+        }
 
-        for i in range(0, len(bricks)):
-            if bricks[i] == "BAGHN":
-                bricks[i] = "BAGHAN THT"
-            if bricks[i] == "BUHUR":
-                bricks[i] = "BUHURO"
-            if bricks[i] == "CHAJN":
-                bricks[i] = "CHACH JAHAN"
-            if bricks[i] == "DABHE":
-                bricks[i] = "DHABEEJI"
-            if bricks[i] == "JHARK":
-                bricks[i] = "JHIRK SIDE"
-            if bricks[i] == "JHIMP":
-                bricks[i] = "JHAMPIR"
-            if bricks[i] == "SUJAW":
-                bricks[i] = "SUJAWAL"
-            if bricks[i] == "THT":
-                bricks[i] = "THATTA THT"
-            if bricks[i] == "C.CND":
-                bricks[i] = "CHATO CHAND"
-            if bricks[i] == "CHOUH":
-                bricks[i] = "CHOUHAR JAMALI"
-            if bricks[i] == "GAGAR":
-                bricks[i] = "GHAGHAR"
-            if bricks[i] == "GHULM":
-                bricks[i] = "GHULLAMULLAH"
-            if bricks[i] == "KHORW":
-                bricks[i] = "KHORWA"
-            if bricks[i] == "NORAD":
-                bricks[i] = "NOORIABAD"
-            if bricks[i] == "S.KRM":
-                bricks[i] = "SHAH KARIM"
-            if bricks[i] == "BATHO":
-                bricks[i] = "BATHORO"
-            if bricks[i] == "GOHRA":
-                bricks[i] = "GHORA BARI"
-            if bricks[i] == "GULMD":
-                bricks[i] = "GULMANDA"
-            if bricks[i] == "J,CHK":
-                bricks[i] = "JATI CHOWK"
-            if bricks[i] == "JUNGS":
-                bricks[i] = "JUNGSHAI"
-            if bricks[i] == "N.B":
-                bricks[i] = "NOOHBHATI"
-            if bricks[i] == "P,T":
-                bricks[i] = "PATHAN COLONY"
-            if bricks[i] == "GULMANDA":
-                bricks[i] = "GUL MANDA"
-            if bricks[i] == "DABHEEJI":
-                bricks[i] = "DHABEEJI"
+        # (required keywords, item code) - pehla match jeetega. SYRUP pehle taake "112ML" 2ML se na takraye
+        THT_PRODUCTS = [
+            (("JETEPAR", "SYRUP"), "002188"),
+            (("JETEPAR", "SYP"), "002188"),
+            (("JETEPAR", "SYR"), "002188"),
+            (("JETEPAR", "CAP"), "002392"),
+            (("JETEPAR", "10ML"), "008999"),
+            (("JETEPAR", "10CC"), "008999"),
+            (("JETEPAR", "2ML"), "004348"),
+            (("JETEPAR", "2CC"), "004348"),
+            (("MAIORAD", "TAB"), "012961"),
+            (("MAIORAD", "INJ"), "009072"),
+            (("MAIORAD", "AMP"), "009072"),
+            (("MAIORAD", "3ML"), "009072"),
+            (("AFLOXON", "CAP"), "008376"),
+            (("AFLOXAN", "CAP"), "008376"),
+            (("AFLOXON", "TAB"), "017230"),
+            (("AFLOXAN", "TAB"), "017230"),
+            (("AFLOXON", "300"), "017230"),
+            (("AFLOXAN", "300"), "017230"),
+            (("AFLOXON", "150"), "008376"),
+            (("AFLOXAN", "150"), "008376"),
+            (("METRONIDAZOLE", "400"), "081274"),
+            (("METRONIDAZOLE", "200"), "008909"),
+            (("MOXILIUM", "DROP"), "006782"),
+            (("MOXILIUM", "125"), "006783"),
+            (("MOXILIUM", "250", "SYP"), "012649"),
+            (("MOXILIUM", "250", "SUS"), "012649"),
+            (("MOXILIUM", "250"), "006784"),
+            (("MOXILIUM", "500"), "008908"),
+            (("CYANORIN",), "005425"),
+            (("DEPROGESIC", "P"), "081838"),
+            (("EBAST",), "023906"),
+            (("HISTAFEX", "120"), "031037"),
+            (("HISTAFEX", "180"), "031038"),
+            (("AVOR", "2"), "007853"),
+            (("AVOR", "1"), "006584"),
+            (("OBEXIL",), "032259"),
+            (("PC-LAC",), "019133"),
+            (("P.C.LAC",), "019133"),
+            (("PROBITOR",), "016654"),
+            (("SAVELOX", "250"), "032255"),
+            (("SAVELOX", "500"), "029328"),
+            (("SUPRACEF", "CAP"), "024820"),
+            (("SUPRACEF", "DS"), "028727"),
+            (("SUPRACEF", "SUS"), "024819"),
+            (("SUPRALOX",), "028728"),
+            (("TRAMAGESIC", "INJ"), "026920"),
+            (("TRAMAGESIC", "CAP"), "029327"),
+            (("VIGROL",), "007018"),
+            (("VIKONON",), "006406"),
+            (("VIKNON",), "006406"),
+        ]
 
-        for i in range(len(sales)):
-            for k in range(len(sales[i])):
-                if sales[i][k] == "nan":
-                    sales[i][k] = "0"
-        for p in range(0, len(products)):
-            for s in range(0, len(sales[p])):
-                child = []
-                child.append(products[p])
-                child.append(bricks[s])
-                child.append(sales[p][s])
-                result.append(child)
-        for r in result:
+        def tht_product(name):
+            n = re.sub(r"\(.*?\)", " ", str(name))  # "(TP: 450.50)" hata dein
+            n = re.sub(r"\s+", " ", n).strip().upper()
+            if not n or n.startswith(("PCW TEAM", "TTL", "G TTL", "ITEM", "NAN")):
+                return None
+            for kws, code in THT_PRODUCTS:
+                if all(k in n for k in kws):
+                    return code
+            print(f"[Thatta] product not recognised, skipped: '{n}'")
+            return None
+
+        def tht_qty(v):
+            if v is None:
+                return "0"
+            s = str(v).replace(",", "").strip()
+            if s == "" or s.lower() == "nan":
+                return "0"
+            try:
+                f = float(s)
+            except ValueError:
+                return "0"
+            return str(int(f)) if f == int(f) else str(f)
+
+        # Report kai sheets mein bati ho sakti hai (har sheet mein kuch bricks) - saari sheets parhein
+        sheets = pd.read_excel(path, sheet_name=None, header=None)
+        for sname, df in sheets.items():
+            hdr_i = None
+            for i in range(len(df)):
+                if str(df.iat[i, 0]).strip().upper() == "ITEM":
+                    hdr_i = i
+                    break
+            if hdr_i is None:
+                continue
+
+            # brick columns: "TTL QTY" / "TTL AMT" se pehle tak
+            cols = []
+            for c in range(1, len(df.columns)):
+                h = df.iat[hdr_i, c]
+                if pd.isna(h):
+                    continue
+                h = re.sub(r"\s+", " ", str(h)).strip().upper()
+                if h.startswith("TTL"):
+                    break
+                cols.append((c, THT_BRICKS.get(h, h)))
+
+            for i in range(hdr_i + 1, len(df)):
+                first = re.sub(r"\s+", " ", str(df.iat[i, 0])).strip().upper()
+                if first.startswith("G TTL"):
+                    break
+                code = tht_product(first)
+                if code is None:
+                    continue
+                for c, bname in cols:
+                    q = tht_qty(df.iat[i, c])
+                    if q != "0":
+                        result.append([code, bname, q])
+
+        for r in range(0, len(result)):
+            for i in item_list:
+                if result[r][0] == i[0]:
+                    new_result.append(result[r])
+        for r in new_result:
             for i in item_list:
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
-        for r in result:
+        new_result = green_team_bricks(new_result)
+        for r in new_result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-        result = green_team_bricks(result)
-        return result
+        return new_result
+
     elif dist_city == "Mir Pur Khas":
         bricks = []
         data = []
@@ -1038,8 +917,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[b] = "KOT GHULAM MUHAMMAD"
             if bricks[b] == "KOT MIRUS":
                 bricks[b] = "KOT MIRS"
-            if bricks[b] == "MISSON":
-                bricks[b] = "MISSON"
             if bricks[b] == "NOUKOT":
                 bricks[b] = "NAUKOT"
             if bricks[b] == "RAJA RASTY":
@@ -1056,14 +933,10 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[b] = "WHOLESALE MPK"
             if bricks[b] == "CHHACHRO":
                 bricks[b] = "CHACHRO"
-            if bricks[b] == "DIPLO ":
-                bricks[b] = "DIPLO"
             if bricks[b] == "ISLAMKOT ":
                 bricks[b] = "ISLAMKOT"
             if bricks[b] == "JHILORI":
                 bricks[b] = "JHULURI"
-
-        # print(bricks)
 
         for i in range(0, len(products)):
             if products[i] == "JT10C":
@@ -1092,12 +965,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
+        result = green_team_bricks(result)
         for r in result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-        result = green_team_bricks(result)
         return result
+
     elif dist_city == "Nawab Shah":
         products = []
         bricks = []
@@ -1105,7 +979,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
         result = []
         df = pd.read_excel(path, header=None)
 
-        # ---- 1. header row dhoondein jahan col 0 == "ITEM" ho ----
         header_row_idx = None
         for i in range(len(df)):
             if str(df.iat[i, 0]).strip().upper() == "ITEM":
@@ -1118,7 +991,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
 
         header_row = df.iloc[header_row_idx]
 
-        # ---- 2. "TTL QTY" column dhoondein ----
         ttl_qty_col = None
         for c in range(2, len(header_row)):
             if str(header_row[c]).strip().upper() == "TTL QTY":
@@ -1129,15 +1001,10 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
 
         brick_cols = list(range(2, ttl_qty_col))
 
-        # ---- 3. bricks list banayein aur normalize karein ----
         bricks = [str(header_row[c]).strip().upper() for c in brick_cols]
         for b in range(0, len(bricks)):
-            if bricks[b] == "KANDIARO":
-                bricks[b] = "KANDIARO"
             if bricks[b] == "N.FEROZ":
                 bricks[b] = "NAUSHAHRO FEROZ"
-            if bricks[b] == "PHULL":
-                bricks[b] = "PHULL"
             if bricks[b] == "T.SHAH":
                 bricks[b] = "T SHAH"
             if bricks[b] == "B.CITY":
@@ -1146,12 +1013,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 bricks[b] = "BHIRIA ROAD"
             if bricks[b] == "P.CHANG":
                 bricks[b] = "PACCA CHANG"
-            if bricks[b] == "AKRI":
-                bricks[b] = "AKRI"
-            if bricks[b] == "KARONDI":
-                bricks[b] = "KARONDI"
-            if bricks[b] == "MORO":
-                bricks[b] = "MORO"
             if bricks[b] == "D.PUR":
                 bricks[b] = "DAULAT PUR"
             if bricks[b] == "NAWABSHAH":
@@ -1159,9 +1020,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             if bricks[b] == "THARUSHAH":
                 bricks[b] = "THARU SHAH"
 
-        # print("DEBUG: bricks =", bricks)
-
-        # ---- 4. products + sales nikalein ----
         for i in range(header_row_idx + 1, len(df)):
             raw_name = str(df.iat[i, 0]).strip()
 
@@ -1183,16 +1041,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     row_sales.append(str(val))
             sales.append(row_sales)
 
-        # print("DEBUG: products =", products)
-        # print("DEBUG: sales =", sales)
-
-        # ---- 5. empty ko "0" bana dein (safety) ----
         for i in sales:
             for a in range(0, len(i)):
                 if i[a] == "":
                     i[a] = "0"
 
-        # ---- 6. products x bricks nested loop, zero sale skip ----
         for p in range(0, len(products)):
             for b in range(0, len(bricks)):
                 if sales[p][b] == "0":
@@ -1210,7 +1063,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             result[:5],
         )
 
-        # ---- 7. product name replacement (readable names ke liye) ----
         for r in result:
             if r[0] == "JETEPAR 10ML AMP. 5 AMP":
                 r[0] = "Jetepar Injection 10ml"
@@ -1225,47 +1077,45 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             if r[0] == "MAIORAD 3ML AMPS 6S":
                 r[0] = "Maiorad Injection"
 
-            # ---- fuzzy match: pehle exact (100), agar na mile to best available match ----
             best_ratio = 0
             best_code = None
+            exact_found = False
+
+            r0_clean = r[0].strip().upper()
+
             for i in item_list:
-                final_result = fuzz.token_set_ratio(r[0], i[1])
-                if final_result > best_ratio:
-                    best_ratio = final_result
+                if r0_clean == i[1].strip().upper():
                     best_code = i[0]
-            if best_ratio >= 100:
-                r[0] = best_code
-            else:
-                print(
-                    f"DEBUG: NO EXACT MATCH for '{r[0]}' -> best guess was '{best_code}' with ratio {best_ratio}"
-                )
+                    exact_found = True
+                    break
 
-        # print("DEBUG: result AFTER matching sample:", result[:5])
+            if not exact_found:
+                for i in item_list:
+                    final_result = fuzz.ratio(r0_clean, i[1].strip().upper())
+                    if final_result > best_ratio:
+                        best_ratio = final_result
+                        best_code = i[0]
 
-        # ---- 8. item_list se naam/rate insert ----
+                if best_ratio < 95:  # confidence threshold - tune as needed
+                    print(
+                        f"DEBUG: NO CONFIDENT MATCH for '{r[0]}' -> best guess was "
+                        f"'{best_code}' with ratio {best_ratio}"
+                    )
+                    best_code = None
+
+            r[0] = best_code
+
         for r in result:
             for i in item_list:
                 if r[0] == i[0]:
                     r.insert(1, i[1])
                     r.append(i[2])
-
-        # print("DEBUG: result AFTER item_list insert sample:", result[:5])
-
-        # ---- 9. tt_list se extra field insert ----
+        result = green_team_bricks(result)
         for r in result:
             for t in tt_list:
                 if r[2] == t[0]:
                     r.insert(4, t[1])
-
-        # print("DEBUG: result FINAL (total rows =", len(result), ") sample:", result[:5])
-
-        # result = green_team_bricks(result)
-        # print("DEBUG: result AFTER green_team_bricks (total rows =", len(result), ")")
-
-        # return result
-        result = green_team_bricks(result)
         return result
-        # print(result)
 
     else:
         with open(path, "rb") as f:
@@ -1319,7 +1169,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if b[0] == "PRODUCT NAME PACK":
                             for c in range(len(b)):
                                 for t in tt_list:
-                                    if b[c] == "C.M.H":
+                                    if b[c] == "1010115":
                                         b[c] = "COMBINED MILITARY HOSPITAL"
                                     elif b[c] == "L.G.H":
                                         b[c] = "LAHORE GENERAL HOSPITAL"
@@ -1335,7 +1185,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                         b[c] = "AL FAISAL TOWN"
                                     elif b[c] == "GULSHAN-E-":
                                         b[c] = "GULSHAN E RAVI"
-                                    elif b[c] == "BAIGAM KOT":
+                                    elif b[c] == "1010109":
                                         b[c] = "BAIGUM KOT"
                                     elif b[c] == "SANDA":
                                         b[c] = "SANDA LAHORE"
@@ -1347,8 +1197,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                         b[c] = "SAMANA BAD"
                                     elif b[c] == "SAMANAABD":
                                         b[c] = "SAMANA ABAD"
-                                    elif b[c] == "BAIGAM KOT":
-                                        b[c] = "BAIGUM KOT"
                                     elif b[c] == "TEZAB AAHATA":
                                         b[c] = "TEHZAB AAHATA"
                                     elif b[c] == "JALLO PIND":
@@ -1357,17 +1205,15 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                         b[c] = "TEHZAB AAHATA"
                                     elif b[c] == "THOKAR NIA":
                                         b[c] = "THOKAR NAIZ BAIG"
-                                    elif b[c] == "BAIGAM KOT":
-                                        b[c] = "BAIGUM KOT"
-                                    elif b[c] == "BUND ROAD":
+                                    elif b[c] == "1010114":
                                         b[c] = "BAND ROAD"
-                                    elif b[c] == "AL-FAISAL TOWN":
+                                    elif b[c] == "1010102":
                                         b[c] = "AL FAISAL TOWN"
-                                    elif b[c] == "G.T ROAD MANAWA":
+                                    elif b[c] == "1010137":
                                         b[c] = "GT ROAD MANAWA"
-                                    elif b[c] == "GARHI SHAHU":
+                                    elif b[c] == "1010139":
                                         b[c] = "GARHI SHAHU BAZAR"
-                                    elif b[c] == "GULSHAN-E-RAVI":
+                                    elif b[c] == "1010147":
                                         b[c] = "GULSHAN E RAVI"
                                     elif b[c] == "L.G.H":
                                         b[c] = "LAHORE GENERAL HOSPITAL"
@@ -1393,9 +1239,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                         b[c] = "TAJ BAGH LHR"
                                     elif b[c] == "SHEIKHUPURA":
                                         b[c] = "SHEIKHUPURA LHR"
-                                    elif b[c] == "KOT ABDUL MALIK GT":
+                                    elif b[c] == "KOT ABDUL MALIK":
                                         print("Hello")
-                                        b[c] = "KOT ABDUL MALIK LHR1 GT"
+                                        b[c] = "KOT ABDUL MALIK LHR1"
 
                     item_code = [
                         "008376",
@@ -1475,7 +1321,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
 
                 else:
                     PRODUCT_CODES = ["002392", "002188", "004348", "008999"]
-                    NAME_X0_CUTOFF = 105  # anything left of this is region-name text
+                    NAME_X0_CUTOFF = 105
 
                     def cluster_rows(words, tol=2.0):
                         words = sorted(words, key=lambda w: w["top"])
@@ -1532,11 +1378,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             if r[0] == i[0]:
                                 r.insert(1, i[1])
                                 r.append(i[2])
+
+                    result = green_team_bricks(result)
                     for r in result:
                         for t in tt_list:
                             if r[2] == t[0]:
                                 r.insert(4, t[1])
-                    result = green_team_bricks(result)
                     return result
             elif dist_city == "Sheikhupura":
                 products = []
@@ -1585,8 +1432,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         sale = sales[i][j]
                         child.append(sale)
                         result.append(child)
-                # print(len(result))
-                ## makes array according to data model
                 for r in result:
                     for i in item_list:
                         if r[0] == "MAIROAD INJ":
@@ -1622,12 +1467,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-                # for brick parent
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
-                            r.insert(4, t[1])  ## insert brick parent into index 4
-                result = green_team_bricks(result)
+                            r.insert(4, t[1])
                 return result
             elif dist_city == "Kasur":
                 products = []
@@ -1639,7 +1483,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if data[0][-1] != "Total":
                         child_brick = data[0][2:]
                         bricks.append(child_brick)
-                        for i in range(1, len(data) - 2):  ## for skipping total row
+                        for i in range(1, len(data) - 2):
                             products.append(data[i][1])
                             sales.append(data[i][2:])
                     else:
@@ -1681,10 +1525,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if b[c] == "RWD":
                             b[c] = "RAI WIND"
                         if b[c] == "THM":
-                            b[c] = "THENG MORE"  # print(bricks)
+                            b[c] = "THENG MORE"
                         if b[c] == "KS3":
-                            b[c] = "KASUR 3"  # print(bricks)
-                ## set sale value only
+                            b[c] = "KASUR 3"
                 for s in sales:
                     for i in range(0, len(s)):
                         index = s[i].index("\n")
@@ -1703,10 +1546,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         zipped_list[z][l] = list(zipped_list[z][l])
                         zipped_list[z][l].insert(0, products[z])
                         zipped_list[z][l] = tuple(zipped_list[z][l])
-                # print(zipped_list)
                 final_list = [item for z in zipped_list for item in z]
-                # print(final_list)
-                ## make array a/c  data model
                 end_result = []
                 for r in final_list:
                     for i in item_list:
@@ -1735,15 +1575,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             end_result[r] = list(end_result[r])
                             end_result[r].insert(1, i[1])
                             end_result[r].append(i[2])
-                # print(end_result)
-                # # for brick parent
+                end_result = green_team_bricks(end_result)
                 for r in range(0, len(end_result)):
                     for t in tt_list:
                         if end_result[r][2] == t[0]:
-                            end_result[r].insert(
-                                4, t[1]
-                            )  ## insert brick parent into index 4
-                end_result = green_team_bricks(end_result)
+                            end_result[r].insert(4, t[1])
                 return end_result
             elif dist_city == "Okara":
                 products = []
@@ -1763,7 +1599,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     for s in range(1, len(data) - 2):
                         sale = data[s][2:-1]
                         sales.append(sale)
-                    # print(sales)        bricks = data[0][2:-1]
                 new_bricks = [
                     "AKHTER ABAD",
                     "BANGLA GOGERA",
@@ -1877,17 +1712,16 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
+
             elif dist_city == "Karachi":
                 result = []
                 new_result = []
-
-                # (PDF mein jo naam/hissa ho, Territory Tree ka naam) - pehla match jeetega
                 KHI_BRICKS = [
                     ("AL-ASIF SQUARE", "AL ASIF SQUARE"),
                     ("AZAM-BASTI,MEHMOODABAD", "AZAM-BASTI AND MEHMOODABAD"),
@@ -1968,7 +1802,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         return "038427" if "10" in h else "038426"
                     if re.search(r"^[A-Z0-9]?(MOX|MXL)", h):
                         if not re.search(r"\d", h):
-                            return "006782"  # MOXILIUM-D (drops)
+                            return "006782"
                         if "125" in h:
                             return "006783"
                         if "500" in h:
@@ -2064,13 +1898,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
+
             elif dist_city == "Sahiwal":
                 products = []
                 bricks = []
@@ -2148,13 +1982,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             if r[0] == i[0]:
                                 r.insert(1, i[1])
                                 r.append(i[2])
-
+                    result = green_team_bricks(result)
                     for r in result:
                         for t in tt_list:
                             if r[2] == t[0]:
                                 r.insert(4, t[1])
-
-                    result = green_team_bricks(result)
                     return result
             elif dist_city == "Sialkot":
                 bricks = []
@@ -2179,8 +2011,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             products[p] = "009072"
                         if "046006" in products[p]:
                             products[p] = "012961"
-                        # if '' in products[p]:
-                        #     product[p] = ''
 
                     if x == len(pdf.pages) - 1:
                         for b in range(1, len(data) - 3):
@@ -2404,8 +2234,10 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         bricks[b] = "BHOTH"
                     if "1011004" in bricks[b]:
                         bricks[b] = "KUBAY CHAK"
+
+                    # CEO-KAY SKT-J
                     if "1011107" in bricks[b]:
-                        bricks[b] = "1011107 - CEO-KAY SKT-J"
+                        bricks[b] = ""
                     if "1020101" in bricks[b]:
                         bricks[b] = "JASSAR WALA"
                     if "1031002" in bricks[b]:
@@ -2430,8 +2262,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         bricks[b] = "ORA CHOWK KNG"
                     if "1010608" in bricks[b]:
                         bricks[b] = "MUBARAK PURA KHADIM ALI ROAD"
-
-                    # bricks code changed
                     if "2010101" in bricks[b]:
                         bricks[b] = "COMMISSIONER ROAD"
                     if "2010504" in bricks[b]:
@@ -2669,6 +2499,75 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if "2020404" in bricks[b]:
                         bricks[b] = "RANGERS ROAD"
 
+                    if "3010201" in bricks[b]:
+                        bricks[b] = "CHUNGI # 6"
+                    if "2010705" in bricks[b]:
+                        bricks[b] = "DEFENCE ROAD WEST SIDE"
+
+                    # BOTH SKT-K GONDL
+                    if "2020203" in bricks[b]:
+                        bricks[b] = ""
+                    if "2020611" in bricks[b]:
+                        bricks[b] = "THQ ROAD PASRUR"
+                    if "3020102" in bricks[b]:
+                        bricks[b] = "DAK WALA"
+
+                    # BOTH SKT-K GONDL
+                    if "2020203" in bricks[b]:
+                        bricks[b] = ""
+                    if "4020103" in bricks[b]:
+                        bricks[b] = "DHAMTHAL SIALKOT"
+                    if "2010705" in bricks[b]:
+                        bricks[b] = "DEFENCE ROAD WEST SIDE"
+                    if "2010102" in bricks[b]:
+                        bricks[b] = "RAJA ROAD"
+                    if "2010503" in bricks[b]:
+                        bricks[b] = "MUJAHID ROAD"
+                    if "3020110" in bricks[b]:
+                        bricks[b] = "ADDA KASSOWALA"
+                    if "4020209" in bricks[b]:
+                        bricks[b] = "NOOR KOT"
+                    if "3020112" in bricks[b]:
+                        bricks[b] = "BAN BAJWA"
+                    if "20108" in bricks[b]:
+                        bricks[b] = "GOHAD PUR / KHADIM ALI ROAD"
+                    if "20101" in bricks[b]:
+                        bricks[b] = "COMMISSIONER ROAD CITY"
+                    if "20102" in bricks[b]:
+                        bricks[b] = "CANTT CITY"
+                    if "20103" in bricks[b]:
+                        bricks[b] = "RANGPURA"
+                    if "20104" in bricks[b]:
+                        bricks[b] = "PULL AIK"
+                    if "20105" in bricks[b]:
+                        bricks[b] = "PARIS ROAD"
+                    if "20106" in bricks[b]:
+                        bricks[b] = "HAJI PURA"
+                    if "20107" in bricks[b]:
+                        bricks[b] = "KASHMIR ROAD SIALKOT"
+                    if "20201" in bricks[b]:
+                        bricks[b] = "KOTLI LOHARAN / KULLUWAL"
+                    if "20202" in bricks[b]:
+                        bricks[b] = "GONDAL"
+                    if "20203" in bricks[b]:
+                        bricks[b] = "SAID PUR"
+                    if "20204" in bricks[b]:
+                        bricks[b] = "DALUWALI"
+                    if "20205" in bricks[b]:
+                        bricks[b] = "KINGRA"
+                    if "20206" in bricks[b]:
+                        bricks[b] = "PASRUR / CHAWINDA / BADIANA"
+                    if "30101" in bricks[b]:
+                        bricks[b] = "DASKA CITY AREA 1"
+                    if "30102" in bricks[b]:
+                        bricks[b] = "DASKA CITY AREA 2"
+                    if "30201" in bricks[b]:
+                        bricks[b] = "MUNDEKE / KOTLI BAWA"
+                    if "30202" in bricks[b]:
+                        bricks[b] = "JAMKE / BHOPAL WALA"
+                    if "30203" in bricks[b]:
+                        bricks[b] = "SAMBRIAL SIALKOT"
+
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
                         child = []
@@ -2687,12 +2586,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
+
             elif dist_city == "Narowal":
                 products = []
                 bricks = []
@@ -2786,7 +2686,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if "1010203" in bricks[b]:
                         bricks[b] = "BUSTAN"
                     if "1010205" in bricks[b]:
-                        bricks[b] = "KANJRUR"
+                        bricks[b] = "KANJRUR 1"
                     if "1010207" in bricks[b]:
                         bricks[b] = "SHAKARGHAR CITY"
                     if "1010208" in bricks[b]:
@@ -2806,7 +2706,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if "1010307" in bricks[b]:
                         bricks[b] = "NONAR NAROWAL"
                     if "1010308" in bricks[b]:
-                        bricks[b] = "NONAR NAROWAL"
+                        bricks[b] = "KANJRUR 2"
                     if "1010309" in bricks[b]:
                         bricks[b] = "SHAH GREEB"
                     if "1010311" in bricks[b]:
@@ -2856,11 +2756,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Gujranwala":
@@ -2873,7 +2773,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     text = page.extract_text()
                     lines = text.split("\n")
 
-                    # ---- header aur footer ke darmiyan asal data ka range dhoondein ----
                     start_idx = None
                     end_idx = len(lines)
                     for i, line in enumerate(lines):
@@ -2891,7 +2790,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
 
                         tokens = line.split()
 
-                        # ---- pehla "pure number" token dhoondein; yahin se values shuru hoti hain ----
                         idx = None
                         for j in range(1, len(tokens)):
                             if re.fullmatch(r"-?\d+", tokens[j]):
@@ -2901,12 +2799,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             continue  # yeh brick line nahi hai
 
                         name = " ".join(tokens[0:idx])
-                        values = tokens[
-                            idx:-1
-                        ]  # aakhri token total value hai, hata dein
+                        values = tokens[idx:-1]
 
-                        # ---- agli line ek chhota "serial number" column hai (product value NAHI hai) ----
-                        # ---- ise sirf skip/consume karein, values mein add na karein ----
                         if i < end_idx and re.fullmatch(r"-?\d+", lines[i].strip()):
                             i += 1
 
@@ -2927,15 +2821,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         bricks[b] = "GAKHAR"
                     if bricks[b] == "SIALKOT":
                         bricks[b] = "SIALKOT GUJRANWALA"
-
-                # ---- column order (confirm ki gayi): ----
-                # col0 = A-JETEPAR10ML  -> 008999 (Jetepar Injection 10ml)
-                # col1 = JETEPAR2MLAMP  -> 004348 (Jetepar Injection 2ml)
-                # col2 = JETEPARCAPS    -> 002392 (Jetepar Capsule)
-                # col3 = JETEPARINJ10m  -> 008999 (SAME product jaisa col0, add karein)
-                # col4 = JETEPARSYRUP   -> 002188 (Jetepar Syrup)
-                # col5 = MAIORADTAB     -> 012961 (Maiorad Tablet)
-                # (Maiorad Injection is report mein nahi hai)
 
                 for b in range(0, len(bricks)):
                     vals = sales[b]
@@ -2974,15 +2859,14 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
-
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-
-                new_result = green_team_bricks(new_result)
                 return new_result
-            elif dist_city == "MBD":
+
+            elif dist_city == "Mandi Bahauddin":
                 result = []
                 new_result = []
                 products = []
@@ -3006,7 +2890,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             if data[d][0] != "BLUE":
                                 sales.append(data[d][1:15])
                                 products.append(data[d][0])
-                # print(len(products))
 
                 for b in range(0, len(bricks)):
                     if bricks[b] == "KUT.SHK":
@@ -3040,7 +2923,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         child.append(bricks[s])
                         child.append(sales[p][s])
                         result.append(child)
-                # print(result)
 
                 for r in range(0, len(result)):
                     if "MAIORAD INJ 6AMP" in result[r][0]:
@@ -3105,8 +2987,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         result[r][0] = "081838"
                     if "AVOR 2MG TAB 100TAB" in result[r][0]:
                         result[r][0] = "007853"
-                # print(result)
-
                 for r in range(0, len(result)):
                     for i in item_list:
                         if result[r][0] == i[0]:
@@ -3118,26 +2998,16 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Mardan":
                 result = []
 
-                # This is the "4M Technologies" invoice-style report (same
-                # software family as the newer Lahore/Multan reports) --
-                # completely different layout from the old grid-based
-                # extract_tables() report this branch used to expect, which
-                # is why the old logic (index1 == 8/14/15 heuristics) no
-                # longer applies. Region rows look like:
-                #   "1010101 - MC PLAZA - - 300 100 10 410" then "52,582.80"
-                # and each page can show a DIFFERENT set of product columns
-                # (there's no fixed column count), so products are matched
-                # by name instead of by position/count.
                 NAME_TO_CODE = [
                     ("CYANORIN FORTE", "005425"),
                     ("MOXILIUM 125MG", "006783"),
@@ -3286,12 +3156,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
                 new_result = green_team_bricks(new_result)
+
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
                 return new_result
-                # print(new_result)
 
             elif dist_city == "FAISALABAD":
                 result = []
@@ -3483,17 +3353,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             break
 
                 for r in new_result:
-                    # Territory is checked FIRST. Price is only looked up
-                    # and attached if the brick ALSO matched something in
-                    # tt_list -- if the brick's PDF spelling doesn't match
-                    # the Territory Tree (or the brick doesn't exist there
-                    # at all), price is left unset, so Value (qty x price)
-                    # comes out as NaN on the frontend. That NaN is the
-                    # visible signal that this specific brick still needs a
-                    # BRICK_RENAME entry above. Once it's added, the same
-                    # row will match and Value will calculate normally.
                     matched_territory = None
                     matched_price = None
+                    new_result = green_team_bricks(new_result)
                     for t in tt_list:
                         if r[2] == t[0]:
                             matched_territory = t[1]
@@ -3503,66 +3365,119 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             if r[0] == i[0]:
                                 matched_price = i[2]
                                 break
-                    # always insert/append something (even None) so every
-                    # row keeps the same length regardless of match status
-                    # -- a row that's shorter than the rest is what broke
-                    # the frontend earlier for Multan
+
                     r.insert(4, matched_territory)
                     r.append(matched_price)
 
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Timergara":
-                result = []
-                products = []
-                bricks = []
-                sales = []
-                data = pdf.pages[0].extract_table()
-                for i in range(0, len(data)):
-                    bricks = data[0][3:-1]
+                code_map = {
+                    "AFLOXAN CAP": "008376",
+                    "AFLOXAN TAB 300MG": "017230",
+                    "JETEPAR 10ML AMP": "008999",
+                    "JETEPAR 2ML AMP:": "004348",
+                    "JETEPAR CAPS": "002392",
+                    "JETEPAR SYP": "002188",
+                    "MAIORAD 3ML AMP": "009072",
+                    "MAIORAD TAB": "012961",
+                    "DEPROGESIC-P TABS": "081838",
+                    "METRONIDAZOLE 400MG": "081274",
+                    "VIKONAN 120ML SYP": "006406",
+                }
+                nan = float("nan")
 
-                    if data[i][1] == None:
-                        pass
+                def clean(x):
+                    return re.sub(r"\s+", " ", x or "").strip()
+
+                def parse_table(table):
+                    rows = []
+                    hdr_idx = None
+                    for ri, row in enumerate(table):
+                        if "PRODUCT NAME" in [clean(c).upper() for c in row]:
+                            hdr_idx = ri
+                            break
+
+                    if hdr_idx is not None:
+                        header = [clean(c).upper() for c in table[hdr_idx]]
+                        p_col = header.index("PRODUCT NAME")
+                        start = (
+                            next(
+                                (
+                                    i
+                                    for i, c in enumerate(header)
+                                    if c.startswith("T.PRICE")
+                                ),
+                                p_col + 1,
+                            )
+                            + 1
+                        )
+                        end = next(
+                            (
+                                i
+                                for i, c in enumerate(header)
+                                if c.replace(" ", "").startswith("T.QTY")
+                            ),
+                            len(header) - 2,
+                        )
                     else:
-                        products.append(data[i][1])
-                        sales.append(data[i][3:-1])
-                for i in range(0, len(products)):
-                    bricks[i] = re.sub("TIMERGARA", "TIMERGARA TMG", bricks[i])
-                for i in range(0, len(products)):
-                    # products2[i] = re.sub('\n','',products2[i])
-                    products[i] = re.sub("AFLOXAN CAP", "008376", products[i])
-                    products[i] = re.sub("AFLOXAN TAB 300MG", "017230", products[i])
-                    products[i] = re.sub("JETEPAR 10ML AMP", "008999", products[i])
-                    products[i] = re.sub("JETEPAR 2ML AMP:", "004348", products[i])
-                    products[i] = re.sub("JETEPAR CAPS", "002392", products[i])
-                    products[i] = re.sub("JETEPAR SYP", "002188", products[i])
-                    products[i] = re.sub("MAIORAD 3ML AMP", "009072", products[i])
-                    products[i] = re.sub("MAIORAD TAB", "012961", products[i])
-                for s in range(0, len(sales)):
-                    for i in range(0, len(sales[s])):
-                        if sales[s][i] == "":
-                            sales[s][i] = "0"
-                # print(bricks)
-                # print(products)
-                # print(sales)
-                for p in range(0, len(products)):
-                    for s in range(0, len(sales[p])):
-                        child = []
-                        child.append(products[p])
-                        child.append(bricks[s])
-                        child.append(sales[p][s])
-                        result.append(child)
+                        hdr_idx, p_col, start = 0, 1, 3
+                        header = [clean(c).upper() for c in table[0]]
+                        end = len(header) - 2
+
+                    brick_cols = []
+                    for ci in range(start, end):
+                        name = header[ci] if ci < len(header) else ""
+                        if name:
+                            if name == "TIMERGARA":
+                                name = "TIMERGARA TMG"
+                            brick_cols.append((ci, name))
+
+                    for row in table[hdr_idx + 1 :]:
+                        if p_col >= len(row):
+                            continue
+                        product = clean(row[p_col])
+                        if (
+                            not product
+                            or product.upper() in ("PRODUCT NAME", "CODE")
+                            or product.upper().startswith("GROUP TOTAL")
+                        ):
+                            continue
+                        for ci, bname in brick_cols:
+                            val = clean(row[ci]) if ci < len(row) else ""
+                            val = val.replace(",", "") or "0"
+                            rows.append((product, bname, val))
+                    return rows
+
+                result = []
+                missing = set()
+
+                for page in pdf.pages:
+                    for table in page.extract_tables():
+                        if not table:
+                            continue
+                        for product, brick, qty in parse_table(table):
+                            code = code_map.get(product)
+                            if code is None:
+                                missing.add(product)
+                                # code missing -> poori row mein NaN
+                                result.append([nan, nan, brick, qty, nan])
+                            else:
+                                result.append([code, brick, qty])
+
+                if missing:
+                    print("Mapping missing for:", sorted(missing))
+
                 for r in result:
                     for i in item_list:
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
 
             elif dist_city == "Bannu":
@@ -3572,15 +3487,26 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 result = []
                 for x in range(0, len(pdf.pages)):
                     data = pdf.pages[x].extract_table()
-                    # print(data)
-                    # change the zero below to 1 if any error occurs in product
+
+                    header_len = len(data[0])
+                    for row_idx in range(1, len(data) - 1):
+                        row = data[row_idx]
+                        diff = header_len - len(row)
+                        if diff > 0:
+                            tokens = row[0].split(" ")
+                            if len(tokens) > diff:
+                                merged_vals = tokens[-diff:]
+                                if all(
+                                    re.match(r"^-?\d+(\.\d+)?$|^-$", t)
+                                    for t in merged_vals
+                                ):
+                                    new_name = " ".join(tokens[:-diff])
+                                    data[row_idx] = [new_name] + merged_vals + row[1:]
+
                     products.append(data[0][1:-1])
-                    # print(data[0])
-                    for i in range(2, len(data) - 1):
+                    for i in range(1, len(data) - 1):
                         sales.append(data[i][1:-1])
-                        # print(sales)
                         bricks.append(data[i][0])
-                    # print(bricks)
                     for k in range(0, len(bricks)):
                         bricks[k] = bricks[k][8:]
                         if bricks[k] == "BANNU":
@@ -3629,21 +3555,20 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             bricks[k] = "TAKHT E NASRATI"
                         if bricks[k] == "MIRANSHAH":
                             bricks[k] = "MIRAN SHAH"
-                        if bricks[k] == "- SURANI GT":
-                            bricks[k] = "SURANI GT"
+                        if bricks[k] == "- SURANI":
+                            bricks[k] = "SURANI"
                         if bricks[k] == "- SURANI":
                             bricks[k] = "SURANI"
                         if bricks[k] == "- TAJI KALA":
                             bricks[k] = "TAJI KALA"
-                        if bricks[k] == "- TAJI KALA GT":
-                            bricks[k] = "TAJI KALA GT"
+                        if bricks[k] == "- TAJI KALA":
+                            bricks[k] = "TAJI KALA"
                         if bricks[k] == "- SABIR ABAD":
                             bricks[k] = "SABIR ABAD"
-                        if bricks[k] == "- SABIR ABAD GT":
-                            bricks[k] = "SABIR ABAD GT"
-
-                        # if '- TAJI KALA' in bricks:
-                        # 	bricks[k]='TAJI KALA'
+                        if bricks[k] == "- SABIR ABAD":
+                            bricks[k] = "SABIR ABAD"
+                        if bricks[k] == "- GHAZNI KHEL":
+                            bricks[k] = "GHAZNI KHEL"
 
                 for p in range(0, len(products)):
                     for i in range(0, len(products[p])):
@@ -3711,7 +3636,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             products[p][i] = "007018"
                         if "014005" in products[p][i]:
                             products[p][i] = "007853"
-                        # print(products[p][i])
 
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
@@ -3729,79 +3653,173 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-                            # print(r)
-                # print(result)
+
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                            # print(r)
-                result = green_team_bricks(result)
+
                 return result
+                # print(bricks)
 
             elif dist_city == "Dera Ismail Khan":
                 result = []
-                products = ["008999", "004348", "002392", "002188", "009072", "012961"]
+                new_result = []
 
-                bricks = [
-                    "D.I.KHAN",
-                    "TANK",
-                    "WANA",
-                    "PAHAR",
-                    "DRABAN/CHOD",
-                    "PROVA/RAMAK",
-                    "JANDOLA",
-                    "ZAFAR",
-                    "PEZU/PANYALA",
-                    "NEW DERA",
-                    "MAKEEN",
+                DIK_DEFAULT = {
+                    1: "D.I.KHAN",
+                    2: "TANK",
+                    3: "WANA",
+                    4: "PAHAR",
+                    5: "DRABAN/CHOD",
+                    6: "PROVA/RAMAK",
+                    7: "JANDOLA",
+                    8: "ZAFAR",
+                    9: "PEZU/PANYALA",
+                    10: "NEW DERA",
+                    11: "MAKEEN",
+                }
+                DIK_RENAME = {
+                    "PAHAR": "PAHAR PUR",
+                    "DRABAN/CHOD": "DRABAN",
+                    "PROVA/RAMAK": "PROVA",
+                    "PEZU/PANYALA": "PANI ALA",
+                    "D.I.KHAN": "DIKHAN",
+                }
+
+                DIK_PRODUCTS = [
+                    (("JETEPAR", "SYP"), "002188"),
+                    (("JETEPAR", "SYR"), "002188"),
+                    (("JETEPAR", "CAP"), "002392"),
+                    (("JETEPAR", "10ML"), "008999"),
+                    (("JETEPAR", "2ML"), "004348"),
+                    (("MAIORAD", "TAB"), "012961"),
+                    (("MAIORAD", "INJ"), "009072"),
+                    (("MAIORAD", "AMP"), "009072"),
+                    (("AFLOXAN", "CAP"), "008376"),
+                    (("AFLOXAN", "TAB"), "017230"),
                 ]
 
-                sales = []
+                def dik_product(name):
+                    n = (
+                        re.sub(r"\s+", " ", str(name or "").replace("\n", " "))
+                        .strip()
+                        .upper()
+                    )
+                    n = re.sub(r"^\d+\s+", "", n)
+                    if not n or n.startswith(("TOTAL", "P A R T")):
+                        return None
+                    for kws, code in DIK_PRODUCTS:
+                        if all(k in n for k in kws):
+                            return code
+                    print(f"[D.I.Khan] product not recognised, skipped: '{n}'")
+                    return None
 
-                data = pdf.pages[0].extract_table()
-                for x in range(0, len(data)):
-                    # print(data[x][0:11])
-                    sales.append(data[x][0:11])
-                # print(sales)
-                for b in range(0, len(bricks)):
-                    if bricks[b] == "PAHAR":
-                        bricks[b] = "PAHAR PUR"
-                    if bricks[b] == "DRABAN/CHOD":
-                        bricks[b] = "DRABAN"
-                    if bricks[b] == "PROVA/RAMAK":
-                        bricks[b] = "PROVA"
-                    if bricks[b] == "PEZU/PANYALA":
-                        bricks[b] = "PANI ALA"
-                    if bricks[b] == "D.I.KHAN":
-                        bricks[b] = "DIKHAN"
+                def dik_legend(pg):
+                    """Page ke neeche '01=D.I.KHAN', '10=NEW DERA' wali legend parhna"""
+                    amt = re.compile(r"^[\d,]+\.\d{2}$")
+                    words = sorted(
+                        pg.extract_words(x_tolerance=1.5), key=lambda w: w["top"]
+                    )
+                    lines, cur, cur_top = [], [], None
+                    for w in words:
+                        if cur_top is None or abs(w["top"] - cur_top) <= 2.5:
+                            cur.append(w)
+                            cur_top = w["top"] if cur_top is None else cur_top
+                        else:
+                            lines.append(cur)
+                            cur, cur_top = [w], w["top"]
+                    if cur:
+                        lines.append(cur)
+                    legend = {}
+                    for ln in lines:
+                        ln.sort(key=lambda w: w["x0"])
+                        for j, w in enumerate(ln):
+                            m = re.match(r"^(\d{1,2})=(.*)$", w["text"])
+                            if not m:
+                                continue
+                            parts = [m.group(2)] if m.group(2) else []
+                            prev_x1 = w["x1"]
+                            for w2 in ln[j + 1 :]:
+                                if (
+                                    re.match(r"^\d{1,2}=", w2["text"])
+                                    or amt.match(w2["text"])
+                                    or w2["text"].upper() == "TOTAL"
+                                    or w2["x0"] - prev_x1 > 12
+                                ):
+                                    break
+                                parts.append(w2["text"])
+                                prev_x1 = w2["x1"]
+                            if parts:
+                                legend[int(m.group(1))] = " ".join(parts).strip()
+                    return legend
 
-                for s in range(0, len(sales)):
-                    for i in range(0, len(sales[s])):
-                        if sales[s][i] == "":
-                            sales[s][i] = "0"
-                for p in range(0, len(products)):
-                    for s in range(0, len(sales[p])):
-                        child = []
-                        child.append(products[p])
-                        child.append(bricks[s])
-                        child.append(sales[p][s])
-                        result.append(child)
+                sums = {}
+                order = []
+                for pg in pdf.pages:
+                    legend = dik_legend(pg)
+                    for data in pg.extract_tables():
+                        if not data or len(data[0]) < 3:
+                            continue
+                        header = data[0]
+                        cols = []
+                        for ci in range(1, len(header)):
+                            h = str(header[ci] or "").strip()
+                            if h.isdigit():
+                                n = int(h)
+                                nm = legend.get(n) or DIK_DEFAULT.get(n)
+                                if nm:
+                                    nm = re.sub(r"\s+", " ", nm).strip()
+                                    cols.append((ci, DIK_RENAME.get(nm, nm)))
+                        if not cols:
+                            continue
+                        for row in data[1:]:
+                            if not row or not row[0]:
+                                continue
+                            code = dik_product(row[0])
+                            if code is None:
+                                continue
+                            for ci, bname in cols:
+                                if ci >= len(row):
+                                    continue
+                                s = str(row[ci] or "").replace(",", "").strip()
+                                if s in ("", "-"):
+                                    continue
+                                try:
+                                    f = float(s)
+                                except ValueError:
+                                    continue
+                                key = (code, bname)
+                                if key not in sums:
+                                    sums[key] = 0.0
+                                    order.append(key)
+                                sums[key] += f
 
-                for r in result:
+                for key in order:
+                    tot = sums[key]
+                    if tot == 0:
+                        continue
+                    result.append(
+                        [key[0], key[1], str(int(tot)) if tot == int(tot) else str(tot)]
+                    )
+
+                for r in range(0, len(result)):
+                    for i in item_list:
+                        if result[r][0] == i[0]:
+                            new_result.append(result[r])
+                for r in new_result:
                     for i in item_list:
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-                        # print(r)
-
-                for r in result:
+                new_result = green_team_bricks(new_result)
+                for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                            # print(r)
-                result = green_team_bricks(result)
-                return result
+                return new_result
+
             elif dist_city == "Abbotabad":
                 result = []
                 products = []
@@ -4033,14 +4051,14 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
 
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-
-                new_result = green_team_bricks(new_result)
                 return new_result
+
             elif dist_city == "Jhelum":
                 result = []
                 products = []
@@ -4292,29 +4310,16 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Vehari":
                 result = []
                 new_result = []
-
-                # -------------------------------------------------------
-                # Bricks are read dynamically from each page's header row
-                # instead of a hardcoded list (see earlier note), then
-                # matched to the correct name via a letter-fingerprint --
-                # not a plain reverse -- because some environments extract
-                # these header cells with a newline between almost every
-                # character (rather than between whole words like in the
-                # sample PDF this was built against), which can also
-                # transpose adjacent letters (e.g. "THINGI" -> "TIHNIG").
-                # Sorting the letters ignores both the extra spaces and
-                # any such transposition, so it matches reliably either way.
-                # -------------------------------------------------------
                 from collections import OrderedDict
 
                 KNOWN_BRICKS = [
@@ -4331,6 +4336,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "G.MORE",
                     "GAGOO",
                     "JAMLERA",
+                    "KACHI PAKKI",
                     "KARMPUR",
                     "LUD(VHR)",
                     "LUDDON",
@@ -4347,6 +4353,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "VEHARI",
                     "VEH-B",
                     "VIJHIANWALA",
+                    "WHOLESALE VHR",
+                    "WHOLESALE BUR",
                 ]
 
                 def _fingerprint(s):
@@ -4364,7 +4372,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "90 MOR": "90 MORR",
                     "DALLAN/KAMAND": "DALLAN / KAMAND",
                     "DEWAN SAHAB": "DEEWAN SAHAB",
-                    "GAGOO": "GAGGOO",
                     "KARMPUR": "KARAM PUR",
                     "LUD(VHR)": "LUD VHR",
                     "LUDDON": "LUDDAN",
@@ -4377,8 +4384,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "TIBA": "TIBBA SULTANPUR",
                     "VEHARI": "VEHARI VRI",
                     "G.MORE": "GARHA MORE",
-                    "VEHARI GT": "VEHARI VRI GT",
                     "VEH-B": "VEHARI B",
+                    "WHOLESALE BUR": "WHOLESALE BURY WALA",
                 }
 
                 def decode_brick(raw):
@@ -4393,9 +4400,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     return BRICK_RENAME.get(name, name)
 
                 all_bricks = []
-                sales_by_product = (
-                    OrderedDict()
-                )  # product name -> accumulated sale values across pages
+                sales_by_product = OrderedDict()
 
                 for x in range(0, len(pdf.pages)):
                     data = pdf.pages[x].extract_table()
@@ -4454,7 +4459,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "JETEPAR SYP 120ml": "002188",
                     "JETEPAR.2ML INJ 10s": "004348",
                     "MAIORAD INJ 6s": "009072",
-                    "MOXILIUM SUS 125MG": "006783",  # new product on this report, wasn't handled before
+                    "MOXILIUM SUS 125MG": "006783",
+                    "PC-LAC SYP 120ml": "019133",
                 }
                 for i in range(0, len(products)):
                     for name, code in NAME_TO_CODE.items():
@@ -4483,12 +4489,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
 
-                new_result = green_team_bricks(new_result)
                 return new_result
             elif dist_city == "Larkana":
                 result = []
@@ -4774,18 +4780,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     )
                     bricks[i] = re.sub("KOHAT RAOD", "KOHAT ROAD", bricks[i])
                     bricks[i] = re.sub("SHANAGLA MARKET", "SHANGLA MARKET", bricks[i])
-                    bricks[i] = re.sub(
-                        "SHANAGLA MARKET GT", "SHANGLA MARKET GT", bricks[i]
-                    )
+                    bricks[i] = re.sub("SHANAGLA MARKET", "SHANGLA MARKET", bricks[i])
                     bricks[i] = re.sub("AL MANSOOR MARKET", "AL MANSOOR", bricks[i])
-                    bricks[i] = re.sub("NISHTER ABAD GT", "NISHTERABAD GT", bricks[i])
+                    bricks[i] = re.sub("NISHTER ABAD", "NISHTERABAD", bricks[i])
                     bricks[i] = re.sub("NISHTER ABAD", "NISHTERABAD", bricks[i])
                     bricks[i] = re.sub("PAJJAGI ROAD", "PAJAGI ROAD", bricks[i])
-                    bricks[i] = re.sub(
-                        "CHARSADDA ROAD GT", "CHARSADDA ROAD GT", bricks[i]
-                    )
+                    bricks[i] = re.sub("CHARSADDA ROAD", "CHARSADDA ROAD", bricks[i])
                     bricks[i] = re.sub("CHARSADDA ROAD", "CHARSADA ROAD", bricks[i])
-                    bricks[i] = re.sub("D A O R T G", "DAORT G", bricks[i])
                     bricks[i] = re.sub(
                         "ABASEEN MEDICAL CENT", "ABASEEN MEDICAL CENTER", bricks[i]
                     )
@@ -4819,19 +4820,16 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
-
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-
-                new_result = green_team_bricks(new_result)
                 return new_result
             elif dist_city == "Quetta":
                 result = []
                 new_result = []
 
-                # Header text (letters sorted, so wrapping/order does not matter) -> Territory name
                 QTA_HEADERS = {
                     "Alam Khan Chock": "ALAM KHAN CHOWK",
                     "Alamdar Road": "ALAMDAR ROAD",
@@ -4871,7 +4869,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "Saranan": "SARANAN",
                     "Sibbi": "SIBI",
                     "Zhob": "ZHOB",
-                    "ZIARAT": "ZIARAT",
                 }
 
                 def qta_fp(s):
@@ -4895,7 +4892,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if any(k in up for k in ("TOTAL", "QUANTITY", "AMOUNT")):
                         return "skip", None
                     have = Counter(fp)
-                    # scrambled "Quantity Total" / "Amount" / "TOTAL AREA" cells
                     if (
                         qta_subset(have, "QUANTITY")
                         or qta_subset(have, "AMOUNT")
@@ -5042,12 +5038,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
+
             elif dist_city == "Jacobabad":
                 result = []
                 products = []
@@ -5175,11 +5172,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
             elif dist_city == "Layyah":
                 result = []
@@ -5266,129 +5263,103 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
 
             elif dist_city == "Toba Tek Singh":
                 result = []
-                products = []
-                sale_quantity = []
-                sales_price = []
-                sales = []
-                bricks = []
-                brick = []
-                product = []
-                is_team_section = False  # Renamed for clarity
+                NUM = re.compile(r"^-?[\d,]+$")
 
-                for x in range(len(pdf.pages)):
-                    data = pdf.pages[x].extract_text()
-                    bricks = pdf.pages[x].extract_table()
-                    if not bricks or not bricks[0]:
+                BRICK_FIX = {
+                    "GOJRA": "GOJRA TTS",
+                    "KAMAL": "KAMAL CHOWK",
+                    "PIR M": "PIR MAHAL",
+                    "RAJAN": "RAJANA",
+                    "S/WAL": "SAHIWAL TTS",
+                    "SHORK": "SHORK",
+                    "TOBA": "TOBA TEK SINGH TTS",
+                }
+
+                # (text to look for, item code) - order matters
+                PRODUCT_CODES = [
+                    ("JETEPAR CAP", "002392"),
+                    ("JETEPAR 10", "008999"),
+                    ("JETEPAR 2", "004348"),
+                    ("JETEPAR SYP", "002188"),
+                    ("MAIORAD 3", "009072"),
+                    ("MAIORAD TAB", "012961"),
+                    ("MOXILIUM CAP", "006784"),
+                    ("MOXILIUM SYP 125MG", "006783"),
+                    ("MOXILIUM SYP 250MG", "012649"),
+                    ("P.C.LAC SYP", "019133"),
+                    ("PROBITOR CAPS 20MG", "016654"),
+                    ("TRAMAGESIC", "026920"),
+                    ("METRONIDAZOLE 400MG", "081274"),
+                    ("METRONIDAZOLE 200MG", "008909"),
+                    ("SUPRALOX SUSP 40MG", "028728"),
+                    ("HISTAFEX TAB 120MG", "031037"),
+                    ("EBAST TAB", "023906"),
+                    ("VIKNON FORTE 120ML", "006406"),
+                    ("CYNORIN FORT", "005425"),
+                ]
+
+                def get_item_code(name):
+                    name = re.sub(r"\s+", " ", name).strip().upper()
+                    for key, code in PRODUCT_CODES:
+                        if key in name:
+                            return code
+                    return None
+
+                is_team_section = False
+
+                for page in pdf.pages:
+                    table = page.extract_table()
+                    text = page.extract_text()
+                    if not table or not table[0] or not text:
                         continue
-                    bricks = bricks[0]
-                    bricks = bricks[1:-1]  # skip first (Packing) and last (T.Qty.)
 
-                    # Replace all empty or blank strings with default value
-                    bricks = [
-                        "TOBA TEK SINGH TTS" if not b or not b.strip() else b.strip()
-                        for b in bricks
-                    ]
-                    brick = bricks  # assign cleaned bricks list
+                    # header: Packing | brick1 ... brickN | T.Qty.
+                    header = table[0][1:-1]
+                    bricks = []
+                    for b in header:
+                        b = (b or "").strip()
+                        # blank header columns are treated as TOBA (same as before)
+                        bricks.append(
+                            BRICK_FIX.get(b, b) if b else "TOBA TEK SINGH TTS"
+                        )
+                    n = len(bricks)
 
-                    data = re.sub("\n", "$", data)
-                    data = data.split("$")
-
-                    for i in range(len(data)):
-                        # Detect start of Blue or Green team section
-                        if re.search(r"(BLUE TEAM|GREEN TEAM)", data[i - 1]):
+                    for line in text.split("\n"):
+                        if re.search(r"(BLUE TEAM|GREEN TEAM)", line):
                             is_team_section = True
-                        # Detect end of product block
-                        if re.search(r"Group Total", data[i]):
+                            continue
+                        if "Total" in line:
                             is_team_section = False
-                        if is_team_section:
-                            sales.append(data[i])
+                            continue
+                        if not is_team_section:
+                            continue
 
-                for i in range(len(sales)):
-                    sales[i] = re.sub("'S", "$", sales[i])
-                    sales[i] = re.sub("ML", "$", sales[i])
-                    sales[i] = re.sub("AMP", "$", sales[i])
-                    sales[i] = sales[i].split("$")
-                    products.append(sales[i][0])
-                    sales[i] = sales[i][-1][1:]
-                    sales[i] = re.sub(r"\s+", "$", sales[i])
-                    sales[i] = sales[i].split("$")
-                    # Remove unwanted data before brick-wise quantities
-                    s_index = next(
-                        (idx for idx, val in enumerate(sales[i]) if val.endswith("S")),
-                        -1,
-                    )
-                    if s_index != -1:
-                        sales[i] = sales[i][s_index + 1 :]
+                        tokens = line.split()
+                        # name/packing ... n brick values ... T.Qty ... Value
+                        if len(tokens) < n + 3:
+                            continue
+                        if not all(NUM.match(t) for t in tokens[-(n + 2) :]):
+                            continue
 
-                    # Now ensure exactly 15 values
-                    if len(sales[i]) < len(brick):
-                        # Pad with "0" if missing values
-                        sales[i] += ["0"] * (len(brick) - len(sales[i]))
-                    elif len(sales[i]) > len(brick):
-                        # Trim extra values
-                        sales[i] = sales[i][: len(brick)]
+                        product_name = " ".join(tokens[: -(n + 2)])  # includes packing
+                        qtys = tokens[-(n + 2) : -2]  # only brick quantities
 
-                    print(sales[i])
+                        code = get_item_code(product_name)
+                        if code is None:
+                            print("UNMAPPED PRODUCT:", product_name)
+                            continue
 
-                # Map product names to item codes
-                for i in range(len(products)):
-                    if "JETEPAR CAP" in products[i]:
-                        products[i] = "002392"
-                    if "JETEPAR 10" in products[i]:
-                        products[i] = "008999"
-                    if "JETEPAR 2" in products[i]:
-                        products[i] = "004348"
-                    if "JETEPAR SYP" in products[i]:
-                        products[i] = "002188"
-                    if "MAIORAD  3" in products[i]:
-                        products[i] = "009072"
-                    if "MAIORAD TAB" in products[i]:
-                        products[i] = "012961"
-                    if "MOXILIUM  CAP" in products[i]:
-                        products[i] = "006784"  # Add correct codes if needed
-                    if "MOXILIUM SYP 125MG" in products[i]:
-                        products[i] = "006783"
-                    if "MOXILIUM SYP 250MG" in products[i]:
-                        products[i] = "012649"
-                    if "P.C.LAC SYP" in products[i]:
-                        products[i] = "019133"
-                    if "TRAMAGESIC" in products[i]:
-                        products[i] = "026920"
-                    if "METRONIDAZOLE" in products[i]:
-                        products[i] = "081274"
-
-                # Fix brick names
-                for i in range(len(brick)):
-                    if brick[i] == "GOJRA":
-                        brick[i] = "GOJRA TTS"
-                    if brick[i] == "KAMAL":
-                        brick[i] = "KAMAL CHOWK"
-                    if brick[i] == "PIR M":
-                        brick[i] = "PIR MAHAL"
-                    if brick[i] == "RAJAN":
-                        brick[i] = "RAJANA"
-                    if brick[i] == "S/WAL":
-                        brick[i] = "SAHIWAL TTS"
-                    if brick[i] == "TOBA":
-                        brick[i] = "TOBA TEK SINGH TTS"
-
-                # Build result
-                for p in range(len(products)):
-                    for s in range(len(sales[p])):
-                        child = []
-                        child.append(products[p])  # item code
-                        child.append(brick[s])  # brick name
-                        child.append(sales[p][s])  # quantity
-                        result.append(child)
+                        for brick_name, qty in zip(bricks, qtys):
+                            result.append([code, brick_name, qty.replace(",", "")])
 
                 # Enrich result with item_list info
                 for r in result:
@@ -5397,13 +5368,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             r.insert(1, i[1])  # item name
                             r.append(i[2])  # item group
 
-                # Enrich result with team info
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
-                        if r[2] == t[0]:  # match on quantity or brick code if needed
+                        if r[2] == t[0]:
                             r.insert(4, t[1])
-
-                result = green_team_bricks(result)  # Apply final custom filtering
                 return result
             elif dist_city == "Dera Ghazi Khan":
                 result = []
@@ -5434,12 +5403,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             bricks.append("GADDAI")
                         if "H IJAPUR" in brick[i]:
                             bricks.append("HAJIPUR")
-                        if "JAMPUR" in brick[i]:
-                            bricks.append("JAMPUR")
                         if "JHO KUTRAH" in brick[i]:
                             bricks.append("JHOK UTRA")
-                        if "KALA" in brick[i]:
-                            bricks.append("KALA")
                         if "KO TCHUTTA" in brick[i]:
                             bricks.append("KOT CHUTTA")
                         if "KO TMETHAN" in brick[i]:
@@ -5527,11 +5492,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Jhang":
@@ -5544,10 +5509,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("AHMAD", "AHMADPUR SIAL"),
                     ("BHOW", "BHOWA"),
                     ("GOJRA", "GOJRA JNG"),
-                    (
-                        "JHANG",
-                        "JHANG",
-                    ),  # pehla JHANG -> JHANG 1, doosra -> JHANG 2 (neeche)
                     ("KOT", "KOT SHAKIR JNG"),
                     ("SHAH", "SHAH JEEWNA"),
                     ("SHK.C", "SHORKOT CANTT"),
@@ -5746,13 +5707,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-
-                new_result = green_team_bricks(new_result)
                 return new_result
+
             elif dist_city == "Sargodha":
                 result = []
                 products = []
@@ -5770,7 +5731,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "KHB": "KHUSHAB",
                     "MTH": "MITHA LAK",
                     "NOW": "NOWSHRA",
-                    "NUR": "NUR",
+                    "NUR": "NOORPUR",
                     "QIAD": "QUAIDABAD",
                     "CHKI": "CHOWKI BHAGAT",
                     "BHL": "BHALWAL",
@@ -5778,7 +5739,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "FRQ": "FAROOKA",  # font renders "O" as "Q" in this position
                     "KOT": "KOT MOMIN",
                     "MRI": "MARI LAK",
-                    "PHL": "PHL",
+                    "PHL": "PHULARWAN",
                     "SAHW": "SAHIWAL",
                     "SRG1": "SARGODHA 1",
                     "SHP": "SHAHPUR",
@@ -5787,7 +5748,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "SAG2": "SARGODHA 2",
                     "WHOLESALE": "WHOLESALE SGD",
                     "JHWN": "JAVERIA",
-                    # "SHCITY": "",   # <-- still unconfirmed, see note below
+                    "SHCITY": "SHAHPUR CITY",
                 }
                 # Header columns that are report totals, not real bricks -- always dropped.
                 NON_BRICK_HEADER_TOKENS = {
@@ -5820,9 +5781,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("BIGUANAIL 500 MG TABLET", "005310"),
                     ("CODAMIN-P TABLET 50'S", "028729"),
                     ("CYANORIN FORTE INJ", "005425"),
-                    ("DEKOF TABLET", "777777"),
                     ("DEPROGESIC P TAB", "081838"),
-                    ("DEPROGESIC TABLET", "777777"),
+                    ("DEPROGESIC TABLET", "081838"),
                     ("EBAST TABLET 10 MG", "023906"),
                     ("HISTAFEX 120 MG TABLET", "031037"),
                     ("HISTAFEX 180 MG TABLET", "031038"),
@@ -5836,12 +5796,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("JETEPAR SYRUP 112ML", "002188"),
                     ("MAIROAD INJ 3 ML", "009072"),
                     ("MAIROAD TABLET", "012961"),
-                    ("MALTEM 40 MG TABLET", "777777"),
+                    ("MALTEM 40 MG TABLET", "085180"),
                     ("MALTEM PLUS DS", "071560"),
                     ("METRONIDAZOLE TAB 200", "008909"),
                     ("METRONIDAZOLE TAB 400", "081274"),
-                    ("MILID 200 MG TABLET", "777777"),
-                    ("MILID 400 MG TABLET", "777777"),
+                    # ("MILID 200 MG TABLET", "777777"),
+                    # ("MILID 400 MG TABLET", "777777"),
                     ("MINGAIR 10 MG TABLET", "038427"),
                     ("MINGAIR 5 MG TABLET", "038426"),
                     ("MOXILIUM 125 MG SUSPEN 45 ML", "006783"),
@@ -5858,7 +5818,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("SUPRACEF SUSPEN 30 ML", "024819"),
                     ("SUPRACEF-DS SYRUP 30 ML", "028727"),
                     ("SUPRALOX SUSPEN 50 ML", "028728"),
-                    ("SUPRALOX TABLET", "777777"),
+                    ("SUPRALOX TABLET", "028728"),
                     ("TRAMAGESIC INJ 5 AMPS", "026920"),
                     ("TRAMGESIC CAPSUL", "029327"),
                     ("VIGROL FORTE TABLET", "007018"),
@@ -5998,42 +5958,17 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
             elif dist_city == "Mianwali":
                 result = []
                 new_result = []
                 products = []
 
-                # ---------------------------------------------------------
-                # Page 1 bricks are now read DIRECTLY from each PDF's own
-                # header (word positions), instead of being a fixed
-                # hardcoded list. This is exactly the same idea already
-                # used for page 2's `bricks2` below, applied to page 1 too.
-                #
-                # WHY: a fixed hardcoded list only stays correct as long as
-                # the brick order/columns never change. That's exactly what
-                # broke last time (old PDFs had "MAKERWAL" at a column that
-                # newer PDFs use for "SULTAN KHEL", and a brick called "RIK"
-                # existed in the PDF but wasn't in the hardcoded list at
-                # all, which silently shifted every brick after it).
-                #
-                # With this approach, whatever bricks/columns/order a PDF
-                # actually has -- old, new, or future -- get picked up
-                # correctly every time, because the names come straight
-                # from that PDF's own text instead of an assumed position.
-                #
-                # PAGE1_NAME_ALIASES below only cleans up how the PDF's
-                # multi-line column headers get glued together (e.g. the
-                # PDF prints "PIP" above "LAN" -> raw join is "PIP LAN",
-                # alias turns it into the canonical "PIPLAN" so it matches
-                # what item_list / green_team_bricks expect). If a brick's
-                # canonical name is ever wrong or missing, just add/edit an
-                # entry here -- no other code needs to change.
                 PAGE1_NAME_ALIASES = {
                     "PIP LAN": "PIPLAN",
                     "KAMMR MASHA NI": "KAMAR MASHANI",
@@ -6218,11 +6153,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
             elif dist_city == "Bhakkar":
                 result = []
@@ -6299,15 +6234,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         return "FAROOQ"
                     return None
 
-                # Fingerprint-based brick matching for the NEW format.
-                # We match on the SORTED SET OF LETTERS rather than a plain
-                # substring, because different pdfplumber/environment
-                # versions can split a 2-line cell at a slightly different
-                # point, which after removing the newline can leave two
-                # adjacent letters swapped (e.g. "ALIKHEL" -> "AILKHEL",
-                # "DAILYCROSS" -> "DIALYCROSS"). A plain "in" substring
-                # check breaks on that swap; a sorted-letters fingerprint
-                # does not, since it ignores order entirely.
                 BRICK_FINGERPRINTS = {}
 
                 def _register_brick(canonical_no_space, label):
@@ -6340,10 +6266,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 _register_brick("SHAHALM", "SHAH ALAM")
                 _register_brick("ZAMAYWALA", "ZAMAY WALA")
 
-                # "Total"/"Grand Total" columns can also come through with
-                # transposed letters in some environments (e.g. "TTOLA"),
-                # so this is matched by letter-fingerprint too, not just
-                # an exact string check.
                 TOTAL_FINGERPRINTS = {
                     "".join(sorted("TOTAL")),
                     "".join(sorted("GRANDTOTAL")),
@@ -6517,21 +6439,15 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
             elif dist_city == "Mingora":
                 result = []
                 new_result = []
-
-                # This report's product IDs ("Groupid") don't match the old
-                # hardcoded 2700-7xxx scheme at all -- this PDF uses IDs like
-                # 10997, 11001, 11007 etc. Matching by the PRODUCT NAME text
-                # (which is always printed alongside the ID) is robust to
-                # whichever ID scheme a given distributor's report uses.
                 PRODUCT_NAME_TO_CODE = [
                     ("JETEPAR INJ 10ML", "008999"),
                     ("JETEFAR 112ML SYP", "002188"),
@@ -6541,9 +6457,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("MAIORAD TAB", "012961"),
                     ("MAIORAD INJ", "009072"),
                 ]
-                # Fallback to the old numeric-ID scheme too, in case an
-                # older-style report (with "2700"-style Groupid codes) is
-                # ever used again.
+
                 OLD_ID_TO_CODE = {
                     "2700": "008999",
                     "2701": "004348",
@@ -6585,10 +6499,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             return code
                     return OLD_ID_TO_CODE.get(groupid)
 
-                # Small fixed vocabulary of known Mingora brick names, used
-                # to greedily re-group the header's word-wrapped tokens
-                # (some brick names span 1 word, some span 2, and one wraps
-                # onto a continuation line) into the right columns.
                 BRICK_VOCAB = [
                     (("MINGORA-1",), "MINGORA 1"),
                     (("MINGORA-2",), "MINGORA 2"),
@@ -6739,271 +6649,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
-            # elif dist_city == "MULTAN":
-            #     result = []
-            #     products = []
-            #     new_result = []
-            #     brick = []
-            #     bricks = []
-            #     sales = []
-            #     sales2 = []
-            #     last_page = False
-            #     for x in range(0, len(pdf.pages)):
-            #         data = pdf.pages[x].extract_table()
-            #         for i in range(1, len(data[0])):
-            #             #   # for k in range(0,len(brick[i])):
-            #             data[0][i] = str(data[0][i]).replace("\n", "")
-            #             brick.append(data[0][i])
-            #         # print(products)
-            #         for i in range(0, len(brick)):
-            #             if "D AORR NEATTHLSUNIM" in brick[i]:
-            #                 brick[i] = "NISHTER ROAD MULTAN"
-            #             if "TTNACN ATLUM" in brick[i]:
-            #                 brick[i] = "MULTAN CANTT"
-            #             if (
-            #                 "D ABAUJHDSAD OLR" in brick[i]
-            #                 or "D ABAUJHDSALD ROO" in brick[i]
-            #             ):
-            #                 brick[i] = "OLD SUJABAD ROAD"
-            #             if "D AORY NAAWTAILMULR" in brick[i]:
-            #                 brick[i] = "RAILWAY ROAD"
-            #             if (
-            #                 "H AHSK SWACHOABB" in brick[i]
-            #                 or "H AHSK SWAHOABBC" in brick[i]
-            #             ):
-            #                 brick[i] = "CHOWK SHAH ABBAS"
-            #             if "D ABAZNAATTMLUUMM" in brick[i]:
-            #                 brick[i] = "MUMTAZABAD MULTAN"
-            #             if "K WOHNCAC.G. ULTB.M" in brick[i]:
-            #                 brick[i] = "BGC CHOWK"
-            #             if "E TK GATANALPU" in brick[i]:
-            #                 brick[i] = "PAK GATE"
-            #             if "E TAGM ANATRLAUHM" in brick[i]:
-            #                 brick[i] = "HARAM GATE"
-            #             if "L AMAHAFIZ JROAD" in brick[i]:
-            #                 brick[i] = "HAFIZ JAMAL ROAD"
-            #             if "E TAGT NAALTULAUDM" in brick[i]:
-            #                 brick[i] = "DAULAT GATE MULTAN"
-            #             if "H AHSM ODOASOARM" in brick[i]:
-            #                 brick[i] = "MASOOM SHAH ROAD"
-            #             if "1 O. NGI ANNTULHUCM" in brick[i]:
-            #                 brick[i] = "CHUNGI NO 1"
-            #             if "D AONRAT.B. ULT" in brick[i]:
-            #                 brick[i] = "T.B ROAD MULTAN"
-            #             if "NATLUMW EN" in brick[i]:
-            #                 brick[i] = "NEW MULTAN"
-            #             if "FI AZAQNK AWTLOUHMC" in brick[i]:
-            #                 brick[i] = "CHOWK QAZAFI"
-            #             if (
-            #                 "D ABANMIJTA2) SAMUL" in brick[i]
-            #                 or "D ABANMIJTAAUL2) SM" in brick[i]
-            #             ):
-            #                 brick[i] = "SAMIJABAD"
-            #             if (
-            #                 "L LRAEHLN ALWSOE TL" in brick[i]
-            #                 or "L LRAEN HALLWSOE" in brick[i]
-            #             ):
-            #                 brick[i] = "TOWN HALL WHOLE SALLER"
-            #             if "9 O.NUNGI LTANHUCM" in brick[i]:
-            #                 brick[i] = "CHUNGI NO 9"
-            #             if "T HSANGALTULGU" in brick[i]:
-            #                 brick[i] = "GULGASHT"
-            #             if "D, AON RAN.ATSLOUBM" in brick[i]:
-            #                 brick[i] = "BOSAN ROAD"
-            #             if "R UPB ADWAAONR" in brick[i]:
-            #                 brick[i] = "NAWAB PUR ROAD"
-            #             if "A. D.M.K ANWTOLHUCM5) 31(" in brick[i]:
-            #                 brick[i] = "MDA CHOWK"
-            #             if "NI AMIAJ DRAUOORS" in brick[i]:
-            #                 brick[i] = "SURAJ MIANI ROAD"
-            #             if "L ANWAHANEMULTKD" in brick[i]:
-            #                 brick[i] = "KHANEWAL"
-            #             if "H AHSR DEAHOSR" in brick[i]:
-            #                 brick[i] = "SHER SHAH ROAD"
-            #             if "KWOHCRI AHEV" in brick[i]:
-            #                 brick[i] = "VEHARI CHOWK"
-            #             if "E RALCAEDIPITMS0)HO51(" in brick[i]:
-            #                 brick[i] = "MEDICARE HOSPITAL"
-            #             if "Y ADNSALISAAWW" in brick[i]:
-            #                 brick[i] = "WASSANDAY WALI"
-            #             if "LIAWNALHIOR" in brick[i]:
-            #                 brick[i] = "ROHILLAN WALI"
-            #             if "NATLUSR EHAHS" in brick[i] or "SHAHER SULTAN" in brick[i]:
-            #                 brick[i] = "SHAHER SULTAN"
-            #             if "RUPLI A" in brick[i]:
-            #                 brick[i] = "ALI PUR"
-            #             if "RUPLALA1" in brick[i]:
-            #                 brick[i] = "JALAL PUR"
-            #             if "DABAUJHS" in brick[i]:
-            #                 brick[i] = "SHUJABAD"
-            #             if "M OODKHLIMAAL" in brick[i] or "M OODAKHALLIM" in brick[i]:
-            #                 brick[i] = "MAKHDOOM ALI"
-            #             if "ZAIF5- K CAHC" in brick[i]:
-            #                 brick[i] = "CHACK 5 FAIZ"
-            #             if "RALA DDA" in brick[i]:
-            #                 brick[i] = "ADDA LAR MULTAN"
-            #             if "R AFFAHUZRAMG" in brick[i] or "R AFFAHZAURMG" in brick[i]:
-            #                 brick[i] = "MUZAFFAR GARH"
-            #             if "AREESAB" in brick[i]:
-            #                 brick[i] = "BASEERA"
-            #             if "LAMAH JAHS" in brick[i]:
-            #                 brick[i] = "SHAH JAMAL MULTAN"
-            #             if "EROMHI SERUQ" in brick[i]:
-            #                 brick[i] = "QURESHI MORE"
-            #             if "NAWANAS" in brick[i]:
-            #                 brick[i] = "SANAWAN"
-            #             if "TARUJG" in brick[i]:
-            #                 brick[i] = "GUJRAT MLT"
-            #             if "UNNAHCN AMI" in brick[i]:
-            #                 brick[i] = "MIAN CHANNU"
-            #             if "MKIAHL UDBA" in brick[i]:
-            #                 brick[i] = "ABDUL HAKIM"
-            #             if "ABMALUT" in brick[i]:
-            #                 brick[i] = "TULAMBA"
-            #             if "HOHKA HCAK" in brick[i]:
-            #                 brick[i] = "KACHA KHOH"
-            #             if "N SIHOMLA LDADWA" in brick[i]:
-            #                 brick[i] = "ADDA MOHSIN WALL"
-            #             if "LEEM2 - 1L LUP" in brick[i]:
-            #                 brick[i] = "PULL 12 MEEL"
-            #             if "RUPM ONOADRHAKHAOMP8" in brick[i]:
-            #                 brick[i] = "MAKHDOOM PUR PAHORAN"
-            #             if "argabul p" in brick[i]:
-            #                 brick[i] = "PULL BAGAR MULTAN"
-            #             if "ALAWRBIAK" in brick[i]:
-            #                 brick[i] = "KABIR WALA"
-            #             if "LAWENAHK" in brick[i]:
-            #                 brick[i] = "KHANEWAL"
-            #             if "41L - LUP" in brick[i]:
-            #                 brick[i] = "PULL 14"
-            #             if "M OODDKHHIMARAS" in brick[i]:
-            #                 brick[i] = "MAKHDOOM RASHEED"
-            #             if "ATTAHT" in brick[i]:
-            #                 brick[i] = "THATTA MULTAN"
-            #             if "SILAIM" in brick[i]:
-            #                 brick[i] = "MAILSI"
-            #             if "ATOKOD4" in brick[i]:
-            #                 brick[i] = "DOKOTA MULTAN"
-            #             if "ANIAHA" in brick[i]:
-            #                 brick[i] = "JAHANIAN"
-            #             if "D AORI RANATVEHMUL9) 01(" in brick[i]:
-            #                 brick[i] = "VEHARI ROAD"
-            #             if (
-            #                 "E- N-NKAH RUMULTHAM SA" in brick[i]
-            #                 or "E- N-NKARUULTH MHAM SA" in brick[i]
-            #             ):
-            #                 brick[i] = "SHAH RUKN E ALAM"
-            #             if "NATLUMH AGD E" in brick[i]:
-            #                 brick[i] = "EID GAH MULTAN"
-            #             if "NARARABL LUP" in brick[i]:
-            #                 brick[i] = "PULL BARARAN"
-            #             if "D AORHARI MJ)E(V1) 61(" in brick[i]:
-            #                 brick[i] = "VEHARI ROAD"
-            #             if "N ERLDALTHIPI2) CHOS61(" in brick[i]:
-            #                 brick[i] = "CHILDREN HOSPITAL MULTAN"
-            #             if "A NELE-STAN-PI6) IBHOS" in brick[i]:
-            #                 brick[i] = "IBN E SENA HOSPITAL"
-            #             if "C M.A RHSNHTE" in brick[i]:
-            #                 brick[i] = "AHSAN MEDICINE COMPANY NISHTER"
-            #             if "HRAGN AHK" in brick[i]:
-            #                 brick[i] = "KHAN GARH"
-            #             if "KOOLAMTI SAB" in brick[i]:
-            #                 brick[i] = "BASTI MALOOK"
-            #             if "RUPA YNUD" in brick[i]:
-            #                 brick[i] = "DUNYA PUR"
-            #             if "NWOTN EDRAG" in brick[i]:
-            #                 brick[i] = "GARDEN TOWN"
-            #             if "DABAR AFFAZUM" in brick[i]:
-            #                 brick[i] = "MUZAFFAR ABAD"
-            #             if "NHIAWR ALAS" in brick[i]:
-            #                 brick[i] = "SALAR WAHIN"
-            #             if "D NAA BANDSDOAB" in brick[i]:
-            #                 brick[i] = "ADDA BAND BOSAN"
-            #             if "N WOTSEL ASMODBYP" in brick[i]:
-            #                 brick[i] = "MODEL TOWN BYPASS"
-            #             if "NAWNAR" in brick[i]:
-            #                 brick[i] = "RANWAN"
-            #             if "OGNARL LUP" in brick[i]:
-            #                 brick[i] = "PULL RANGO"
-            #             if "SALLVIH CUB" in brick[i]:
-            #                 brick[i] = "BUCH VILLAS"
-            #             if "L EDOMDL AAOZRAF" in brick[i]:
-            #                 brick[i] = "FAZAL MODEL ROAD"
-            #             if "RUPY ATAT" in brick[i]:
-            #                 brick[i] = "TATAY PUR"
-            #             if "TNASA LHDOB" in brick[i]:
-            #                 brick[i] = "BUDHLA SANT"
-            #             if "DAORH ANNA JIM" in brick[i]:
-            #                 brick[i] = "M A JINNAH ROAD"
-            #         bricks = brick[:-1]
-            #         # for p in data:
-            #         if x == len(pdf.pages) - 1:
-            #             last_page = True
-            #         if x == 0:
-            #             sales = data[1:-1]
-            #         else:
-            #             sales2 = data[1:-1]
-            #             for i in range(0, len(sales2)):
-            #                 if sales[i][0] == sales2[i][0] and last_page == True:
-            #                     sales[i] = sales[i][:] + sales2[i][1:-1]
-            #                     products.append(sales[i][0])
-            #                 # print(sales[i])
-            #                 elif sales[i][0] == sales2[i][0]:
-            #                     sales[i] = sales[i][:] + sales2[i][1:]
-
-            #     for i in range(0, len(products)):
-            #         sales[i] = sales[i][1:]
-            #         if "JETEPAR 2ML INJ" in products[i]:
-            #             products[i] = "004348"
-            #         if "JETEPAR CAP" in products[i]:
-            #             products[i] = "002392"
-            #         if "JETEPAR INJ" in products[i]:
-            #             products[i] = "008999"
-            #         if (
-            #             products[i] == "JETEPAR 10ML 5S"
-            #             or products[i] == "JETEPAR 10ML INJ  5S"
-            #         ):
-            #             products[i] = "008999"
-            #         if "JETEPAR SYP" in products[i]:
-            #             products[i] = "002188"
-            #         # if products[i] == 'JETEPAR SYP. 112ML':
-            #         #   products[i] = '002188'
-            #         if (
-            #             "MAIORAD INJ" in products[i]
-            #             or "MAIORAD 3ML-INJ 6,S" in products[i]
-            #         ):
-            #             products[i] = "009072"
-            #     for p in range(0, len(products)):
-            #         for s in range(0, len(sales[p])):
-            #             child = []
-            #             child.append(products[p])
-            #             child.append(bricks[s])
-            #             child.append(sales[p][s])
-            #             result.append(child)
-            #     for r in range(0, len(result)):
-            #         for i in item_list:
-            #             if result[r][0] == i[0]:
-            #                 if result[r][2] != "0":
-            #                     new_result.append(result[r])
-            #     # print(len(new_result))
-            #     for r in range(0, len(new_result)):
-            #         for i in item_list:
-            #             if new_result[r][0] == i[0]:
-            #                 new_result[r].insert(1, i[1])
-            #                 new_result[r].append(i[2])
-            #                 # print(new_result[r])
-            #     for r in new_result:
-            #         for t in tt_list:
-            #             if r[2] == t[0]:
-            #                 r.insert(4, t[1])
-            #     new_result = green_team_bricks(new_result)
-            #     return new_result
 
             elif dist_city == "Multan":
                 result = []
@@ -7011,18 +6662,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 new_result = []
                 sales = []
 
-                # -------------------------------------------------------
-                # All known brick names across BOTH the old (2022-2024
-                # style, "(101) NISHTER ROAD MULTAN") and new (2026 style,
-                # "NISHTER ROAD MULTAN" abbreviated column headers) report
-                # formats. Matching is done by letter-fingerprint (sorted
-                # letters+digits), not literal substrings, because the two
-                # report formats scramble/wrap the header text completely
-                # differently -- a fixed substring list calibrated to one
-                # format's exact scrambling will not match the other's (this
-                # was the root cause: the old substring rules matched 0
-                # bricks against this exact file when tested).
-                # -------------------------------------------------------
                 KNOWN_BRICKS = [
                     "Others",
                     "GARDEN TOWN",
@@ -7121,12 +6760,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "MAKHDOOM PUR POHARAN",
                 ]
 
-                # A few OLD-format bricks have a real digit as part of the
-                # name itself (e.g. "CHUNGI NO.9 MULTAN") AND the report
-                # fuses a numeric brick-code into the very same header cell
-                # (e.g. "(129)"). That extra code digit breaks a plain
-                # fingerprint match for just these bricks, so their exact
-                # "(code) name" text is registered directly here.
                 OLD_CODE_VARIANTS = {
                     "(117) CHUNGI NO. 1 MULTAN": "CHUNGI NO. 1 MULTAN",
                     "(129) CHUNGI NO.9 MULTAN": "CHUNGI NO.9 MULTAN",
@@ -7172,12 +6805,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         return NODIGIT_MAP[f2]
                     return literal
 
-                # -------------------------------------------------------
-                # Read all pages, merging same-named product rows across
-                # pages (both `sales` and `bricks` accumulate across every
-                # page -- a brick list that only kept the LAST page's
-                # columns was a bug in an earlier version of this fix).
-                # -------------------------------------------------------
                 all_bricks = []
                 for x in range(0, len(pdf.pages)):
                     data = pdf.pages[x].extract_table()
@@ -7203,9 +6830,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                 sales.append(row)
                 bricks = all_bricks
 
-                # If any brick names above don't exactly match your
-                # Territory Tree spelling, put the correction here:
-                #   "name as it comes out above": "correct Territory Tree name"
                 BRICK_RENAME = {
                     # "PDF/DECODED NAME": "TERRITORY TREE NAME",
                     "CHOWK QAZAFI MULTAN": "CHOWK QAZAFI",
@@ -7241,7 +6865,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "CHUNGI NO. 1 MULTAN": "CHUNGI NO 1",
                     "SAMIJABAD MULTAN": "SAMIJABAD",
                     "BOSAN ROAD, MULTAN.": "BOSAN ROAD",
-                    "NAWAB PUR ROAD MULTAN": "NAWAB PUR ROAD",  # noqa: F601
+                    "NAWAB PUR ROAD MULTAN": "NAWAB PUR ROAD",
                     "KHANEWAL ROAD MULTAN": "KHANEWAL",
                     "TOWN HALL RETAIL MULTAN": "TOWN HALL RETAILERS",
                     "VEHARI ROAD (MJ)": "VEHARI ROAD MJ",
@@ -7249,17 +6873,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 }
                 bricks = [BRICK_RENAME.get(b, b) for b in bricks]
 
-                # -----------------------------------------------------------
-                # `products` is built ONCE here, after ALL pages have been
-                # merged into `sales` -- not only when there's a 2nd+ page.
-                # The earlier version only ever appended to `products`
-                # inside the multi-page merge branch (x != 0), so any
-                # SINGLE-PAGE report (like the new format's monthly PDF)
-                # left `products` permanently empty. Every loop below then
-                # ran zero times and `return new_result` silently came back
-                # empty -- no crash, just no data. This works the same
-                # whether the report is 1 page or several.
-                # -----------------------------------------------------------
                 for row in sales:
                     products.append(row[0])
 
@@ -7273,10 +6886,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     elif "JETEPAR SYP" in name:
                         products[i] = "002188"
                     elif "JETEPAR" in name and "10ML" in name:
-                        # covers "JETEPAR 10ML 5S", "JETEPAR 10ML INJ 5S",
-                        # "JETEPAR 10ML INJ  5S" (double space) etc. in one
-                        # go -- an exact-string list was silently dropping
-                        # any row whose spacing didn't match exactly
                         products[i] = "008999"
                     elif "MAIORAD INJ" in name or "MAIORAD 3ML" in name:
                         products[i] = "009072"
@@ -7300,18 +6909,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             break
-
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
-                    # Territory is checked FIRST. Price is only looked up
-                    # and attached if the brick ALSO matched something in
-                    # tt_list -- if the brick's PDF spelling doesn't match
-                    # the Territory Tree (or the brick doesn't exist there
-                    # at all), price is left unset, so Value (qty x price)
-                    # comes out as NaN on the frontend. That NaN is the
-                    # visible signal that this specific brick still needs a
-                    # KNOWN_BRICKS/fingerprint fix above, or needs adding to
-                    # the Territory Tree. Once fixed, the row will match and
-                    # Value will calculate normally.
                     matched_territory = None
                     matched_price = None
                     for t in tt_list:
@@ -7323,16 +6922,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             if r[0] == i[0]:
                                 matched_price = i[2]
                                 break
-                    # always insert/append something (even None) so every
-                    # row keeps the SAME length regardless of match status
-                    # -- a row that's one element shorter than the rest is
-                    # what breaks the frontend's parse_data_into_child()
-                    # with "Cannot read properties of undefined (reading
-                    # 'length')".
                     r.insert(4, matched_territory)
                     r.append(matched_price)
-
-                new_result = green_team_bricks(new_result)
                 return new_result
 
             elif dist_city == "Rahim Yar Khan":
@@ -7510,12 +7101,11 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[0] == i[0]:
                             r.insert(1, i[1])
                             r.append(i[2])
-                            # print(r)
+                result = green_team_bricks(result)
                 for r in result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                result = green_team_bricks(result)
                 return result
 
             elif dist_city == "Bahawalnagar" or dist_city == "Bahawalpur":
@@ -7550,10 +7140,17 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "MUBARAKPUR",
                 ]
 
-                # Product-name -> item-code lookup. Both the old and new PDF
-                # formats use (very nearly) the same product names, so one
-                # shared list covers both -- a couple of harmless variants
-                # (with/without a period) are listed for safety.
+                # ---------- helpers (local to this block) ----------
+                def _clean(s):
+                    """Uppercase, unify quotes, collapse newlines/spaces."""
+                    s = (s or "").replace("\u2019", "'").replace("`", "'")
+                    return re.sub(r"\s+", " ", s).strip().upper()
+
+                def _k(s):
+                    """Key for brick header matching: letters/digits only."""
+                    return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+                # Product-name -> item-code lookup (old + new PDFs)
                 PRODUCT_NAME_TO_CODE = [
                     ("JETEPAR 10ML INJ. 5S", "008999"),
                     ("JETEPAR 10ML INJ 5S", "008999"),
@@ -7565,17 +7162,77 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     ("JETEPAR SYP 112ML", "002188"),
                     ("MAIORAD 3ML INJ. 6S", "009072"),
                     ("MAIORAD 3ML INJ 6'S", "009072"),
+                    ("MAIORAD 3ML INJ 6S", "009072"),
                     ("MAIORAD TAB. 30S", "012961"),
                     ("MAIORAD TAB 30S", "012961"),
                     ("AFLOXON 150MG CAP. 20S", "008376"),
+                    ("AFLOXON 150MG CAP 20S", "008376"),
                     ("AFLOXON 300MG TAB. 30S", "017230"),
+                    ("AFLOXON 300MG TAB 30S", "017230"),
                 ]
 
                 def code_for(name):
+                    name = _clean(name)
+                    if not name:
+                        return None
                     for label, code in PRODUCT_NAME_TO_CODE:
-                        if label in name:
+                        if _clean(label) in name:
                             return code
                     return None
+
+                # Header text (as printed in PDF) -> brick name
+                LOCAL_ALIASES = {
+                    # Bahawalnagar
+                    "bwncity": "BAHAWALNAGAR CITY",
+                    "bahawalnagarcity": "BAHAWALNAGAR CITY",
+                    "bahawalnagar": "BAHAWALNAGAR CITY",
+                    "dongabonga": "DUNGA BUNGA",
+                    "dungabunga": "DUNGA BUNGA",
+                    "haroonabad": "HAROONABAD",
+                    "faqirwali": "FAQIR WALA",
+                    "faqirwala": "FAQIR WALA",
+                    "khichiwala": "KHICHI WALA",
+                    "fortabbas": "FORT ABBAS",
+                    "maroot": "MAROT",
+                    "marot": "MAROT",
+                    "madrasa": "MADRASA",
+                    "madrasah": "MADRASA",
+                    "chishtian": "CHISHTIAN",
+                    "dharanwala": "DAHRANWALA",
+                    "dahranwala": "DAHRANWALA",
+                    "minchinaabad": "MINCHINABAD",
+                    "minchinabad": "MINCHINABAD",
+                    "mclodganj": "MCLEOD GANJ",
+                    "mcleodganj": "MCLEOD GANJ",
+                    "mandisadqganj": "MANDI SADQ GANJ",
+                    "mandisadiqganj": "MANDI SADQ GANJ",
+                    "bahawalpura": "BAHAWALPUR A",
+                    "bahawalpurb": "BAHAWALPUR B",
+                    "bahawalpurc": "BAHAWALPUR C",
+                    "bahawalpurd": "BAHAWALPUR D",
+                    "khairpur": "KHAIRPUR",
+                    "hasilpur": "HASILPUR",
+                    "lodhran": "LODHRAN",
+                    "kahrorpakka": "KAHROR PAKKA",
+                    "yazmancity": "YAZMAN CITY",
+                    "yazman": "YAZMAN CITY",
+                    "tailwala": "TAILWALA",
+                    "ahmedpur": "AHMEDPUR",
+                    "uchsharif": "UCH SHARIF",
+                    "mubarakpur": "MUBARAKPUR",
+                }
+
+                def _qty(val):
+                    """Cell -> clean quantity string ('0' if empty/invalid)."""
+                    val = (val or "").split("\n")[0]
+                    val = val.strip().replace(",", "")
+                    if val == "":
+                        return "0"
+                    try:
+                        float(val)
+                    except ValueError:
+                        return "0"
+                    return val
 
                 result = []
                 new_result = []
@@ -7585,13 +7242,12 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if not full_text:
                         continue
 
-                    text_lines = full_text.split("\n")
-                    address_line = text_lines[1] if len(text_lines) > 1 else ""
-                    area_bricks = (
-                        bahawalpur_bricks
-                        if re.search(r"Bahawalpur", address_line)
-                        else bricks
+                    # Bahawalpur vs Bahawalnagar: check the whole page header
+                    is_bahawalpur = bool(
+                        re.search(r"Bahawalpur", full_text, re.I)
+                        and not re.search(r"Bahawalnagar", full_text, re.I)
                     )
+                    area_bricks = bahawalpur_bricks if is_bahawalpur else bricks
 
                     if "Product Pack Rate" in full_text:
                         # ============ OLD FORMAT: plain text, no grid lines ============
@@ -7620,37 +7276,55 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                 result.append([code, brick, val])
 
                     else:
-                        # ============ NEW FORMAT: real bordered table ============
-                        # (this is exactly why the old text-scraping logic
-                        # broke here: this report layout no longer has a
-                        # "Product Pack Rate ..." text header at all -- it's
-                        # a proper table now, so extract_tables() reads it
-                        # cleanly instead.)
-                        tables = page.extract_tables()
-                        if not tables:
-                            continue
-                        table = tables[0]
+                        # ============ NEW FORMAT: bordered brick grid ============
+                        # Columns are mapped by header text, so it works with or
+                        # without the trailing "Total" column, and with wrapped
+                        # product names ("JETEPAR 10ML\nINJ 5S").
+                        for table in page.extract_tables() or []:
+                            if not table:
+                                continue
 
-                        for row in table[1:]:
-                            if not row or len(row) < 4:
-                                continue
-                            name = row[1] or row[0]
-                            if not name or name.strip().lower() == "total":
-                                continue
-                            code = code_for(name)
-                            if code is None:
-                                continue
-                            values = row[
-                                3:-1
-                            ]  # drop first 3 label cols + trailing Total col
-                            for brick, val in zip(area_bricks, values):
-                                qty = (
-                                    "0"
-                                    if val in (None, "")
-                                    else str(val).replace(",", "")
-                                )
-                                result.append([code, brick, qty])
+                            # 1) header row -> {column index: brick}
+                            col_map = {}
+                            for row in table:
+                                if not row:
+                                    continue
+                                m = {}
+                                for ci, cell in enumerate(row):
+                                    b = LOCAL_ALIASES.get(_k(cell))
+                                    if b:
+                                        m[ci] = b
+                                if len(m) >= 3:
+                                    col_map = m
+                                    break
 
+                            # 2) product rows
+                            for row in table:
+                                if not row:
+                                    continue
+                                name_idx = None
+                                for ci, cell in enumerate(row):
+                                    if cell and code_for(cell):
+                                        name_idx = ci
+                                        break
+                                if name_idx is None:
+                                    continue
+                                code = code_for(row[name_idx])
+
+                                if col_map:
+                                    pairs = [
+                                        (b, row[ci])
+                                        for ci, b in col_map.items()
+                                        if ci < len(row)
+                                    ]
+                                else:
+                                    # fallback: cells after name + rate col
+                                    pairs = list(zip(area_bricks, row[name_idx + 2 :]))
+
+                                for brick, val in pairs:
+                                    result.append([code, brick, _qty(val)])
+
+                # ---------- same post-processing as before ----------
                 for r in range(0, len(result)):
                     for i in item_list:
                         if result[r][0] == i[0]:
@@ -7662,6 +7336,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
@@ -7962,16 +7637,15 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if new_result[r][0] == i[0]:
                             new_result[r].insert(1, i[1])
                             new_result[r].append(i[2])
+                new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
-                new_result = green_team_bricks(new_result)
                 return new_result
 
 
 def _is_zero_sale(val):
-    # sirf asli zero ko True return karega; nan / "" / "-" / None ko nahi
     if val is None:
         return False
     s = str(val).strip().replace(",", "")
@@ -8000,7 +7674,521 @@ def _remove_zero_sale_rows(rows):
     return out
 
 
+# new code
 @frappe.whitelist(allow_guest=True)
 def parse_pdf(pdf_file, parse_check, parent_detail):
+    global _debug_bricks
+    _debug_bricks = []
     result = _parse_pdf(pdf_file, parse_check, parent_detail)
-    return _remove_zero_sale_rows(result)
+    result = _remove_zero_sale_rows(result)
+    return {"result": result, "parsed_bricks": _debug_bricks}
+
+
+def _is_invalid_number(val):
+    """True for None/blank/NaN/'-'/non-numeric values."""
+    if val is None:
+        return True
+    s = str(val).strip()
+    if s == "" or s.lower() in ("nan", "none", "-"):
+        return True
+    try:
+        float(s)
+        return False
+    except (ValueError, TypeError):
+        return True
+
+
+@frappe.whitelist()
+def validate_sale(doc):
+    """Validate an in-memory (possibly unsaved) Brick Wise Sale doc.
+    Returns {"passed": bool, "errors": [...], "parsed_brick_count": int, "matched_brick_count": int}
+    """
+    if isinstance(doc, str):
+        doc = json.loads(doc)
+
+    doc = frappe.get_doc(doc)  # build Document object without hitting the DB
+
+    errors = []
+    seen_bricks = set()
+
+    for row in doc.get("selling_product", []):
+        line = row.idx
+
+        if not row.product:
+            errors.append(f"Row {line}: Product is missing")
+
+        if _is_invalid_number(row.sale_qty):
+            errors.append(f"Row {line}: Sale Qty is invalid/NaN ('{row.sale_qty}')")
+
+        if _is_invalid_number(row.product_price) or not row.product_price:
+            errors.append(
+                f"Row {line}: Product Price is missing/invalid ('{row.product_price}')"
+            )
+
+        if _is_invalid_number(row.value):
+            errors.append(f"Row {line}: Value is NaN/invalid ('{row.value}')")
+
+        if not row.brick:
+            errors.append(f"Row {line}: Brick is missing")
+        else:
+            seen_bricks.add(str(row.brick).strip())
+            if not frappe.db.exists("Territory", row.brick):
+                errors.append(
+                    f"Row {line}: Brick '{row.brick}' does not exist as a Territory "
+                    f"— this is why Brick Parent / price can't resolve"
+                )
+            elif not row.brick_parent:
+                errors.append(
+                    f"Row {line}: Brick Parent missing for brick '{row.brick}'"
+                )
+
+    # Cross-check: did every brick actually EXTRACTED FROM THIS PDF get a row?
+    # (parsed_bricks is populated on the form when process_pdf runs, from the
+    # exact list the parser built for this file — not the whole Territory tree,
+    # which also contains admin/rollup entries like "LHR1"-"LHR5", "MISC" etc.
+    # that never appear in any real PDF and would otherwise show as false positives.)
+    parsed_bricks = []
+    if doc.get("parsed_bricks"):
+        try:
+            parsed_bricks = json.loads(doc.parsed_bricks)
+        except Exception:
+            parsed_bricks = []
+
+    missing = [b for b in parsed_bricks if str(b).strip() not in seen_bricks]
+    for m in missing:
+        errors.append(
+            f"Missing Brick: '{m}' was extracted from the PDF ({len(parsed_bricks)} bricks total) "
+            f"but has no row in Selling Product — check the parser/mapping for this exact brick"
+        )
+
+    return {
+        "passed": len(errors) == 0,
+        "errors": errors,
+        "parsed_brick_count": len(parsed_bricks),
+        "matched_brick_count": len(seen_bricks),
+    }
+
+
+# ======================================================================
+# VALIDATE CODE  — apni MAUJUDA brick_wise_sale.py ke bilkul NEECHE paste karein
+# (aapka purana parse_pdf / class / baqi code jaisa hai waisa hi rahe)
+#
+# Shart: isi file mein `parse_pdf` function maujood ho (wo aapke paas hai),
+# kyunke validate usi ko dobara chala kar PDF ka expected output leta hai.
+# Helper names `_bw_` se shuru hote hain taake aapke purane code se na takrayein.
+# ======================================================================
+import json
+import math
+import re
+from collections import defaultdict
+
+import frappe
+from frappe.utils import cint, flt, getdate
+from frappe.utils.nestedset import get_descendants_of
+
+_BW_TOL = 0.01
+_BW_NAN = {"nan", "none", "null", "nat", "undefined", "#n/a"}
+_BW_MAX_ERRORS = 300
+
+
+def _bw_bad(v):
+    """None / khali / NaN / 'nan' text"""
+    if v is None:
+        return True
+    if isinstance(v, float) and math.isnan(v):
+        return True
+    return isinstance(v, str) and (not v.strip() or v.strip().lower() in _BW_NAN)
+
+
+def _bw_num(v):
+    """'1,200' -> 1200.0 ; kharab value -> None"""
+    if _bw_bad(v):
+        return None
+    try:
+        return float(str(v).replace(",", "").strip())
+    except ValueError:
+        return None
+
+
+def _bw_total_like(brick):
+    """brick ki jagah 'Total' ya amount ('6,298.50', '984,357') likha ho."""
+    b = str(brick).strip().lower()
+    if re.search(r"\b(grand\s*total|sub\s*total|total|amount)\b", b):
+        return True
+    return bool(re.fullmatch(r"-?\d{1,3}(,\d{3})+(\.\d+)?|-?\d+\.\d+", b))
+
+
+def _bw_city(city):
+    city = (city or "").strip()
+    return city or None  # DocType ka default "\n" hai
+
+
+def _bw_run_parse(doc):
+    """Aapka apna parse_pdf dobara chala kar PDF ka expected output lo."""
+    detail = {
+        "city": _bw_city(doc.get("city")),
+        "fromDate": doc.get("from"),
+        "toDate": doc.get("to"),
+    }
+    check = cint(doc.get("having_different_bricks")) > 0
+    try:
+        out = parse_pdf(doc.get("file"), check, detail)
+    except Exception:
+        # agar parse_pdf HTTP ki tarah string args expect karta ho
+        out = parse_pdf(
+            doc.get("file"),
+            "true" if check else "false",
+            json.dumps(detail, default=str),
+        )
+    if isinstance(out, dict):
+        return out.get("result") or [], out.get("parsed_bricks") or []
+    return out or [], []
+
+
+def _bw_file_dates(pdf_file):
+    """PDF ke upar likhi 'Date From: dd/mm/yyyy To: dd/mm/yyyy' -> (from_date, to_date) ya None"""
+    try:
+        path = frappe.get_doc("File", {"file_url": pdf_file}).get_full_path()
+        lib = None
+        for mod in ("pypdf", "PyPDF2"):
+            try:
+                lib = __import__(mod)
+                break
+            except ImportError:
+                continue
+        if not lib:
+            return None
+        text = " ".join((p.extract_text() or "") for p in lib.PdfReader(path).pages[:1])
+        m = re.search(
+            r"Date From:\s*(\d{1,2}/\d{1,2}/\d{4})\s*To:\s*(\d{1,2}/\d{1,2}/\d{4})",
+            text,
+        )
+        if not m:
+            return None
+        to_date = lambda t: getdate(
+            "-".join(reversed(t.split("/")))
+        )  # dd/mm/yyyy -> yyyy-mm-dd
+        return to_date(m.group(1)), to_date(m.group(2))
+    except Exception:
+        return None
+
+
+def _bw_fiscal_year(d):
+    fy = frappe.get_all(
+        "Fiscal Year",
+        filters={"year_start_date": ["<=", d], "year_end_date": [">=", d]},
+        pluck="name",
+        limit=1,
+    )
+    return fy[0] if fy else None
+
+
+@frappe.whitelist()
+def get_fiscal_year_from_file(pdf_file, from_date=None):
+    """File ki date se Fiscal Year (JS isay file upload / process ke baad call karta hai)."""
+    dates = _bw_file_dates(pdf_file)
+    d = dates[0] if dates else (getdate(from_date) if from_date else None)
+    return {
+        "fiscal_year": _bw_fiscal_year(d) if d else None,
+        "from": str(dates[0]) if dates else None,
+        "to": str(dates[1]) if dates else None,
+    }
+
+
+@frappe.whitelist()
+def validate_sale(doc):
+    if isinstance(doc, str):
+        doc = frappe.parse_json(doc)
+    doc = frappe._dict(doc)
+
+    errors = []
+    add = errors.append
+    rows = doc.get("selling_product") or []
+    city = _bw_city(doc.get("city"))
+
+    if not rows:
+        return {
+            "passed": False,
+            "errors": ["Selling Product table khali hai."],
+            "parsed_brick_count": 0,
+            "matched_brick_count": 0,
+        }
+
+    # ---------- lookups (ek hi baar) ----------
+    bricks = {str(r.get("brick")).strip() for r in rows if not _bw_bad(r.get("brick"))}
+    products = {
+        str(r.get("product")).strip() for r in rows if not _bw_bad(r.get("product"))
+    }
+
+    territory = {
+        t.name: t
+        for t in frappe.get_all(
+            "Territory",
+            fields=["name", "parent_territory", "is_group"],
+            filters={"name": ["in", list(bricks)]} if bricks else {"name": ""},
+            limit_page_length=0,
+        )
+    }
+    items = {
+        i.name: i
+        for i in frappe.get_all(
+            "Item",
+            fields=["name", "item_name", "trade_price", "disabled"],
+            filters={"name": ["in", list(products)]} if products else {"name": ""},
+            limit_page_length=0,
+        )
+    }
+    city_tree = set()
+    if city:
+        city_tree = set(get_descendants_of("Territory", city)) | {city}
+
+    # ---------- 1) table ki har row ----------
+    seen = defaultdict(list)
+    row_sum = 0.0
+    for pos, r in enumerate(rows, start=1):
+        no = r.get("idx") or pos
+        tag = f"Row {no}"
+        prod, brick = r.get("product"), r.get("brick")
+        qty, price, value = (
+            _bw_num(r.get("sale_qty")),
+            _bw_num(r.get("product_price")),
+            _bw_num(r.get("value")),
+        )
+
+        if _bw_bad(prod) and qty is None:
+            add(
+                f"{tag}: Khali row hai (product aur qty nahi, brick '{brick}') — delete kar dein."
+            )
+            continue
+
+        for field, label in [
+            ("product", "Product code"),
+            ("product_name", "Product name"),
+            ("brick", "Brick"),
+            ("sale_qty", "Sale qty"),
+            ("product_price", "Product price"),
+            ("value", "Value"),
+            ("brick_parent", "Brick parent"),
+        ]:
+            if _bw_bad(r.get(field)):
+                add(f"{tag}: {label} khali / NaN hai (product={prod}, brick={brick}).")
+
+        if qty == 0:
+            add(
+                f"{tag}: Sale qty 0 hai — {prod} / {brick}."
+            )  # minus qty (return) allowed hai
+        if (
+            qty is not None
+            and price is not None
+            and value is not None
+            and abs(qty * price - value) > _BW_TOL
+        ):
+            add(
+                f"{tag}: Value galat — {qty:g} x {price:g} = {qty * price:g}, row mein {value:g} ({prod} / {brick})."
+            )
+        row_sum += value or 0
+
+        # product
+        item = None
+        if not _bw_bad(prod):
+            prod = str(prod).strip()
+            item = items.get(prod)
+            if not item:
+                add(f"{tag}: Product '{prod}' Item master mein nahi mila.")
+            else:
+                if item.disabled:
+                    add(f"{tag}: Product '{prod}' disabled hai.")
+                if (
+                    price is not None
+                    and item.trade_price is not None
+                    and abs(flt(item.trade_price) - price) > _BW_TOL
+                ):
+                    add(
+                        f"{tag}: Price galat — row mein {price:g}, Item master (trade price) mein {flt(item.trade_price):g} ({prod})."
+                    )
+                pname = str(r.get("product_name") or "")
+                if (
+                    pname
+                    and item.item_name
+                    and pname.strip().lower() != item.item_name.strip().lower()
+                ):
+                    add(
+                        f"{tag}: Product name '{pname}' Item master ke naam '{item.item_name}' se match nahi karta."
+                    )
+            if re.search(
+                r"\bactive\b",
+                f"{r.get('product_name') or ''} {item.item_name if item else ''}",
+                re.I,
+            ):
+                add(
+                    f"{tag}: Product naam mein 'Active' word hai — '{r.get('product_name')}' ({prod})."
+                )
+
+        # brick
+        if not _bw_bad(brick):
+            brick = str(brick).strip()
+            if _bw_total_like(brick):
+                add(f"{tag}: Brick ki jagah Total / amount likha hai: '{brick}'.")
+            t = territory.get(brick)
+            if not t:
+                hint = (
+                    frappe.get_all(
+                        "Territory",
+                        filters={"name": ["like", f"%{brick}%"]},
+                        pluck="name",
+                        limit=1,
+                    )
+                    if len(brick) >= 4 and not _bw_total_like(brick)
+                    else []
+                )
+                tip = f" Shayad sahi naam '{hint[0]}' hai." if hint else ""
+                add(
+                    f"{tag}: Brick '{brick}' Territory tree mein nahi hai (code ya naam galat).{tip}"
+                )
+            else:
+                if t.is_group:
+                    add(f"{tag}: '{brick}' brick nahi, group territory hai.")
+                if (
+                    not _bw_bad(r.get("brick_parent"))
+                    and r.get("brick_parent") != t.parent_territory
+                ):
+                    add(
+                        f"{tag}: Brick parent galat — row mein '{r.get('brick_parent')}', tree mein '{t.parent_territory}' ({brick})."
+                    )
+                if city and brick not in city_tree:
+                    add(
+                        f"{tag}: Brick '{brick}' city '{city}' ke neeche nahi aati (parent: {t.parent_territory})."
+                    )
+
+        if not _bw_bad(prod) and not _bw_bad(brick):
+            seen[(str(prod).strip(), str(brick).strip())].append(no)
+
+    for (p, b), nos in seen.items():
+        if len(nos) > 1:
+            add(
+                f"Duplicate: Product '{p}' brick '{b}' {len(nos)} baar hai (rows {', '.join(map(str, nos))})."
+            )
+
+    if abs(flt(doc.get("total_value")) - row_sum) > 1:
+        add(
+            f"Total Value Sale galat — rows ka jama {row_sum:,.2f}, field mein {flt(doc.get('total_value')):,.2f} (Calculate dabayein)."
+        )
+
+    # ---------- 2) PDF se muqabla ----------
+    parsed_brick_count = matched_brick_count = 0
+    if not doc.get("file"):
+        add("File attach nahi hai — PDF se muqabla nahi ho saka.")
+    else:
+        try:
+            parsed, parsed_bricks = _bw_run_parse(doc)
+        except Exception as e:
+            parsed, parsed_bricks = [], []
+            add(f"File dobara parse nahi ho saki: {e}")
+
+        p_map = defaultdict(list)
+        for i, e in enumerate(parsed, start=1):
+            e = list(e) + [None] * (6 - len(e))
+            if any(_bw_bad(x) for x in (e[0], e[2], e[3])):
+                add(
+                    f"File row {i}: product / brick / qty NaN ya khali parse hua (product={e[0]}, brick={e[2]}, qty={e[3]})."
+                )
+                continue
+            if _bw_total_like(e[2]):
+                add(
+                    f"File row {i}: Brick ki jagah Total / amount parse hua: '{e[2]}' (product {e[0]})."
+                )
+            p_map[(str(e[0]).strip(), str(e[2]).strip())].append(
+                {"i": i, "qty": _bw_num(e[3]), "price": _bw_num(e[5])}
+            )
+
+        for (p, b), lst in p_map.items():
+            if len(lst) > 1:
+                add(
+                    f"File mein duplicate: Product '{p}' brick '{b}' {len(lst)} baar hai (file rows {', '.join(str(x['i']) for x in lst)})."
+                )
+
+        t_map = defaultdict(list)
+        for pos, r in enumerate(rows, start=1):
+            if not _bw_bad(r.get("product")) and not _bw_bad(r.get("brick")):
+                t_map[
+                    (str(r.get("product")).strip(), str(r.get("brick")).strip())
+                ].append((r.get("idx") or pos, r))
+
+        for key, lst in p_map.items():
+            if key not in t_map:
+                for x in lst:
+                    add(
+                        f"MISSING: File mein product '{key[0]}' brick '{key[1]}' qty {x['qty']:g} hai, table mein nahi."
+                    )
+        for key, lst in t_map.items():
+            if key not in p_map:
+                for no, _r in lst:
+                    add(
+                        f"Row {no}: Product '{key[0]}' brick '{key[1]}' table mein hai, file mein nahi mila."
+                    )
+
+        for key in set(p_map) & set(t_map):
+            plist = sorted(p_map[key], key=lambda x: x["qty"] or 0)
+            tlist = sorted(t_map[key], key=lambda x: _bw_num(x[1].get("sale_qty")) or 0)
+            if len(plist) != len(tlist):
+                add(
+                    f"Count mismatch: '{key[0]}' / '{key[1]}' file mein {len(plist)} baar, table mein {len(tlist)} baar."
+                )
+            for x, (no, r) in zip(plist, tlist):
+                tq, tp = _bw_num(r.get("sale_qty")), _bw_num(r.get("product_price"))
+                if (
+                    x["qty"] is not None
+                    and tq is not None
+                    and abs(x["qty"] - tq) > _BW_TOL
+                ):
+                    add(
+                        f"Row {no}: Qty galat — file mein {x['qty']:g}, table mein {tq:g} ({key[0]} / {key[1]})."
+                    )
+                if (
+                    x["price"] is not None
+                    and tp is not None
+                    and abs(x["price"] - tp) > _BW_TOL
+                ):
+                    add(
+                        f"Row {no}: Price galat — file mein {x['price']:g}, table mein {tp:g} ({key[0]} / {key[1]})."
+                    )
+
+        if len(parsed) != len(rows):
+            add(
+                f"Row count mismatch: file se {len(parsed)} rows aayi, table mein {len(rows)} rows hain."
+            )
+
+        pb = set()
+        try:
+            stored = json.loads(doc.get("parsed_bricks") or "[]")
+        except ValueError:
+            stored = []
+        for b in parsed_bricks or stored:
+            pb.add(
+                str(b.get("name") or b.get("brick")) if isinstance(b, dict) else str(b)
+            )
+        parsed_brick_count = len(pb)
+        matched_brick_count = len(pb & bricks)
+        for b in sorted(pb - bricks):
+            add(f"Brick '{b}' file mein hai, lekin table mein ek bhi row nahi.")
+        if pb:
+            for b in sorted(bricks - pb):
+                add(f"Brick '{b}' table mein hai, lekin file se parse nahi hui.")
+
+    errors = list(dict.fromkeys(errors))
+    if len(errors) > _BW_MAX_ERRORS:
+        extra = len(errors) - _BW_MAX_ERRORS
+        errors = errors[:_BW_MAX_ERRORS] + [
+            f"... aur {extra} errors (pehle yeh theek karein, phir dobara Validate dabayein)."
+        ]
+    fy = None
+    if doc.get("file"):
+        dates = _bw_file_dates(doc.get("file"))
+        fy = _bw_fiscal_year(dates[0]) if dates else None
+    return {
+        "passed": not errors,
+        "errors": errors,
+        "fiscal_year": fy,
+        "parsed_brick_count": parsed_brick_count,
+        "matched_brick_count": matched_brick_count,
+    }
