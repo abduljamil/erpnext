@@ -3384,6 +3384,30 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "DEPROGESIC-P TABS": "081838",
                     "METRONIDAZOLE 400MG": "081274",
                     "VIKONAN 120ML SYP": "006406",
+                    "CYANORIN INJ": "005425",
+                    "MOXILIUM 250MG SYP": "012649",
+                    "CODAMIN-P": "028729",
+                    "EBAST 10MG TAB": "023906",
+                    "HISTAFEX 120MG": "031037",
+                    "HISTAFEX 180MG": "031038",
+                    "MALTEM PLUS DS TAB": "071560",
+                    "METRONIDAZOLE 200MG": "008909",
+                    "MOXILIUM 250MG CAP": "006784",
+                    "MOXILIUM 125MG SYP": "006783",
+                    "MOXILIUM 500MG CAP": "008908",
+                    "MOXILIUM DROPS": "006782",
+                    "PC-LAC SYP": "019133",
+                    "PROBITOR CAP 20MG": "016654",
+                    "SAVELOX 250MG": "032255",
+                    "SAVELOX 500MG": "029328",
+                    "SUPRACEF 400MG CAP": "024820",
+                    "SUPRACEF DS SUSP": "028727",
+                    "SUPRACEF SUSP": "024819",
+                    "SUPRALOX SUSP": "028728",
+                    # "SUPRALOX TAB": "028728"
+                    "TRAMAGESIC AMP": "026920",
+                    "TRAMAGESIC CAPS": "029327",
+                    "VIGORAL FORT TAB": "007018",
                 }
                 nan = float("nan")
 
@@ -3431,6 +3455,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if name:
                             if name == "TIMERGARA":
                                 name = "TIMERGARA TMG"
+                            if name == "CHAKDARA":
+                                name = "CHAKDARA TMG"
+
                             brick_cols.append((ci, name))
 
                     for row in table[hdr_idx + 1 :]:
@@ -3683,11 +3710,10 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 DIK_RENAME = {
                     "PAHAR": "PAHAR PUR",
                     "DRABAN/CHOD": "DRABAN",
-                    "PROVA/RAMAK": "PROVA",
                     "PEZU/PANYALA": "PANI ALA",
                     "D.I.KHAN": "DIKHAN",
+                    "PROVA/RAMAK": "PROVA / RAMAK",
                 }
-
                 DIK_PRODUCTS = [
                     (("JETEPAR", "SYP"), "002188"),
                     (("JETEPAR", "SYR"), "002188"),
@@ -3702,29 +3728,27 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 ]
 
                 def dik_product(name):
+                    """returns (code, variant) ; variant = '(New)' / '(Old)' / ''"""
                     n = (
                         re.sub(r"\s+", " ", str(name or "").replace("\n", " "))
                         .strip()
                         .upper()
                     )
-                    n = re.sub(r"^\d+\s+", "", n)
+                    n = re.sub(r"^\d+\s*", "", n)  # product code (2417) hata do
                     if not n or n.startswith(("TOTAL", "P A R T")):
                         return None
+                    variant = "(New)" if "NEW" in n else ("(Old)" if "OLD" in n else "")
                     for kws, code in DIK_PRODUCTS:
                         if all(k in n for k in kws):
-                            return code
+                            return code, variant
                     print(f"[D.I.Khan] product not recognised, skipped: '{n}'")
                     return None
 
-                def dik_legend(pg):
-                    """Page ke neeche '01=D.I.KHAN', '10=NEW DERA' wali legend parhna"""
-                    amt = re.compile(r"^[\d,]+\.\d{2}$")
-                    words = sorted(
-                        pg.extract_words(x_tolerance=1.5), key=lambda w: w["top"]
-                    )
+                def dik_group(words):
+                    words = sorted(words, key=lambda w: w["top"])
                     lines, cur, cur_top = [], [], None
                     for w in words:
-                        if cur_top is None or abs(w["top"] - cur_top) <= 2.5:
+                        if cur_top is None or abs(w["top"] - cur_top) <= 3:
                             cur.append(w)
                             cur_top = w["top"] if cur_top is None else cur_top
                         else:
@@ -3732,9 +3756,15 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             cur, cur_top = [w], w["top"]
                     if cur:
                         lines.append(cur)
-                    legend = {}
                     for ln in lines:
                         ln.sort(key=lambda w: w["x0"])
+                    return lines
+
+                def dik_legend(pg):
+                    """Page ke neeche '01=D.I.KHAN', '10=NEW DERA' wali legend"""
+                    amt = re.compile(r"^-?[\d,]+\.\d{2}$")  # negative amount bhi
+                    legend = {}
+                    for ln in dik_group(pg.extract_words(x_tolerance=1.5)):
                         for j, w in enumerate(ln):
                             m = re.match(r"^(\d{1,2})=(.*)$", w["text"])
                             if not m:
@@ -3755,71 +3785,107 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                 legend[int(m.group(1))] = " ".join(parts).strip()
                     return legend
 
+                def dik_rows(pg):
+                    """har product row -> (naam, {town_no: qty}) ; x-position se column pehchanta hai"""
+                    words = pg.extract_words(x_tolerance=1.5)
+                    lines = dik_group(words)
+                    header = None
+                    for ln in lines:
+                        d = [w for w in ln if w["text"].isdigit() and w["x0"] > 100]
+                        if len(d) >= 3:
+                            header = (ln[0]["top"], d, ln)
+                            break
+                    if not header:
+                        return []
+                    h_top, d, h_line = header
+                    # numbers right-aligned hote hain: header ke x1 + ~11 par value ka x1 aata hai
+                    cols = [(int(w["text"]), w["x1"] + 11) for w in d]
+                    first_x0 = min(w["x0"] for w in d)
+                    tot = [w for w in h_line if w["text"].upper() == "TOTAL"]
+                    total_x0 = tot[0]["x0"] if tot else max(w["x1"] for w in d) + 25
+                    legend_top = min(
+                        [w["top"] for w in words if re.match(r"^\d{1,2}=", w["text"])]
+                        or [1e9]
+                    )
+                    out = []
+                    for ln in lines:
+                        top = ln[0]["top"]
+                        if top <= h_top + 5 or top >= legend_top - 2:
+                            continue
+                        name = " ".join(
+                            w["text"] for w in ln if w["x1"] <= first_x0 - 5
+                        )
+                        if not name:
+                            continue
+                        vals = {}
+                        for w in ln:
+                            if w["x0"] < first_x0 - 5 or w["x0"] >= total_x0 - 10:
+                                continue  # naam wala hissa / TOTAL column
+                            # negative values (jaise -5) bhi allow
+                            if not re.fullmatch(r"-?[\d,]+(\.\d+)?", w["text"]):
+                                continue
+                            n, _ = min(cols, key=lambda c: abs(w["x1"] - c[1]))
+                            vals[n] = vals.get(n, 0) + float(w["text"].replace(",", ""))
+                        out.append((name, vals))
+                    return out
+
                 sums = {}
                 order = []
                 for pg in pdf.pages:
                     legend = dik_legend(pg)
-                    for data in pg.extract_tables():
-                        if not data or len(data[0]) < 3:
+                    for name, vals in dik_rows(pg):
+                        p = dik_product(name)
+                        if p is None:
                             continue
-                        header = data[0]
-                        cols = []
-                        for ci in range(1, len(header)):
-                            h = str(header[ci] or "").strip()
-                            if h.isdigit():
-                                n = int(h)
-                                nm = legend.get(n) or DIK_DEFAULT.get(n)
-                                if nm:
-                                    nm = re.sub(r"\s+", " ", nm).strip()
-                                    cols.append((ci, DIK_RENAME.get(nm, nm)))
-                        if not cols:
-                            continue
-                        for row in data[1:]:
-                            if not row or not row[0]:
+                        code, variant = p
+                        for n, f in vals.items():
+                            nm = legend.get(n) or DIK_DEFAULT.get(n)
+                            if not nm:
                                 continue
-                            code = dik_product(row[0])
-                            if code is None:
-                                continue
-                            for ci, bname in cols:
-                                if ci >= len(row):
-                                    continue
-                                s = str(row[ci] or "").replace(",", "").strip()
-                                if s in ("", "-"):
-                                    continue
-                                try:
-                                    f = float(s)
-                                except ValueError:
-                                    continue
-                                key = (code, bname)
-                                if key not in sums:
-                                    sums[key] = 0.0
-                                    order.append(key)
-                                sums[key] += f
+                            nm = re.sub(r"\s+", " ", nm).strip()
+                            bname = DIK_RENAME.get(nm, nm)
+                            key = (code, variant, bname)  # New / Old alag alag
+                            if key not in sums:
+                                sums[key] = 0.0
+                                order.append(key)
+                            sums[key] += f
 
                 for key in order:
                     tot = sums[key]
                     if tot == 0:
-                        continue
+                        continue  # jis brick mein sale 0 ho uski row nahi aayegi
                     result.append(
-                        [key[0], key[1], str(int(tot)) if tot == int(tot) else str(tot)]
+                        [
+                            key[0],
+                            key[1],
+                            str(int(tot)) if tot == int(tot) else str(tot),
+                            key[2],
+                        ]
                     )
+                # abhi row = [code, variant, qty, branch] -> [code, branch, qty, variant]
+                result = [[r[0], r[3], r[2], r[1]] for r in result]
 
-                for r in range(0, len(result)):
+                for r in result:
                     for i in item_list:
-                        if result[r][0] == i[0]:
-                            new_result.append(result[r])
+                        if r[0] == i[0]:
+                            new_result.append(r)
+                            break
                 for r in new_result:
                     for i in item_list:
                         if r[0] == i[0]:
-                            r.insert(1, i[1])
+                            variant = r.pop()
+                            r.insert(1, f"{i[1]} {variant}".strip())  # e.g. "... (New)"
                             r.append(i[2])
+                            break
                 new_result = green_team_bricks(new_result)
                 for r in new_result:
                     for t in tt_list:
                         if r[2] == t[0]:
                             r.insert(4, t[1])
+                            break
+                    else:
+                        r.insert(4, "nan")  # brick territory tree mein nahi mili
                 return new_result
-
             elif dist_city == "Abbotabad":
                 result = []
                 products = []
