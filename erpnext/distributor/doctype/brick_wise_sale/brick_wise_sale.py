@@ -132,26 +132,21 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             # "PDF NAME": "TERRITORY TREE NAME",
             "KHIR": "KHARRIAN",
             "PHAR": "PAHRIANWALI",
-            "LALA": "LALAMUSA",
             "KOTL": "KOTLA",
-            "DNGA": "DINGA GUJRAT",
             "FPUR": "FATEH PUR",
             "MANG": "MANGOWAL",
             "KUNJ": "KUNJAH",
-            "JPJ": "JALAL PUR JATTAN",
-            "PHAR": "PAHRIANWALI",
             "DOLT": "DOLAT",
             "TAND": "TANDA",
             "SRGO": "SARGO",
             "KUTC": "KUTCH",
-            "ShaF": "SHAHF",
             "MUSL": "MUSLI",
             "JINH": "JINNA",
             "CIRC": "CIRCU",
             "RAMT": "RAMTA",
             "KHIR": "KHARIAN",
             "LALA": "LALAMUSA GUJRAT",
-            "JPJ": "JALAL PUR JATTAN ROAD",
+            "JPJ": "JALAL PUR JATTAN",
             "DNGA": "DINGA GUJRAT",
             "ShaF": "SHAHF",
             "ShaD": "SHAHD",
@@ -1906,88 +1901,145 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 return new_result
 
             elif dist_city == "Sahiwal":
-                products = []
-                bricks = []
-                sales = []
-                result = []
-                for x in range(0, len(pdf.pages)):
-                    data = pdf.pages[x].extract_table()
-                    bricks = data[0][1:-2]
-                    for b in range(0, len(bricks)):
-                        if bricks[b] == "SWLCN":
-                            bricks[b] = "SAHIWAL CENTER"
-                        if bricks[b] == "DHQ":
-                            bricks[b] = "DISTRICT HEAD QUARTER HOSPITAL"
-                        if bricks[b] == "PAKPN":
-                            bricks[b] = "PAK PATTAN"
-                        if bricks[b] == "ARIFW":
-                            bricks[b] = "ARIFWALA"
-                        if bricks[b] == "IQNGR":
-                            bricks[b] = "IQBAL NAGAR"
-                        if bricks[b] == "KASWL":
-                            bricks[b] = "KASSOWAL"
-                        if bricks[b] == "QBLA":
-                            bricks[b] = "QABOOLA"
-                        if bricks[b] == "CCI":
-                            bricks[b] = "CHICHAWATNI"
-                        if bricks[b] == "GHABD":
-                            bricks[b] = "GHAZIA ABAD"
-                        if bricks[b] == "HARPA":
-                            bricks[b] = "HARAPPA"
+                SWL_BRICKS = {
+                    "SWLCN": "SAHIWAL CENTER",
+                    "DHQ": "DISTRICT HEAD QUARTER HOSPITAL",
+                    "PAKPN": "PAK PATTAN",
+                    "ARIFW": "ARIFWALA",
+                    "IQNGR": "IQBAL NAGAR",
+                    "KASWL": "KASSOWAL",
+                    "QBLA": "QABOOLA",
+                    "CCI": "CHICHAWATNI",
+                    "GHABD": "GHAZIA ABAD",
+                    "HARPA": "HARAPPA",
+                }
+                SWL_PRODUCTS = {
+                    "AFLOXAN 300MG TAB 30S": "Afloxan Tablet",
+                    "AFLOXAN CAP 20'S": "Afloxan Capsule",
+                    "JETEPAR 10ML INJ 5S": "Jetepar Injection 10ml",
+                    "JETEPAR 2ML INJ 10S": "Jetepar Injection 2ml",
+                    "JETEPAR CAP 20S": "Jetepar Capsule",
+                    "JETEPAR SYRUP 112ML": "Jetepar Syrup",
+                    "MAIORAD 3ML INJ 6S": "Maiorad Injection",
+                    "MAIORAD TAB 30S": "Maiorad Tablet",
+                }
 
-                    for p in range(2, len(data) - 4):
-                        products.append(data[p][0])
-                        sales.append(data[p][1:-2])
+                def swl_group(words):
+                    words = sorted(words, key=lambda w: w["top"])
+                    lines, cur, cur_top = [], [], None
+                    for w in words:
+                        if cur_top is None or abs(w["top"] - cur_top) <= 3:
+                            cur.append(w)
+                            cur_top = w["top"] if cur_top is None else cur_top
+                        else:
+                            lines.append(cur)
+                            cur, cur_top = [w], w["top"]
+                    if cur:
+                        lines.append(cur)
+                    for ln in lines:
+                        ln.sort(key=lambda w: w["x0"])
+                    return lines
 
-                    for i in sales:
-                        for a in range(0, len(i)):
-                            if i[a] == "":
-                                i[a] = "0"
-
-                    for p in range(0, len(products)):
-                        for b in range(0, len(bricks)):
-                            if sales[p][b] == "0":
+                def swl_rows(pg):
+                    """har product row -> (NAAM, {brick: qty}); table lines/'#' se beparwah"""
+                    words = pg.extract_words(x_tolerance=2)
+                    lines = swl_group(words)
+                    hdr = None
+                    for ln in lines:
+                        if any(w["text"].upper() in SWL_BRICKS for w in ln):
+                            hdr = ln
+                            break
+                    if not hdr:
+                        return []
+                    hw = [w for w in hdr if w["text"].upper() in SWL_BRICKS]
+                    centers = [
+                        ((w["x0"] + w["x1"]) / 2, SWL_BRICKS[w["text"].upper()])
+                        for w in hw
+                    ]
+                    # vertical lines (double line ko merge karke) = cell ki hudood
+                    vx = sorted(
+                        r["x0"] for r in pg.rects if r["width"] < 3 and r["height"] > 10
+                    )
+                    edges = []
+                    for x in vx:
+                        if not edges or x - edges[-1] > 4:
+                            edges.append(x)
+                    cells = []
+                    for k, (c, b) in enumerate(centers):
+                        half = (c - centers[k - 1][0]) / 2 if k else 20
+                        left = max([e for e in edges if e <= c] or [c - half])
+                        right = min([e for e in edges if e > c] or [c + 20])
+                        cells.append((left, right, b))
+                    name_right = cells[0][0]
+                    out = []
+                    for ln in lines:
+                        if ln[0]["top"] <= hdr[0]["top"] + 3:
+                            continue
+                        name = (
+                            re.sub(
+                                r"\s+",
+                                " ",
+                                " ".join(
+                                    w["text"] for w in ln if w["x0"] < name_right - 3
+                                ),
+                            )
+                            .strip()
+                            .upper()
+                        )
+                        if not name:
+                            continue
+                        vals = {}
+                        for w in ln:
+                            if w["x0"] < name_right - 3:
                                 continue
-                            child = []
-                            child.append(products[p])
-                            child.append(bricks[b])
-                            child.append(sales[p][b])
-                            result.append(child)
+                            # '#', khali, text -> ignore ; sirf asli number
+                            if not re.fullmatch(r"-?[\d,]+(\.\d+)?", w["text"]):
+                                continue
+                            cx = (w["x0"] + w["x1"]) / 2
+                            for l, r, b in cells:
+                                if l <= cx < r:
+                                    vals[b] = vals.get(b, 0) + float(
+                                        w["text"].replace(",", "")
+                                    )
+                                    break
+                        out.append((name, vals))
+                    return out
 
-                    # for jetepar syrup and 2ml inj
-                    for r in result:
-                        if r[0] == "JETEPAR 2ML INJ 10S":
-                            r[0] = "Jetepar Injection 2ml"
-                        if r[0] == "AFLOXAN 300MG TAB 30S":
-                            r[0] = "Afloxan Tablet"
-                        if r[0] == "AFLOXAN CAP 20'S":
-                            r[0] = "Afloxan Capsule"
-                        if r[0] == "JETEPAR 10ML INJ 5S":
-                            r[0] = "Jetepar Injection 10ml"
-                        if r[0] == "JETEPAR CAP 20S":
-                            r[0] = "Jetepar Capsule"
-                        if r[0] == "JETEPAR SYRUP 112ML":
-                            r[0] = "Jetepar Syrup"
-                        if r[0] == "MAIORAD 3ML INJ 6S":
-                            r[0] = "Maiorad Injection"
-                        if r[0] == "MAIORAD TAB 30S":
-                            r[0] = "Maiorad Tablet"
-                        for i in item_list:
-                            final_result = fuzz.token_set_ratio(r[0], i[1])
-                            if final_result >= 100:
-                                r[0] = i[0]
+                rows = []  # [product_name, brick, qty]
+                for pg in pdf.pages:
+                    for pname, vals in swl_rows(pg):
+                        if pname not in SWL_PRODUCTS:
+                            if not pname.startswith(("BLUE GROUP", "TTL", "G TTL")):
+                                print(
+                                    f"[Sahiwal] product not recognised, skipped: '{pname}'"
+                                )
+                            continue
+                        for bname, f in vals.items():
+                            if f == 0:
+                                continue
+                            q = str(int(f)) if f == int(f) else str(f)
+                            rows.append([SWL_PRODUCTS[pname], bname, q])
 
-                    for r in result:
-                        for i in item_list:
-                            if r[0] == i[0]:
-                                r.insert(1, i[1])
-                                r.append(i[2])
-                    result = green_team_bricks(result)
-                    for r in result:
-                        for t in tt_list:
-                            if r[2] == t[0]:
-                                r.insert(4, t[1])
-                    return result
+                result = []
+                for r in rows:
+                    matched = None
+                    for i in item_list:
+                        if fuzz.token_set_ratio(r[0], i[1]) >= 100:
+                            matched = i
+                            break
+                    if matched is None:
+                        print(f"[Sahiwal] item_list mein match nahi mila: '{r[0]}'")
+                        continue
+                    # [code, name, brick, qty, extra]
+                    result.append([matched[0], matched[1], r[1], r[2], matched[2]])
+
+                result = green_team_bricks(result)
+                for r in result:
+                    for t in tt_list:
+                        if r[2] == t[0]:
+                            r.insert(4, t[1])
+                            break
+                return result
             elif dist_city == "Sialkot":
                 bricks = []
                 sales = []
@@ -2672,13 +2724,13 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if "1010101" in bricks[b]:
                         bricks[b] = "DHA NAROWAL"
                     if "1010102" in bricks[b]:
-                        bricks[b] = "KUTCHERY ROAD"
+                        bricks[b] = "KACHEHRI ROAD NAROWAL"
                     if "1010103" in bricks[b]:
                         bricks[b] = "RAILWAY ROAD NAROWAL"
                     if "1010104" in bricks[b]:
                         bricks[b] = "ZAFARWAL ROAD NAROWAL"
                     if "1010105" in bricks[b]:
-                        bricks[b] = "MURIDKE ROAD"
+                        bricks[b] = "MURIDKE ROAD NAROWAL"
                     if "1010201" in bricks[b]:
                         bricks[b] = "NURKOT"
                     if "1010202" in bricks[b]:
@@ -2728,7 +2780,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     if "1010504" in bricks[b]:
                         bricks[b] = "BADDO MALHI"
                     if "1010204" in bricks[b]:
-                        bricks[b] = "MANZOR PURA"
+                        bricks[b] = "MANZOOR PURA"
                 # print(bricks)
 
                 for s in range(0, len(sales)):
@@ -7195,7 +7247,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "BAHAWALPUR B",
                     "BAHAWALPUR C",
                     "BAHAWALPUR D",
-                    "KHAIRPUR",
+                    "KHAIRPUR TAMIWALI",
                     "HASILPUR",
                     "LODHRAN",
                     "KAHROR PAKKA",
@@ -7276,7 +7328,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "bahawalpurb": "BAHAWALPUR B",
                     "bahawalpurc": "BAHAWALPUR C",
                     "bahawalpurd": "BAHAWALPUR D",
-                    "khairpur": "KHAIRPUR",
+                    "khairpur": "KHAIRPUR TAMIWALI",
+                    "khairpurtamiwali": "KHAIRPUR TAMIWALI",
                     "hasilpur": "HASILPUR",
                     "lodhran": "LODHRAN",
                     "kahrorpakka": "KAHROR PAKKA",
