@@ -130,7 +130,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
         # Example: "ShaD": "SHAHDARA GUJRAT",
         BRICK_RENAME = {
             # "PDF NAME": "TERRITORY TREE NAME",
-            "KHIR": "KHARRIAN",
             "PHAR": "PAHRIANWALI",
             "KOTL": "KOTLA",
             "FPUR": "FATEH PUR",
@@ -151,6 +150,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             "ShaF": "SHAHF",
             "ShaD": "SHAHD",
             "PHAL": "PHALIA",
+            "MBD": "MANDI.B.DIN",
         }
         bricks = [BRICK_RENAME.get(b, b) for b in bricks]
 
@@ -306,6 +306,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
             bricks[b] = re.sub("KUNJA", "KUNJAH", bricks[b])
             bricks[b] = re.sub("J.P.J", "JALAL PUR JATTAN", bricks[b])
             bricks[b] = re.sub("PAHRI", "PAHRIANWALI", bricks[b])
+            bricks[b] = re.sub("MBD", "MANDI.B.DIN", bricks[b])
 
         for i in range(s_s_index, s_e_index):
             if words[i][0] > 100:
@@ -3648,6 +3649,10 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             bricks[k] = "SABIR ABAD"
                         if bricks[k] == "- GHAZNI KHEL":
                             bricks[k] = "GHAZNI KHEL"
+                        if bricks[k] == "RAILWAY ROAD":
+                            bricks[k] = "RAILWAY ROAD BNU"
+                        if bricks[k] == "- BAKA KHEL":
+                            bricks[k] = "BAKA KHEL"
 
                 for p in range(0, len(products)):
                     for i in range(0, len(products[p])):
@@ -3715,6 +3720,8 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             products[p][i] = "007018"
                         if "014005" in products[p][i]:
                             products[p][i] = "007853"
+                        if "014016" in products[p][i]:
+                            products[p][i] = "031038"
 
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
