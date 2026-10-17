@@ -2,6 +2,33 @@
 // For license information, please see license.txt
 let info = [];
 
+// File ki date se Fiscal Year set karo aur child rows mein sync karo
+function sync_fiscal_year_to_rows(frm) {
+	(frm.doc.selling_product || []).forEach(row => {
+		frappe.model.set_value(row.doctype, row.name, 'fiscal_year', frm.doc.fiscal_year);
+	});
+	frm.refresh_field('selling_product');
+}
+
+function set_fiscal_year_from_file(frm) {
+	if (!frm.doc.file) return;
+	frappe.call({
+		method: "erpnext.distributor.doctype.brick_wise_sale.brick_wise_sale.get_fiscal_year_from_file",
+		args: { pdf_file: frm.doc.file, from_date: frm.doc.from },
+		callback: function (r) {
+			let res = r.message || {};
+			if (res.fiscal_year) {
+				frm.set_value('fiscal_year', res.fiscal_year).then(() => sync_fiscal_year_to_rows(frm));
+			} else {
+				frappe.show_alert({
+					message: __('File ki date ka Fiscal Year master mein nahi mila.'),
+					indicator: 'orange'
+				});
+			}
+		}
+	});
+}
+
 // Cache: Territory name -> parent_territory, Item code -> trade_price
 // Populated once per parse (parse_data_into_child), so brick_parent / product_price
 // get set correctly even for rows set via script (fetch_from does NOT fire on
@@ -111,7 +138,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 		frm.compute_total_value_sale = function (frm, row) {
 			let total = 0;
 			frm.doc.selling_product.forEach(d => {
-				total = total + d.value;
+				total = total + (d.value || 0);
 			});
 			if (total) {
 				frm.set_value('total_value', total);
@@ -198,6 +225,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 		cur_frm.clear_table("selling_product");
 		cur_frm.refresh_fields();
 		if (frm.doc.file) {
+			set_fiscal_year_from_file(frm);
 			frappe.msgprint({
 				title: __('File Upload Successfully.'),
 				indicator: 'green',
@@ -241,6 +269,7 @@ frappe.ui.form.on('Brick Wise Sale', {
 					frm.set_value('parsed_bricks', JSON.stringify(payload.parsed_bricks || []));
 
 					parse_data_into_child(info);
+					set_fiscal_year_from_file(frm);
 				}
 			})
 		} else {

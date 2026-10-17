@@ -1,238 +1,237 @@
 {
- "actions": [],
- "creation": "2021-11-11 14:36:44.689259",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "company_sale_stock_detail_section",
-  "distributor_name",
-  "from",
-  "to",
-  "fiscal_year",
-  "column_break_5",
-  "city",
-  "file",
-  "process_pdf",
-  "calculate",
-  "product_price_variance_section",
-  "item_code",
-  "item_name",
-  "column_break_12",
-  "item_price",
-  "apply_price",
-  "product_sale_detail",
-  "selling_product",
-  "grand_total_section",
-  "total_value",
-  "column_break_13",
-  "parsed_bricks"
- ],
- "fields": [
-  {
-   "fieldname": "company_sale_stock_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Company Brick Wise Detail"
-  },
-  {
-   "fieldname": "distributor_name",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Distributor Name",
-   "options": "Customer"
-  },
-  {
-   "fieldname": "from",
-   "fieldtype": "Date",
-   "in_standard_filter": 1,
-   "label": "From"
-  },
-  {
-   "fieldname": "to",
-   "fieldtype": "Date",
-   "in_standard_filter": 1,
-   "label": "To"
-  },
-  {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "\n",
-   "depends_on": "distributor_name",
-   "fetch_from": "distributor_name.territory",
-   "fieldname": "city",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "City",
-   "options": "Territory"
-  },
-  {
-   "fieldname": "product_sale_detail",
-   "fieldtype": "Section Break",
-   "label": "Product Sale"
-  },
-  {
-   "fieldname": "selling_product",
-   "fieldtype": "Table",
-   "label": "Selling Product",
-   "options": "Brick Wise Sale Child"
-  },
-  {
-   "fieldname": "grand_total_section",
-   "fieldtype": "Section Break",
-   "label": "Grand Total"
-  },
-  {
-   "fieldname": "total_value",
-   "fieldtype": "Currency",
-   "label": "Total Value Sale"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "file",
-   "fieldtype": "Attach",
-   "label": "File"
-  },
-  {
-   "fieldname": "process_pdf",
-   "fieldtype": "Button",
-   "label": "Process Pdf"
-  },
-  {
-   "fieldname": "product_price_variance_section",
-   "fieldtype": "Section Break",
-   "label": "Product Price Variance"
-  },
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item"
-  },
-  {
-   "depends_on": "item_code",
-   "fetch_from": "item_code.item_name",
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "item_code",
-   "fetch_from": "item_code.trade_price",
-   "fieldname": "item_price",
-   "fieldtype": "Data",
-   "label": "Item Price"
-  },
-  {
-   "fieldname": "apply_price",
-   "fieldtype": "Button",
-   "label": "Apply Price"
-  },
-  {
-   "default": "2022",
-   "fieldname": "fiscal_year",
-   "fieldtype": "Link",
-   "label": "Fiscal Year",
-   "options": "Fiscal Year"
-  },
-  {
-   "fieldname": "parsed_bricks",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Parsed Bricks (JSON)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "calculate",
-   "fieldtype": "Button",
-   "label": "Calculate"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-09-26 09:57:55.352156",
- "modified_by": "Administrator",
- "module": "Distributor",
- "name": "Brick Wise Sale",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Distributor",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales Master Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+	"actions": [],
+	"creation": "2021-11-11 14:36:44.689259",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"company_sale_stock_detail_section",
+		"distributor_name",
+		"from",
+		"to",
+		"fiscal_year",
+		"column_break_5",
+		"city",
+		"file",
+		"process_pdf",
+		"calculate",
+		"product_price_variance_section",
+		"item_code",
+		"item_name",
+		"column_break_12",
+		"item_price",
+		"apply_price",
+		"product_sale_detail",
+		"selling_product",
+		"grand_total_section",
+		"total_value",
+		"column_break_13",
+		"parsed_bricks"
+	],
+	"fields": [
+		{
+			"fieldname": "company_sale_stock_detail_section",
+			"fieldtype": "Section Break",
+			"label": "Company Brick Wise Detail"
+		},
+		{
+			"fieldname": "distributor_name",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "Distributor Name",
+			"options": "Customer"
+		},
+		{
+			"fieldname": "from",
+			"fieldtype": "Date",
+			"in_standard_filter": 1,
+			"label": "From"
+		},
+		{
+			"fieldname": "to",
+			"fieldtype": "Date",
+			"in_standard_filter": 1,
+			"label": "To"
+		},
+		{
+			"fieldname": "column_break_5",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "\n",
+			"depends_on": "distributor_name",
+			"fetch_from": "distributor_name.territory",
+			"fieldname": "city",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "City",
+			"options": "Territory"
+		},
+		{
+			"fieldname": "product_sale_detail",
+			"fieldtype": "Section Break",
+			"label": "Product Sale"
+		},
+		{
+			"fieldname": "selling_product",
+			"fieldtype": "Table",
+			"label": "Selling Product",
+			"options": "Brick Wise Sale Child"
+		},
+		{
+			"fieldname": "grand_total_section",
+			"fieldtype": "Section Break",
+			"label": "Grand Total"
+		},
+		{
+			"fieldname": "total_value",
+			"fieldtype": "Currency",
+			"label": "Total Value Sale"
+		},
+		{
+			"fieldname": "column_break_13",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "file",
+			"fieldtype": "Attach",
+			"label": "File"
+		},
+		{
+			"fieldname": "process_pdf",
+			"fieldtype": "Button",
+			"label": "Process Pdf"
+		},
+		{
+			"fieldname": "product_price_variance_section",
+			"fieldtype": "Section Break",
+			"label": "Product Price Variance"
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item Code",
+			"options": "Item"
+		},
+		{
+			"depends_on": "item_code",
+			"fetch_from": "item_code.item_name",
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"label": "Item Name"
+		},
+		{
+			"fieldname": "column_break_12",
+			"fieldtype": "Column Break"
+		},
+		{
+			"depends_on": "item_code",
+			"fetch_from": "item_code.trade_price",
+			"fieldname": "item_price",
+			"fieldtype": "Data",
+			"label": "Item Price"
+		},
+		{
+			"fieldname": "apply_price",
+			"fieldtype": "Button",
+			"label": "Apply Price"
+		},
+		{
+			"fieldname": "fiscal_year",
+			"fieldtype": "Link",
+			"label": "Fiscal Year",
+			"options": "Fiscal Year"
+		},
+		{
+			"fieldname": "parsed_bricks",
+			"fieldtype": "Long Text",
+			"hidden": 1,
+			"label": "Parsed Bricks (JSON)",
+			"read_only": 1
+		},
+		{
+			"fieldname": "calculate",
+			"fieldtype": "Button",
+			"label": "Calculate"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2026-09-26 09:57:55.352156",
+	"modified_by": "Administrator",
+	"module": "Distributor",
+	"name": "Brick Wise Sale",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Distributor",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "HR Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "HR User",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales Master Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"track_changes": 1
 }
