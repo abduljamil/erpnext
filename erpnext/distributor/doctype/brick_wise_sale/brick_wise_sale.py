@@ -3450,7 +3450,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     "T.BAI": "TAKHT BHAI",
                     "LUNDKHUR": "LUND KHWAR",
                     "DAKI+SHAKNO": "DAKI AND SHAKNO",
-                    "HARI CHAND": "H.CHAND",
                     "YAAR HUSSAIN": "YAR HUSSAIN",
                     "SHER GHAR": "SHERGARH",
                     "BAKHSHALI": "BAKSHALI",
@@ -4564,14 +4563,111 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                 return result
 
             elif dist_city == "Bannu":
-                products = []
+                # Brick code -> final name (code se pehchan, sabse pehle check hota hai)
+                CODE_MAP = {
+                    "3010113": "LATAMBER",
+                    "3010802": "LATAMBER 2",
+                }
+
+                # Brick name (code kaatne ke baad) -> final name
+                BRICK_MAP = {
+                    "BANNU": "BANNU MAIN",
+                    "MIRANSHAH": "MIRAN SHAH",
+                    "LAKKI": "LAKKI MARWAT",
+                    "- LAKKI GATE": "LAKKI GATE",
+                    "- DHQ": "DHQ BNU",
+                    "- ZHQ": "ZHQ",
+                    "- RAILWAY ROAD": "RAILWAY ROAD BNU",
+                    "- GHALA MANDI": "GHALA MANDI",
+                    "- DAS CHWOK": "DAS CHOWK",
+                    "- KGN": "KGN",
+                    "- MANGAL MELA": "MANGAL MELA",
+                    "- AMBERI KALA": "AMBERI KALA",
+                    "- DOMAIL": "DOMAIL",
+                    "- MIRANSHAH": "MIRAN SHAH",
+                    "- MIR ALI": "MIR ALI",
+                    "- NAURANG": "NAURANG",
+                    "- GAMBILA": "GAMBILA",
+                    "- TAJORI": "TAJORI",
+                    "- LAKKI": "LAKKI MARWAT",
+                    "- KARAK": "KARAK",
+                    "- LATAMBER": "LATAMBER",
+                    "- TAKHT E NASRATI": "TAKHT E NASRATI",
+                    "- SURANI": "SURANI",
+                    "- TAJI KALA": "TAJI KALA",
+                    "- SABIR ABAD": "SABIR ABAD",
+                    "- GHAZNI KHEL": "GHAZNI KHEL",
+                    "- BAKA KHEL": "BAKA KHEL",
+                }
+
+                # Product code (header mein jo likha ho) -> final product code
+                PRODUCT_MAP = {
+                    "014010": "005425",
+                    "014011": "081838",
+                    "014013": "023906",
+                    "014021": "008999",
+                    "014022": "004348",
+                    "014023": "002188",
+                    "014024": "002392",
+                    "014025": "009072",
+                    "014027": "071560",
+                    "014030": "081274",
+                    "014033": "038427",
+                    "014035": "006783",
+                    "014036": "012649",
+                    "014037": "012649",
+                    "014038": "008908",
+                    "014039": "006782",
+                    "014040": "032259",
+                    "014041": "019133",
+                    "014042": "016654",
+                    "014043": "032255",
+                    "014044": "029328",
+                    "014045": "024819",
+                    "014046": "028727",
+                    "014048": "028728",
+                    "014049": "026920",
+                    "014052": "006406",
+                    "014015": "031037",
+                    "014018": "035295",
+                    "014026": "012961",
+                    "014034": "038426",
+                    "014051": "007018",
+                    "014005": "007853",
+                    "014016": "031038",
+                }
+
+                def map_product(header_text):
+                    header_text = header_text or ""
+                    for code, new_code in PRODUCT_MAP.items():
+                        if code in header_text:
+                            return new_code
+                    return header_text
+
+                def clean_brick(raw):
+                    raw = (raw or "").strip()
+                    code = raw[:7]
+                    if code.isdigit():
+                        if code in CODE_MAP:
+                            return CODE_MAP[code]
+                        name = raw[8:].strip()
+                    else:
+                        name = raw
+                    return BRICK_MAP.get(name, name)
+
                 sales = []
                 bricks = []
+                row_products = []  # har sales row ke saath uske page ke products
                 result = []
+
                 for x in range(0, len(pdf.pages)):
                     data = pdf.pages[x].extract_table()
+                    if not data:
+                        continue
 
                     header_len = len(data[0])
+
+                    # Jin rows mein brick name ke saath values merge ho gayi hon unhe theek karein
                     for row_idx in range(1, len(data) - 1):
                         row = data[row_idx]
                         diff = header_len - len(row)
@@ -4586,155 +4682,26 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                                     new_name = " ".join(tokens[:-diff])
                                     data[row_idx] = [new_name] + merged_vals + row[1:]
 
-                    products.append(data[0][1:-1])
+                    page_products = [map_product(h) for h in data[0][1:-1]]
+
+                    # Last row (Total) skip hoti hai
                     for i in range(1, len(data) - 1):
                         sales.append(data[i][1:-1])
-                        bricks.append(data[i][0])
-                    for k in range(0, len(bricks)):
-                        bricks[k] = bricks[k][8:]
-                        if bricks[k] == "BANNU":
-                            bricks[k] = "BANNU MAIN"
-                        if bricks[k] == "MIRANSHAH":
-                            bricks[k] = "MIRAN SHAH"
-                        if bricks[k] == "LAKKI":
-                            bricks[k] = "LAKKI MARWAT"
-                        if bricks[k] == "- LAKKI GATE":
-                            bricks[k] = "LAKKI GATE"
-                        if bricks[k] == "- DHQ":
-                            bricks[k] = "DHQ BNU"
-                        if bricks[k] == "- ZHQ":
-                            bricks[k] = "ZHQ"
-                        if bricks[k] == "- RAILWAY ROAD":
-                            bricks[k] = "RAILWAY ROAD"
-                        if bricks[k] == "- GHALA MANDI":
-                            bricks[k] = "GHALA MANDI"
-                        if bricks[k] == "- DAS CHWOK":
-                            bricks[k] = "DAS CHOWK"
-                        if bricks[k] == "- KGN":
-                            bricks[k] = "KGN"
-                        if bricks[k] == "- MANGAL MELA":
-                            bricks[k] = "MANGAL MELA"
-                        if bricks[k] == "- AMBERI KALA":
-                            bricks[k] = "AMBERI KALA"
-                        if bricks[k] == "- DOMAIL":
-                            bricks[k] = "DOMAIL"
-                        if bricks[k] == "- MIRANSHAH":
-                            bricks[k] = "MIRANSHAH"
-                        if bricks[k] == "- MIR ALI":
-                            bricks[k] = "MIR ALI"
-                        if bricks[k] == "- NAURANG":
-                            bricks[k] = "NAURANG"
-                        if bricks[k] == "- GAMBILA":
-                            bricks[k] = "GAMBILA"
-                        if bricks[k] == "- TAJORI":
-                            bricks[k] = "TAJORI"
-                        if bricks[k] == "- LAKKI":
-                            bricks[k] = "LAKKI MARWAT"
-                        if bricks[k] == "- KARAK":
-                            bricks[k] = "KARAK"
-                        if bricks[k] == "- LATAMBER":
-                            bricks[k] = "LATAMBER"
-                        if bricks[k] == "- TAKHT E NASRATI":
-                            bricks[k] = "TAKHT E NASRATI"
-                        if bricks[k] == "MIRANSHAH":
-                            bricks[k] = "MIRAN SHAH"
-                        if bricks[k] == "- SURANI":
-                            bricks[k] = "SURANI"
-                        if bricks[k] == "- TAJI KALA":
-                            bricks[k] = "TAJI KALA"
-                        if bricks[k] == "- SABIR ABAD":
-                            bricks[k] = "SABIR ABAD"
-                        if bricks[k] == "- GHAZNI KHEL":
-                            bricks[k] = "GHAZNI KHEL"
-                        if bricks[k] == "RAILWAY ROAD":
-                            bricks[k] = "RAILWAY ROAD BNU"
-                        if bricks[k] == "- BAKA KHEL":
-                            bricks[k] = "BAKA KHEL"
-                        if bricks[k] == "3010113":
-                            bricks[k] = "LATAMBER"
-                        if bricks[k] == "3010802":
-                            bricks[k] = "LATAMBER 2"
+                        bricks.append(clean_brick(data[i][0]))
+                        row_products.append(page_products)
 
-                for p in range(0, len(products)):
-                    for i in range(0, len(products[p])):
-                        if "014010" in products[p][i]:
-                            products[p][i] = "005425"
-                        if "014011" in products[p][i]:
-                            products[p][i] = "081838"
-                        if "014013" in products[p][i]:
-                            products[p][i] = "023906"
-                        if "014021" in products[p][i]:
-                            products[p][i] = "008999"
-                        if "014022" in products[p][i]:
-                            products[p][i] = "004348"
-                        if "014023" in products[p][i]:
-                            products[p][i] = "002188"
-                        if "014024" in products[p][i]:
-                            products[p][i] = "002392"
-                        if "014025" in products[p][i]:
-                            products[p][i] = "009072"
-                        if "014027" in products[p][i]:
-                            products[p][i] = "071560"
-                        if "014030" in products[p][i]:
-                            products[p][i] = "081274"
-                        if "014033" in products[p][i]:
-                            products[p][i] = "038427"
-                        if "014035" in products[p][i]:
-                            products[p][i] = "006783"
-                        if "014036" in products[p][i]:
-                            products[p][i] = "012649"
-                        if "014037" in products[p][i]:
-                            products[p][i] = "012649"
-                        if "014038" in products[p][i]:
-                            products[p][i] = "008908"
-                        if "014039" in products[p][i]:
-                            products[p][i] = "006782"
-                        if "014040" in products[p][i]:
-                            products[p][i] = "032259"
-                        if "014041" in products[p][i]:
-                            products[p][i] = "019133"
-                        if "014042" in products[p][i]:
-                            products[p][i] = "016654"
-                        if "014043" in products[p][i]:
-                            products[p][i] = "032255"
-                        if "014044" in products[p][i]:
-                            products[p][i] = "029328"
-                        if "014045" in products[p][i]:
-                            products[p][i] = "024819"
-                        if "014046" in products[p][i]:
-                            products[p][i] = "028727"
-                        if "014048" in products[p][i]:
-                            products[p][i] = "028728"
-                        if "014049" in products[p][i]:
-                            products[p][i] = "026920"
-                        if "014052" in products[p][i]:
-                            products[p][i] = "006406"
-                        if "014015" in products[p][i]:
-                            products[p][i] = "031037"
-                        if "014018" in products[p][i]:
-                            products[p][i] = "035295"
-                        if "014026" in products[p][i]:
-                            products[p][i] = "012961"
-                        if "014034" in products[p][i]:
-                            products[p][i] = "038426"
-                        if "014051" in products[p][i]:
-                            products[p][i] = "007018"
-                        if "014005" in products[p][i]:
-                            products[p][i] = "007853"
-                        if "014016" in products[p][i]:
-                            products[p][i] = "031038"
-
+                # "-" ko "0" karein
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
                         if sales[s][i] == "-":
                             sales[s][i] = "0"
+
+                # Result banayein: [product, brick, sale]
                 for s in range(0, len(sales)):
                     for i in range(0, len(sales[s])):
-                        child = []
-                        child.append(products[p][i])
-                        child.append(bricks[s])
-                        child.append(sales[s][i])
-                        result.append(child)
+                        result.append([row_products[s][i], bricks[s], sales[s][i]])
+
+                # item_list se match karke extra data jodein
                 for r in result:
                     for i in item_list:
                         if r[0] == i[0]:
@@ -4748,7 +4715,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                             r.insert(4, t[1])
 
                 return result
-                # print(bricks)
 
             elif dist_city == "Dera Ismail Khan":
                 result = []
@@ -6172,7 +6138,6 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         if r[2] == t[0]:
                             r.insert(4, t[1])
                 return new_result
-                # print(new_result)
 
             elif dist_city == "Quetta":
                 result = []
