@@ -6105,6 +6105,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         "MOLVI GEE HOSPITAL", "MOLVI JEE HOSPITAL", bricks[i]
                     )
                     bricks[i] = re.sub("1010317", "ABASEEN MEDICAL CENTER", bricks[i])
+                    bricks[i] = re.sub(
+                        "CANTONMENT BOARD.DAB", "CANTONMENT BOARD.DABGARI", bricks[i]
+                    )
 
                 # print(products)
                 for s in range(0, len(sales)):
