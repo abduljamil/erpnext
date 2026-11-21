@@ -4,7 +4,7 @@
 frappe.query_reports["General Ledger"] = {
 	"filters": [
 		{
-			"fieldname":"company",
+			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
@@ -12,13 +12,13 @@ frappe.query_reports["General Ledger"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"finance_book",
+			"fieldname": "finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
 			"options": "Finance Book"
 		},
 		{
-			"fieldname":"from_date",
+			"fieldname": "from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
@@ -26,7 +26,7 @@ frappe.query_reports["General Ledger"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"to_date",
+			"fieldname": "to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
@@ -34,21 +34,21 @@ frappe.query_reports["General Ledger"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"account",
+			"fieldname": "account",
 			"label": __("Account"),
 			"fieldtype": "MultiSelectList",
 			"options": "Account",
-			get_data: function(txt) {
+			get_data: function (txt) {
 				return frappe.db.get_link_options('Account', txt, {
 					company: frappe.query_report.get_filter_value("company")
 				});
 			}
 		},
 		{
-			"fieldname":"voucher_no",
+			"fieldname": "voucher_no",
 			"label": __("Voucher No"),
 			"fieldtype": "Data",
-			on_change: function() {
+			on_change: function () {
 				frappe.query_report.set_filter_value('group_by', "Group by Voucher (Consolidated)");
 			}
 		},
@@ -56,44 +56,51 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Break",
 		},
 		{
-			"fieldname":"party_type",
+			"fieldname": "party_type",
 			"label": __("Party Type"),
 			"fieldtype": "Link",
 			"options": "Party Type",
 			"default": "",
-			on_change: function() {
+			on_change: function () {
 				frappe.query_report.set_filter_value('party', "");
 			}
 		},
 		{
-			"fieldname":"party",
+			"fieldname": "party",
 			"label": __("Party"),
 			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
+			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
 				let party_type = frappe.query_report.get_filter_value('party_type');
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return frappe.db.get_link_options(party_type, txt).then(function (options) {
+					let perms = frappe.defaults.get_user_permissions() || {};
+					if (party_type === "Customer" && perms["Customer"] && perms["Customer"].length) {
+						let allowed = perms["Customer"].map(function (p) { return p.doc; });
+						options = options.filter(function (o) { return allowed.indexOf(o.value) !== -1; });
+					}
+					return options;
+				});
 			},
-			on_change: function() {
+			on_change: function () {
 				var party_type = frappe.query_report.get_filter_value('party_type');
 				var parties = frappe.query_report.get_filter_value('party');
 
-				if(!party_type || parties.length === 0 || parties.length > 1) {
+				if (!party_type || parties.length === 0 || parties.length > 1) {
 					frappe.query_report.set_filter_value('party_name', "");
 					frappe.query_report.set_filter_value('tax_id', "");
 					return;
 				} else {
 					var party = parties[0];
 					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
-					frappe.db.get_value(party_type, party, fieldname, function(value) {
+					frappe.db.get_value(party_type, party, fieldname, function (value) {
 						frappe.query_report.set_filter_value('party_name', value[fieldname]);
 					});
 
 					if (party_type === "Customer" || party_type === "Supplier") {
-						frappe.db.get_value(party_type, party, "tax_id", function(value) {
+						frappe.db.get_value(party_type, party, "tax_id", function (value) {
 							frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
 						});
 					}
@@ -101,13 +108,13 @@ frappe.query_reports["General Ledger"] = {
 			}
 		},
 		{
-			"fieldname":"party_name",
+			"fieldname": "party_name",
 			"label": __("Party Name"),
 			"fieldtype": "Data",
 			"hidden": 1
 		},
 		{
-			"fieldname":"group_by",
+			"fieldname": "group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
 			"options": ["", __("Group by Voucher"), __("Group by Voucher (Consolidated)"),
@@ -115,7 +122,7 @@ frappe.query_reports["General Ledger"] = {
 			"default": __("Group by Voucher (Consolidated)")
 		},
 		{
-			"fieldname":"tax_id",
+			"fieldname": "tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
@@ -127,20 +134,20 @@ frappe.query_reports["General Ledger"] = {
 			"options": erpnext.get_presentation_currency_list()
 		},
 		{
-			"fieldname":"cost_center",
+			"fieldname": "cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
+			get_data: function (txt) {
 				return frappe.db.get_link_options('Cost Center', txt, {
 					company: frappe.query_report.get_filter_value("company")
 				});
 			}
 		},
 		{
-			"fieldname":"project",
+			"fieldname": "project",
 			"label": __("Project"),
 			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
+			get_data: function (txt) {
 				return frappe.db.get_link_options('Project', txt, {
 					company: frappe.query_report.get_filter_value("company")
 				});
