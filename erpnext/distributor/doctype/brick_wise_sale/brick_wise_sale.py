@@ -6067,7 +6067,7 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                         "H.A.M.C", "HAYATABAD MEDICAL COMPLEX", bricks[i]
                     )
                     bricks[i] = re.sub("BADA BAIR", "BADABER", bricks[i])
-                    bricks[i] = re.sub("NOTHIA", "NOTHIA QADEEM", bricks[i])
+                    bricks[i] = re.sub(r"NOTHIA(?! QADEEM)", "NOTHIA QADEEM", bricks[i])
                     bricks[i] = re.sub(
                         "KHATAK MEDICAL CENTR", "KHATAK MEDICAL CENTER", bricks[i]
                     )
@@ -6107,12 +6107,9 @@ def _parse_pdf(pdf_file, parse_check, parent_detail):
                     bricks[i] = re.sub("1010317", "ABASEEN MEDICAL CENTER", bricks[i])
                     bricks[i] = re.sub("1010320", "CANTONMENT BOARD.DABGARI", bricks[i])
                     bricks[i] = re.sub(
-                        "CANTONMENT BOARD.DABGARI",
+                        r"CANTONMENT BOARD\.DAB(?!GARI)",
                         "CANTONMENT BOARD.DABGARI",
                         bricks[i],
-                    )
-                    bricks[i] = re.sub(
-                        "CANTONMENT BOARD.DAB", "CANTONMENT BOARD.DABGARI", bricks[i]
                     )
 
                 # print(products)
